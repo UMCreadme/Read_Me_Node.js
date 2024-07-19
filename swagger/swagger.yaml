@@ -1,0 +1,168 @@
+#예전에 만든거 예시로 넣어두었어요
+
+openapi: 3.0.0
+info:
+  title: UMC API
+  description: API documentation for UMC application
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+paths:
+  /stores/add:
+    post:
+      tags:
+        - Stores
+      summary: Add a store in a specific location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Store A
+                address:
+                  type: string
+                  example: Seoul
+      responses:
+        '201':
+          description: Store added successfully
+        '400':
+          description: Bad Request
+
+  /stores/{storeId}/reviews:
+    post:
+      tags:
+        - Reviews
+      summary: Add a review to a store
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                memberId:
+                  type: string
+                  example: member123
+                body:
+                  type: string
+                  example: "Great place to eat!"
+                score:
+                  type: number
+                  example: 4.5
+      responses:
+        '201':
+          description: Review added successfully
+        '400':
+          description: Bad Request
+
+  /stores/{storeId}/missions:
+    post:
+      tags:
+        - Missions
+      summary: Add a mission to a store
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reward:
+                  type: number
+                  example: 100
+                deadline:
+                  type: string
+                  format: date-time
+                  example: '2023-12-31T23:59:59Z'
+                missionSpec:
+                  type: string
+                  example: "Complete the task within the deadline"
+      responses:
+        '201':
+          description: Mission added successfully
+        '400':
+          description: Bad Request
+
+  /member-missions:
+    post:
+      tags:
+        - Member Missions
+      summary: Start a mission challenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                memberId:
+                  type: string
+                  example: member123
+                missionId:
+                  type: string
+                  example: mission456
+      responses:
+        '201':
+          description: Mission challenge started successfully
+        '400':
+          description: Bad Request
+
+  /signup:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                email:
+                  type: string
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  example: P@ssw0rd
+                gender:
+                  type: string
+                  example: Male
+                age:
+                  type: integer
+                  example: 30
+                address:
+                  type: string
+                  example: "123 Main St"
+      responses:
+        '201':
+          description: Member registered successfully
+        '400':
+          description: Bad Request
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
