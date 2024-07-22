@@ -3,9 +3,7 @@ import { getShortsDetailToCategory } from "./shorts.dao.js";
 import { getShortsDetailListDto } from "./shorts.dto.js";
 
 export const getShortsDetailHome = async (category, page=1, size=10) => {
-    const userId = 1;
-
-    const result = await getShortsDetailToCategory(category, userId, size+1, (page-1)*size);
+    const result = await getShortsDetailToCategory(category, size+1, (page-1)*size);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
