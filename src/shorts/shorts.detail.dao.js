@@ -1,7 +1,7 @@
 import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
-import { getShortsDetailByBook, getShortsDetailByCategory, getShortsDetailByCategoryExcludeBook } from "./shorts.detail.sql.js";
+import { getShortsDetailByBook, getShortsDetailByCategory, getShortsDetailByCategoryExcludeBook, getShortsDetailByUser } from "./shorts.detail.sql.js";
 import { countShortsDetailByBookId, findBookById, findCategoryNameByBookId, isFollowUser, isLikeShorts } from "./shorts.sql.js";
 
 export const getShortsDetailToCategory = async (category, size, offset, userId=null) => {
@@ -111,6 +111,35 @@ export const getShortsDetailToCategoryExcludeBook = async (category, bookId, siz
 
         return shorts;
     } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.PARAMETER_IS_WRONG);
+        }
+    }
+}
+
+export const getShortsDetailToUser = async (userId, size, offset, myId=null) => {
+    try {
+        const conn = await pool.getConnection();
+        const [shorts] = await conn.query(getShortsDetailByUser, [userId, size, offset]);
+
+        for(const short of shorts) {
+            if(myId != null) {
+                const [isLike] = await conn.query(isLikeShorts, [myId, short.shorts_id]);
+                const [isFollow] = await conn.query(isFollowUser, [myId, short.user_id]);
+
+                short.isLike = isLike;
+                short.isFollow = isFollow;
+            }
+        }
+
+        conn.release();
+
+        return shorts;
+    }
+    catch (err) {
         console.log(err);
         if(err instanceof BaseError) {
             throw err;
