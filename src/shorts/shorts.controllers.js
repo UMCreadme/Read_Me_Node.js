@@ -3,7 +3,7 @@ import { status } from "../../config/response.status.js";
 import { response } from "../../config/response.js";
 
 export const getShortsDetail = async (req, res, next) => {
-    const { category, keyword, book, user, like, page, size } = req.query;
+    const { category, keyword, book, user, like, page=1, size=10 } = req.query;
     let shorts;
 
     if (keyword !== undefined) {
