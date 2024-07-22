@@ -190,3 +190,33 @@ WHERE s.user_id = ?
 GROUP BY s.shorts_id, u.user_id, i.url, si.url
 ORDER BY s.created_at DESC
 LIMIT ? OFFSET ?;`;
+
+export const getShortsDetailByUserLike =
+`SELECT 
+    s.user_id, u.account, i.url AS profile_img,
+    s.phrase, s.title, s.content, s.tag,
+    COALESCE(likes.like_count, 0) AS like_count, 
+    COALESCE(comments.comment_count, 0) AS comment_count,
+    s.book_id
+FROM SHORTS s
+JOIN USERS u ON s.user_id = u.user_id
+JOIN IMAGE i ON u.image_id = i.image_id
+JOIN IMAGE si ON s.image_id = si.image_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS like_count
+    FROM LIKE_SHORTS
+    GROUP BY shorts_id
+) likes ON s.shorts_id = likes.shorts_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS comment_count
+    FROM COMMENT
+    GROUP BY shorts_id
+) comments ON s.shorts_id = comments.shorts_id
+WHERE s.shorts_id IN (
+    SELECT shorts_id
+    FROM LIKE_SHORTS
+    WHERE user_id = ?
+)
+GROUP BY s.shorts_id, u.user_id, i.url, si.url
+ORDER BY s.created_at DESC
+LIMIT ? OFFSET ?;`;
