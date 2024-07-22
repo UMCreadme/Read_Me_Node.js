@@ -1,5 +1,3 @@
-// response.js
-
 export const response = ({isSuccess, code, message}, result, pageInfo) => {
     return {
         isSuccess: isSuccess,

@@ -1,10 +1,7 @@
-// response.js
-
-export const pageInfo = (page, size, totalElements, totalPages) => {
+export const pageInfo = (page, size, hasNext) => {
     return {
         page: page,
         size: size,
-        totalElements: totalElements,
-        totalPages: totalPages
+        hasNext: hasNext
     }
 };
