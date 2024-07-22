@@ -14,8 +14,10 @@ export const getShortsDetail = async (req, res, next) => {
         shorts = await getShortsDetailUserLike(user, parseInt(page), parseInt(size));
     } else if (user !== undefined) {
         shorts = await getShortsDetailUser(user, parseInt(page), parseInt(size));
-    } else {
+    } else if (category !== undefined) {
         shorts = await getShortsDetailHome(category, parseInt(page), parseInt(size));
+    } else {
+        throw new BaseError(status.BAD_REQUEST);
     }
 
     res.send(response(status.SUCCESS, shorts.data, shorts.pageInfo));
