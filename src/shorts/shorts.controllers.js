@@ -9,7 +9,7 @@ export const getShortsDetail = async (req, res, next) => {
     if (keyword !== undefined) {
         shorts = await getShortsDetailSearch(category, keyword, parseInt(page), parseInt(size));
     } else if (book !== undefined) {
-        shorts = await getShortsDetailBook(category, book, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailBook(book, parseInt(page), parseInt(size));
     } else if (user !== undefined && like) {
         shorts = await getShortsDetailUserLike(category, user, parseInt(page), parseInt(size));
     } else if (user !== undefined) {
