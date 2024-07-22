@@ -1,18 +1,12 @@
-<<<<<<< HEAD
-// const express = require('express')   // common JS
-import express from 'express'          // ES6
-import { testRouter } from './src/test/test.route.js'
-import {userRouter} from "./src/users/users.route.js";
-=======
 import express from 'express';    
 import { response } from './config/response.js';
 import { BaseError } from './config/error.js';
 import { status } from './config/response.status.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
->>>>>>> faf341883873f64c843ea367f6eacdbe59a67eb4
 
 import { testRouter } from './src/test/test.route.js';
+import { userRouter } from './src/users/users.route.js';
 
 dotenv.config();
 
