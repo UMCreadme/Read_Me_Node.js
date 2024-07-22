@@ -11,9 +11,9 @@ export const getShortsDetail = async (req, res, next) => {
     } else if (book !== undefined) {
         shorts = await getShortsDetailBook(book, parseInt(page), parseInt(size));
     } else if (user !== undefined && like) {
-        shorts = await getShortsDetailUserLike(category, user, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailUserLike(user, parseInt(page), parseInt(size));
     } else if (user !== undefined) {
-        shorts = await getShortsDetailUser(category, user, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailUser(user, parseInt(page), parseInt(size));
     } else {
         shorts = await getShortsDetailHome(category, parseInt(page), parseInt(size));
     }

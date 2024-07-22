@@ -1,5 +1,5 @@
 import { pageInfo } from "../../config/pageInfo.js";
-import { countShortsDetailToBook, getBookCategory, getShortsDetailToBook, getShortsDetailToCategory, getShortsDetailToCategoryExcludeBook } from "./shorts.dao.js";
+import { countShortsDetailToBook, getBookCategory, getShortsDetailToBook, getShortsDetailToCategory, getShortsDetailToCategoryExcludeBook, getShortsDetailToUser } from "./shorts.detail.dao.js";
 import { getShortsDetailListDto } from "./shorts.dto.js";
 
 export const getShortsDetailHome = async (category, page, size) => {
@@ -40,9 +40,12 @@ export const getShortsDetailBook = async (bookId, page, size) => {
     return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, size, hasNext)};
 }
 
-export const getShortsDetailUser = async (category, userId, page, size) => {
+export const getShortsDetailUser = async (userId, page, size) => {
+    const result = await getShortsDetailToUser(userId, size+1, (page-1)*size);
+    const hasNext = result.length > size;
+    if(hasNext) result.pop();
 
-    return {"data": "유저 마이", "pageInfo": pageInfo(page, size, true)};
+    return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, size, hasNext)};
 }
 
 export const getShortsDetailUserLike = async (category, userId, page, size) => {
