@@ -1,6 +1,6 @@
 // response.js
 
-export const response = ({isSuccess, code, message}, result, pageInfo) => {
+export const response = ({isSuccess, code, message}, result, pageInfo = null) => {
     return {
         isSuccess: isSuccess,
         code: code,
