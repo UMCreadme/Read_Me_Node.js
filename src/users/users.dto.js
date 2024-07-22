@@ -12,7 +12,7 @@ export const userInfoResponseDTO = (userData,  followerNum, followingNum) => {
 // 유저가 만든 쇼츠 리스트 조회시 반환값
 export const userShortsResponseDTO = (userShorts, shortsBookTitle, shortsBookAuthor) => {
 
-    return{   "shortsId" : userShorts.id,
+    return{   "shortsId" : userShorts.shorts_id,
         "shortsImage" : userShorts.image,
         "shortsPhrase" : userShorts.phrase,
         "shortsBookTitle" : shortsBookTitle,
