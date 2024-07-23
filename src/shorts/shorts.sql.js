@@ -12,3 +12,5 @@ export const countShortsDetailByBookId = "SELECT COUNT(*) AS total FROM SHORTS W
 
 // 책에 해당하는 카테고리 조회 TODO: book 도메인으로 옮기기
 export const findCategoryNameByBookId = "SELECT c.name FROM BOOK b JOIN BOOK_CATEGORY bc ON b.book_id = bc.book_id JOIN CATEGORY c ON bc.category_id = c.category_id WHERE b.book_id = ?;";
+
+export const getShortsById = "SELECT * FROM shorts WHERE shorts_id = ?";

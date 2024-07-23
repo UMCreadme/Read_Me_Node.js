@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 
 import { testRouter } from './src/test/test.route.js';
+import { userRouter } from './src/users/users.route.js';
 import { shortsRouter } from './src/shorts/shorts.route.js';
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(express.urlencoded({extended: false})); // 단순 객체 문자열 형�
 
 // router setting
 app.use('/test', testRouter);
+app.use('/users', userRouter);
 app.use('/shorts', shortsRouter);
 
 // index.js
