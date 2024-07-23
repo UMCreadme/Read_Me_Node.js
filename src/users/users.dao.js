@@ -1,4 +1,3 @@
-import express from "express";
 import {BaseError} from "../../config/error.js";
 import {status} from "../../config/response.status.js";
 import {pool} from "../../config/db.config.js";
@@ -13,7 +12,6 @@ import {
 } from "./users.sql.js";
 import {getShortsById} from "../shorts/shorts.sql.js";
 import {getBookById} from "../book/book.sql.js";
-import {stat} from "@babel/core/lib/gensync-utils/fs.js";
 
 
 /**
