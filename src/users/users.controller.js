@@ -27,7 +27,17 @@ export const getUserShorts = async(req, res, next)=> {
 
 //유저가 찜한 쇼츠 리스트 조회
 export const getUserLikeShorts = async(req, res, next) => {
-    res.send(response(status.SUCCESS, await findUserLikeShorts(req.body)))
+
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 20;
+    const offset = (page -1) * size
+
+    const result = await findUserLikeShorts(req.body, offset, size+1)
+
+    const hasNext = result.length > size;
+    if (hasNext) result.pop();
+
+    res.send(response(status.SUCCESS, result, pageInfo(page, size, hasNext)))
 }
 
 // 유저가 읽은 책 리스트 조회

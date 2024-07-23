@@ -2,11 +2,15 @@ import express from "express";
 import {findById, findFollowerNumByUserId, findFollowingNumByUserId, findUserShortsById, findUserLikeShortsById, findUserBooksById } from "./users.dao.js";
 import {userBookResponseDTO, userInfoResponseDTO, userShortsResponseDTO} from "./users.dto.js";
 import {findBookById} from "../book/book.dao.js";
+import {status} from "../../config/response.status.js";
+import {BaseError} from "../../config/error.js";
 
 // 유저 정보 조회 로직
 export const findOne = async(body) => {
+
     const userId = body.id;
     const userData = await findById(userId)
+
 
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
@@ -32,9 +36,9 @@ export const findUserShorts = async(body, offset, limit) => {
 }
 
 // 유저가 찜한 쇼츠 리스트 조회 로직
-export const findUserLikeShorts = async(body) => {
+export const findUserLikeShorts = async(body, offset, limit) => {
     const userId = body.id
-    const userLikeShorts = await findUserLikeShortsById(userId);
+    const userLikeShorts = await findUserLikeShortsById(userId, offset, limit);
     const userShortsResponseDTOList = [];
 
     for (const userLikeShort of userLikeShorts) {

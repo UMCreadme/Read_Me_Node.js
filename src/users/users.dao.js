@@ -63,6 +63,7 @@ export const findUserShortsById = async (userId, offset ,limit) => {
 
     try {
         const conn = await pool.getConnection();
+        const [user] = await pool.query(getUserById, userId);
         const [userShorts] = await pool.query(getUserShortsById, [userId, limit, offset]);
 
 
@@ -78,18 +79,21 @@ export const findUserShortsById = async (userId, offset ,limit) => {
 }
 
 
-// 유저가 찜한 쇼츠 리스트 조회
-export const findUserLikeShortsById = async(userId) => {
+/**
+ * 유저가 찜한 쇼츠 리스트 조회
+ */
+export const findUserLikeShortsById = async(userId, offset, limit) => {
 
     try{
         const conn = await pool.getConnection();
-        const [userLikeShortsIdList] = await pool.query(getUserLikeShortsIdById, userId);
+        const [userLikeShortsIdList] = await pool.query(getUserLikeShortsIdById, [userId, limit, offset]);
         const userLikeShorts =[]
 
         for (const userLikeShortsId of userLikeShortsIdList) {
-            let userLikeShort = await pool.query(getShortsById,userLikeShortsId)
-            userLikeShorts.push(userLikeShort)
+            let [userLikeShort] = await pool.query(getShortsById,userLikeShortsId.shorts_id)
+            userLikeShorts.push(userLikeShort[0])
         }
+
 
         return userLikeShorts;
     }
