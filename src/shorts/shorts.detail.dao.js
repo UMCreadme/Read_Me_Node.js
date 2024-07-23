@@ -178,6 +178,47 @@ export const getShortsDetailToUserLike = async (userId, size, offset, myId=null)
     }
 }
 
+export const getShortsDetailToKeyword = async (keyword, size, offset, userId=null) => {
+    try {
+        const conn = await pool.getConnection();
+
+        // TODO: 검색 dao 호출
+        const searchResult = [];
+
+        conn.release();
+
+        return searchResult;
+    }
+    catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.PARAMETER_IS_WRONG);
+        }
+    }
+}
+
+export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordShorts, size, offset, userId=null) => {
+    try {
+        const conn = await pool.getConnection();
+        // TODO: 검색 기능 먼저 구현 후 개발
+        const shorts = [];
+
+        conn.release();
+
+        return shorts;
+    }
+    catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.PARAMETER_IS_WRONG);
+        }
+    }
+}
+
 // TODO: book 도메인으로 옮기기
 export const getBookCategory = async (bookId) => {
     try {
