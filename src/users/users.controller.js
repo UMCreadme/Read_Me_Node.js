@@ -1,9 +1,8 @@
-import express from "express";
 import {response} from "../../config/response.js";
 import {status} from "../../config/response.status.js";
 import {findOne, findUserShorts, findUserLikeShorts, findUserBooks, followNewUser} from "./users.service.js";
 import {pageInfo} from "../../config/pageInfo.js";
-import {stat} from "@babel/core/lib/gensync-utils/fs.js";
+
 
 // 유저 정보 조회
 export const getUserInfo = async (req, res, next) => {
