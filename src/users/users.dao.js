@@ -1,6 +1,6 @@
-import {BaseError} from "../../config/error.js";
-import {status} from "../../config/response.status.js";
-import {pool} from "../../config/db.config.js";
+import { BaseError } from "../../config/error.js";
+import { status } from "../../config/response.status.js";
+import { pool } from "../../config/db.config.js";
 import {
     getUserReadBooksIdById,
     getUserFollowers,
@@ -10,13 +10,10 @@ import {
     getUserShortsById,
     getImageById, addFollowUser, findFollowStatus
 } from "./users.sql.js";
-import {getShortsById} from "../shorts/shorts.sql.js";
-import {getBookById} from "../book/book.sql.js";
+import { getShortsById } from "../shorts/shorts.sql.js";
+import { getBookById } from "../book/book.sql.js";
 
-
-/**
-* 유저 정보 조회
-* */
+// 유저 정보 조회
 export const findById = async (userId) => {
     try {
         const conn = await pool.getConnection();
@@ -48,7 +45,6 @@ export const findFollowingNumByUserId = async (userId) => {
     catch (err) {
         throw new BaseError(status.BAD_REQUEST)
     }
-
 }
 
 // 유저 정보 조회시 필요한 팔로워 수
@@ -65,11 +61,7 @@ export const findFollowerNumByUserId = async (userId) => {
     }
 }
 
-
-/**
-* 유저가 만든 쇼츠 리스트 조회
- * */
-
+// 유저가 만든 쇼츠 리스트 조회
 export const findUserShortsById = async (userId, offset ,limit) => {
 
     try {
@@ -86,13 +78,9 @@ export const findUserShortsById = async (userId, offset ,limit) => {
     catch(err){
         throw new BaseError(status.BAD_REQUEST);
     }
-
 }
 
-
-/**
- * 유저가 찜한 쇼츠 리스트 조회
- */
+// 유저가 찜한 쇼츠 리스트 조회
 export const findUserLikeShortsById = async(userId, offset, limit) => {
 
     try{
@@ -114,9 +102,7 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
 
 }
 
-/**
- * 유저가 읽은 책 리스트 조회
- * */
+// 유저가 읽은 책 리스트 조회
 export const findUserBooksById = async(userId, offset, limit) => {
     try{
         const conn = await pool.getConnection();
@@ -135,10 +121,7 @@ export const findUserBooksById = async(userId, offset, limit) => {
     }
 }
 
-
-/**
- *  이미지 아이디로 이미지 찾기 이후에 다른 도메인으로 수정할 필요가 있을듯..?
- *  */
+// 이미지 아이디로 이미지 찾기 이후에 다른 도메인으로 수정할 필요가 있을듯..?
 export const findImageById = async(imageId) => {
     try{
         const conn = await pool.getConnection();
@@ -152,17 +135,13 @@ export const findImageById = async(imageId) => {
     }
 }
 
-
-/**
- * 유저(본인)가 다른 유저 팔로잉
- */
+// 유저(본인)가 다른 유저 팔로잉
 export const followUserAdd = async(userId, followingId) => {
 
     try{
         const conn = await pool.getConnection();
 
         const [followStatus] = await pool.query(findFollowStatus, [userId, followingId])
-
 
         // 기존에 팔로우한 내역이 있으면 또 팔로우 할수 없게 만드는 로직, 중복 제거 + 본인이 본인을 팔로우하려는 경우 제거
         if(followStatus[0] || (followingId === userId)){
@@ -177,6 +156,4 @@ export const followUserAdd = async(userId, followingId) => {
     catch (err){
         throw new BaseError(status.BAD_REQUEST)
     }
-
-
 }

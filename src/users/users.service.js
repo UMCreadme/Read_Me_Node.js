@@ -8,14 +8,13 @@ import {
     findImageById,
     followUserAdd
 } from "./users.dao.js";
-import {userBookResponseDTO, userFollowResponseDTO, userInfoResponseDTO, userShortsResponseDTO} from "./users.dto.js";
-import {findBookById} from "../book/book.dao.js";
-import {status} from "../../config/response.status.js";
-import {BaseError} from "../../config/error.js";
+import { userBookResponseDTO, userFollowResponseDTO, userInfoResponseDTO, userShortsResponseDTO } from "./users.dto.js";
+import { findBookById } from "../book/book.dao.js";
+import { status } from "../../config/response.status.js";
+import { BaseError } from "../../config/error.js";
 
 // 유저 정보 조회 로직
 export const findOne = async(body) => {
-
     const userId = body.id;
     const userData = await findById(userId)
 
@@ -31,7 +30,6 @@ export const findOne = async(body) => {
 
     return userInfoResponseDTO( userData, profileImg.url, followerNum, followingNum);
 }
-
 
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(body, offset, limit) => {
@@ -113,12 +111,8 @@ export const followNewUser = async(body, followUserId) =>{
         throw new BaseError(status.BAD_REQUEST)
     }
 
-
-
-
     const followingId = parseInt(followUserId, 10)
     const followStatus = await followUserAdd(userId, followingId)
-
 
     // 중복팔로우 예외 처리 + 본인이 본인을 팔로우하려는 경우
     if(!followStatus){

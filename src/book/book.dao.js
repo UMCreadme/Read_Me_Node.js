@@ -1,5 +1,5 @@
-import {pool} from "../../config/db.config.js";
-import {getBookById} from "./book.sql.js";
+import { pool } from "../../config/db.config.js";
+import { findCategoryNameByBookId, getBookById } from "./book.sql.js";
 
 export const findBookById = async (bookId) => {
 
@@ -9,4 +9,21 @@ export const findBookById = async (bookId) => {
     conn.release();
 
     return book[0];
+}
+
+export const getBookCategory = async (bookId) => {
+    try {
+        const conn = await pool.getConnection();
+        const [result] = await conn.query(findCategoryNameByBookId, [bookId]);
+        conn.release();
+
+        return result[0].name;
+    } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.PARAMETER_IS_WRONG);
+        }
+    }
 }

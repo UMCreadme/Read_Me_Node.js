@@ -1,7 +1,7 @@
-import {response} from "../../config/response.js";
-import {status} from "../../config/response.status.js";
-import {findOne, findUserShorts, findUserLikeShorts, findUserBooks, followNewUser} from "./users.service.js";
-import {pageInfo} from "../../config/pageInfo.js";
+import { response } from "../../config/response.js";
+import { status } from "../../config/response.status.js";
+import { findOne, findUserShorts, findUserLikeShorts, findUserBooks, followNewUser } from "./users.service.js";
+import { pageInfo } from "../../config/pageInfo.js";
 
 
 // 유저 정보 조회

@@ -18,4 +18,4 @@ userRouter.get("/my/likes", asyncHandler(getUserLikeShorts));
 userRouter.get("/my/books", asyncHandler(getUserBooks));
 
 // 다른 유저 팔로잉
-userRouter.post("/:userId/follow", asyncHandler(followUser))
+userRouter.post("/:userId/follow", asyncHandler(followUser));
