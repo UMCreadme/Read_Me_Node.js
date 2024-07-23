@@ -7,6 +7,7 @@ import cors from 'cors';
 
 import { testRouter } from './src/test/test.route.js';
 import { userRouter } from './src/users/users.route.js';
+import { shortsRouter } from './src/shorts/shorts.route.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.urlencoded({extended: false})); // 단순 객체 문자열 형�
 // router setting
 app.use('/test', testRouter);
 app.use('/users', userRouter);
+app.use('/shorts', shortsRouter);
 
 // index.js
 app.use((req, res, next) => {
@@ -31,6 +33,8 @@ app.use((req, res, next) => {
 
 // error handling
 app.use((err, req, res, next) => {
+    console.log(err);
+    
     // 템플릿 엔진 변수 설정
     res.locals.message = err.message;
     // 개발환경이면 에러를 출력하고 아니면 출력하지 않기
