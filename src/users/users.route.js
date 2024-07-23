@@ -1,7 +1,7 @@
 import express from "express";
 import asyncHandler from "express-async-handler"
 
-import {getUserInfo, getUserShorts, getUserLikeShorts, getUserBooks } from "./users.controller.js"
+import {getUserInfo, getUserShorts, getUserLikeShorts, getUserBooks, followUser } from "./users.controller.js"
 
 export const userRouter = express.Router({mergeParams:true});
 
@@ -16,3 +16,6 @@ userRouter.get("/my/likes", asyncHandler(getUserLikeShorts));
 
 //내가 읽은 책 리스트 조회
 userRouter.get("/my/books", asyncHandler(getUserBooks));
+
+// 다른 유저 팔로잉
+userRouter.post("/:userId/follow", asyncHandler(followUser))

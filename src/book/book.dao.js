@@ -4,9 +4,9 @@ import {getBookById} from "./book.sql.js";
 export const findBookById = async (bookId) => {
 
     const conn = await pool.getConnection();
-    const book = await pool.query(getBookById, bookId)
+    const [book] = await pool.query(getBookById, bookId)
 
     conn.release();
 
-    return book;
+    return book[0];
 }
