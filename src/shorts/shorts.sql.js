@@ -1,0 +1,1 @@
+export const getShortsById = "SELECT * FROM shorts WHERE shorts_id = ?"
