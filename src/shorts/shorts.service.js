@@ -1,5 +1,6 @@
 import { pageInfo } from "../../config/pageInfo.js";
-import { countShortsDetailToBook, getBookCategory, getShortsDetailToBook, getShortsDetailToCategory, getShortsDetailToCategoryExcludeBook, getShortsDetailToCategoryExcludeKeyword, getShortsDetailToKeyword, getShortsDetailToUser, getShortsDetailToUserLike } from "./shorts.detail.dao.js";
+import { getBookCategory } from "../book/book.dao.js";
+import { countShortsDetailToBook, getShortsDetailToBook, getShortsDetailToCategory, getShortsDetailToCategoryExcludeBook, getShortsDetailToCategoryExcludeKeyword, getShortsDetailToKeyword, getShortsDetailToUser, getShortsDetailToUserLike } from "./shorts.detail.dao.js";
 import { getShortsDetailListDto } from "./shorts.dto.js";
 
 export const getShortsDetailHome = async (category, page, size) => {

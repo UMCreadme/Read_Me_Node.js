@@ -1,8 +1,10 @@
 import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
+import { getBookById } from "../book/book.sql.js";
+import { findFollowStatus } from "../users/users.sql.js";
 import { getShortsDetailByBook, getShortsDetailByCategory, getShortsDetailByCategoryExcludeBook, getShortsDetailByUser, getShortsDetailByUserLike } from "./shorts.detail.sql.js";
-import { countShortsDetailByBookId, findBookById, findCategoryNameByBookId, isFollowUser, isLikeShorts } from "./shorts.sql.js";
+import { countShortsDetailByBookId, isLikeShorts } from "./shorts.sql.js";
 
 export const getShortsDetailToCategory = async (category, size, offset, userId=null) => {
     try {
@@ -12,7 +14,7 @@ export const getShortsDetailToCategory = async (category, size, offset, userId=n
         for(const short of shorts) {
             if(userId != null) {
                 const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
-                const [isFollow] = await conn.query(isFollowUser, [userId, short.user_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
@@ -39,7 +41,7 @@ export const getShortsDetailToBook = async (bookId, size, offset, userId=null) =
     try {
         const conn = await pool.getConnection();
 
-        const [isBook] = await conn.query(findBookById, [bookId]);
+        const [isBook] = await conn.query(getBookById, [bookId]);
         if(isBook.length == 0) {
             conn.release();
             return [];
@@ -49,7 +51,7 @@ export const getShortsDetailToBook = async (bookId, size, offset, userId=null) =
         for(const short of shorts) {
             if(userId != null) {
                 const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
-                const [isFollow] = await conn.query(isFollowUser, [userId, short.user_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
@@ -97,7 +99,7 @@ export const getShortsDetailToCategoryExcludeBook = async (category, bookId, siz
         for(const short of shorts) {
             if(userId != null) {
                 const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
-                const [isFollow] = await conn.query(isFollowUser, [userId, short.user_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
@@ -128,7 +130,7 @@ export const getShortsDetailToUser = async (userId, size, offset, myId=null) => 
         for(const short of shorts) {
             if(myId != null) {
                 const [isLike] = await conn.query(isLikeShorts, [myId, short.shorts_id]);
-                const [isFollow] = await conn.query(isFollowUser, [myId, short.user_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [myId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
@@ -157,7 +159,7 @@ export const getShortsDetailToUserLike = async (userId, size, offset, myId=null)
         for(const short of shorts) {
             if(myId != null) {
                 const [isLike] = await conn.query(isLikeShorts, [myId, short.shorts_id]);
-                const [isFollow] = await conn.query(isFollowUser, [myId, short.user_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [myId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
@@ -210,24 +212,6 @@ export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordS
         return shorts;
     }
     catch (err) {
-        console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
-        }
-    }
-}
-
-// TODO: book 도메인으로 옮기기
-export const getBookCategory = async (bookId) => {
-    try {
-        const conn = await pool.getConnection();
-        const [result] = await conn.query(findCategoryNameByBookId, [bookId]);
-        conn.release();
-
-        return result[0].name;
-    } catch (err) {
         console.log(err);
         if(err instanceof BaseError) {
             throw err;

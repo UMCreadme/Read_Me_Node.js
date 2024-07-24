@@ -1,4 +1,3 @@
-
 // 유저의 마이프로필 페이지에서 유저 정보 조회시 반환값
 export const userInfoResponseDTO = (userData,  profileImg, followerNum, followingNum) => {
     return {
