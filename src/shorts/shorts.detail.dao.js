@@ -1,26 +1,50 @@
 import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
-import { getBookById } from "../book/book.sql.js";
 import { findFollowStatus } from "../users/users.sql.js";
-import { getShortsDetailByBook, getShortsDetailByCategory, getShortsDetailByCategoryExcludeBook, getShortsDetailByUser, getShortsDetailByUserLike } from "./shorts.detail.sql.js";
+import * as sql from "./shorts.detail.sql.js";
 import { countShortsDetailByBookId, isLikeShorts } from "./shorts.sql.js";
 
-export const getShortsDetailToCategory = async (category, size, offset, userId=null) => {
+// 쇼츠 ID로 쇼츠 상세 조회
+export const getShortsDetailToShortsId = async (shortsId, userId=null) => {
     try {
         const conn = await pool.getConnection();
-        const [shorts] = await conn.query(getShortsDetailByCategory, [category, size, offset]);
+        const [shorts] = await conn.query(sql.getShortsDetailById, [shortsId]);
 
-        for(const short of shorts) {
-            if(userId != null) {
+        if(userId != null) {
+            const [isLike] = await conn.query(isLikeShorts, [userId, shorts[0].shorts_id]);
+            const [isFollow] = await conn.query(findFollowStatus, [userId, shorts[0].user_id]);
+
+            shorts[0].isLike = isLike;
+            shorts[0].isFollow = isFollow;
+        }
+
+        conn.release();
+
+        return shorts;
+    } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.PARAMETER_IS_WRONG);
+        }
+    }
+};
+
+// 카테고리별 쇼츠 상세 조회
+export const getShortsDetailToCategory = async (shortsId, category, size, offset, userId=null) => {
+    try {
+        const conn = await pool.getConnection();
+        const [shorts] = await conn.query(sql.getShortsDetailByCategory, [category, shortsId, size, offset]);
+
+        if(userId != null) {
+            for(const short of shorts) {
                 const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
                 const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
-            } else {
-                short.isLike = false;
-                short.isFollow = false;
             }
         }
 
@@ -35,29 +59,20 @@ export const getShortsDetailToCategory = async (category, size, offset, userId=n
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
 
-export const getShortsDetailToBook = async (bookId, size, offset, userId=null) => {
+export const getShortsDetailToBook = async (shortsId, bookId, size, offset, userId=null) => {
     try {
         const conn = await pool.getConnection();
-
-        const [isBook] = await conn.query(getBookById, [bookId]);
-        if(isBook.length == 0) {
-            conn.release();
-            return [];
-        }
-
-        const [shorts] = await conn.query(getShortsDetailByBook, [bookId, size, offset]);
-        for(const short of shorts) {
-            if(userId != null) {
+        const [shorts] = await conn.query(sql.getShortsDetailByBook, [bookId, shortsId, size, offset]);
+        
+        if(userId != null) {
+            for(const short of shorts) {
                 const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
                 const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
-            } else {
-                short.isLike = false;
-                short.isFollow = false;
             }
         }
 
@@ -72,7 +87,7 @@ export const getShortsDetailToBook = async (bookId, size, offset, userId=null) =
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
 
 export const countShortsDetailToBook = async (bookId) => {
     try {
@@ -89,23 +104,20 @@ export const countShortsDetailToBook = async (bookId) => {
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
 
 export const getShortsDetailToCategoryExcludeBook = async (category, bookId, size, offset, userId=null) => {
     try {
         const conn = await pool.getConnection();
-        const [shorts] = await conn.query(getShortsDetailByCategoryExcludeBook, [category, bookId, size, offset]);
+        const [shorts] = await conn.query(sql.getShortsDetailByCategoryExcludeBook, [category, bookId, size, offset]);
 
-        for(const short of shorts) {
-            if(userId != null) {
+        if(userId != null) {
+            for(const short of shorts) {
                 const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
                 const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
-            } else {
-                short.isLike = false;
-                short.isFollow = false;
             }
         }
 
@@ -120,15 +132,15 @@ export const getShortsDetailToCategoryExcludeBook = async (category, bookId, siz
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
 
 export const getShortsDetailToUser = async (userId, size, offset, myId=null) => {
     try {
         const conn = await pool.getConnection();
-        const [shorts] = await conn.query(getShortsDetailByUser, [userId, size, offset]);
+        const [shorts] = await conn.query(sql.getShortsDetailByUser, [userId, size, offset]);
 
-        for(const short of shorts) {
-            if(myId != null) {
+        if (myId != null) {
+            for(const short of shorts) {
                 const [isLike] = await conn.query(isLikeShorts, [myId, short.shorts_id]);
                 const [isFollow] = await conn.query(findFollowStatus, [myId, short.user_id]);
 
@@ -149,15 +161,15 @@ export const getShortsDetailToUser = async (userId, size, offset, myId=null) => 
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
 
-export const getShortsDetailToUserLike = async (userId, size, offset, myId=null) => {
+export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, myId=null) => {
     try {
         const conn = await pool.getConnection();
-        const [shorts] = await conn.query(getShortsDetailByUserLike, [userId, size, offset]);
+        const [shorts] = await conn.query(sql.getShortsDetailByUserLike, [userId, userId, shortsId, size, offset]);
 
-        for(const short of shorts) {
-            if(myId != null) {
+        if (myId != null) {
+            for(const short of shorts) {
                 const [isLike] = await conn.query(isLikeShorts, [myId, short.shorts_id]);
                 const [isFollow] = await conn.query(findFollowStatus, [myId, short.user_id]);
 
@@ -178,7 +190,7 @@ export const getShortsDetailToUserLike = async (userId, size, offset, myId=null)
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
 
 export const getShortsDetailToKeyword = async (keyword, size, offset, userId=null) => {
     try {
@@ -199,7 +211,7 @@ export const getShortsDetailToKeyword = async (keyword, size, offset, userId=nul
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
 
 export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordShorts, size, offset, userId=null) => {
     try {
@@ -219,4 +231,4 @@ export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordS
             throw new BaseError(status.PARAMETER_IS_WRONG);
         }
     }
-}
+};
