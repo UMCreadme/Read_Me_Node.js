@@ -1,21 +1,23 @@
 import { getSearchShorts, getShortsDetailBook, getShortsDetailHome, getShortsDetailSearch, getShortsDetailUser, getShortsDetailUserLike } from "./shorts.service.js";
 import { status } from "../../config/response.status.js";
 import { response } from "../../config/response.js";
+import { BaseError } from "../../config/error.js";
 
 export const getShortsDetail = async (req, res, next) => {
     const { category, keyword, book, user, like, page=1, size=10 } = req.query;
+    const shortsId = req.params.shortsId;
     let shorts;
 
     if (keyword !== undefined && category !== undefined) {
-        shorts = await getShortsDetailSearch(category, keyword, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailSearch(parseInt(shortsId), category, keyword, parseInt(page), parseInt(size));
     } else if (book !== undefined) {
-        shorts = await getShortsDetailBook(book, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailBook(parseInt(shortsId), book, parseInt(page), parseInt(size));
     } else if (user !== undefined && like) {
-        shorts = await getShortsDetailUserLike(user, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailUserLike(parseInt(shortsId), parseInt(user), parseInt(page), parseInt(size));
     } else if (user !== undefined) {
-        shorts = await getShortsDetailUser(user, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailUser(parseInt(shortsId), parseInt(user), parseInt(page), parseInt(size));
     } else if (category !== undefined) {
-        shorts = await getShortsDetailHome(category, parseInt(page), parseInt(size));
+        shorts = await getShortsDetailHome(parseInt(shortsId), category, parseInt(page), parseInt(size));
     } else {
         throw new BaseError(status.BAD_REQUEST);
     }
