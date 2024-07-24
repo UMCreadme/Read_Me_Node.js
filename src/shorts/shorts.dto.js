@@ -20,4 +20,23 @@ export const getShortsDetailListDto = (data) => {
     }
 
     return shortsList;
-}
+};
+
+export const getSearchShortsListDto = (data) => {
+    const shortsList = [];
+
+    for(const short of data) {
+        shortsList.push({
+            "shortsId": short.shorts_id,
+            "shortsImg": short.shorts_img,
+            "phrase": short.phrase,
+            "category": short.category,
+            "bookTitle": short.book_title,
+            "author": short.author,
+            "translator": short.translator,
+            "tags": short.tag ? short.tag.split("|") : []
+        });
+    }
+
+    return shortsList;
+};
