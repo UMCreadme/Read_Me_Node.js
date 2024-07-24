@@ -1,7 +1,7 @@
 import { pageInfo } from "../../config/pageInfo.js";
-import { getBookCategory } from "../book/book.dao.js";
+import { findBookById, getBookCategory } from "../book/book.dao.js";
 import { getShortsToAuthorKeyword, getShortsToTagKeyword, getShortsToTitleKeyword } from "./shorts.dao.js";
-import { countShortsDetailToBook, getShortsDetailToBook, getShortsDetailToCategory, getShortsDetailToCategoryExcludeBook, getShortsDetailToCategoryExcludeKeyword, getShortsDetailToKeyword, getShortsDetailToUser, getShortsDetailToUserLike } from "./shorts.detail.dao.js";
+import * as dao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
 
 // 쇼츠 검색
@@ -28,16 +28,27 @@ export const getSearchShorts = async (keyword, page, size) => {
 };
 
 // 메인 화면 > 쇼츠 상세 조회
-export const getShortsDetailHome = async (category, page, size) => {
-    const result = await getShortsDetailToCategory(category, size+1, (page-1)*size);
-    const hasNext = result.length > size;
-    if(hasNext) result.pop();
+export const getShortsDetailHome = async (shortsId, category, page, size) => {
+    let result = []; let hasNext;
+    
+    // 첫 번째 페이지일 경우 누른 쇼츠 정보를 먼저 조회
+    if (page == 1) {
+        result = await dao.getShortsDetailToShortsId(shortsId);
+        result.push(...await dao.getShortsDetailToCategory(shortsId, category, size, (page-1)*size));
+
+        hasNext = result.length > size;
+        if(hasNext) result.pop();
+    } else {
+        result = await dao.getShortsDetailToCategory(shortsId, category, size+1, (page-1)*size - 1);
+        hasNext = result.length > size;
+        if(hasNext) result.pop();
+    }
 
     return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
 };
 
 // 검색 화면 > 쇼츠 상세 조회
-export const getShortsDetailSearch = async (category, keyword, page, size) => {
+export const getShortsDetailSearch = async (shortsId, category, keyword, page, size) => {
     // PM님 요구사항: 검색한 쇼츠에 해당하는 3-5개 쇼츠 이후 카테고리 관련 추천 쇼츠 반환
     const SEARCHSIZE = 5;
     let result; let hasNext;
@@ -45,7 +56,7 @@ export const getShortsDetailSearch = async (category, keyword, page, size) => {
     const totalPages = Math.ceil(SEARCHSIZE / size);
     const lastCount = SEARCHSIZE % size;
 
-    const keywordShorts = await getShortsDetailToKeyword(keyword, SEARCHSIZE, 0);
+    const keywordShorts = await dao.getShortsDetailToKeyword(keyword, SEARCHSIZE, 0);
 
     if (page > totalPages) {
         result = await getShortsDetailToCategoryExcludeKeyword(category, keywordShorts.map(short => short.shorts_id), size+1, (page-totalPages-1)*size + lastCount);
@@ -62,19 +73,35 @@ export const getShortsDetailSearch = async (category, keyword, page, size) => {
 };
 
 // 책 상세 화면 > 쇼츠 상세 조회
-export const getShortsDetailBook = async (bookId, page, size) => {
-    const totalPages = Math.ceil(await countShortsDetailToBook(bookId) / size);
-    const lastCount = await countShortsDetailToBook(bookId) % size;
-    let result; let hasNext;
+export const getShortsDetailBook = async (shortsId, bookId, page, size) => {
+    // 책 정보가 존재하지 않을 경우 빈 배열 반환
+    const bookInfo = await findBookById(bookId);
+    if(bookInfo.length == 0) return {"data": [], "pageInfo": pageInfo(page, 0, false)};
+
+    const totalPages = Math.ceil(await dao.countShortsDetailToBook(bookId) / size);
+    const lastCount = await dao.countShortsDetailToBook(bookId) % size;
 
     const category = await getBookCategory(bookId);
+    let result; let hasNext;
 
+    // 전체 페이지 수보다 큰 페이지를 요청할 경우 (책에 해당하는 쇼츠 조회 끝난 경우), 책과 관련된 카테고리 쇼츠를 반환
     if(page > totalPages) {
-        result = await getShortsDetailToCategoryExcludeBook(category, bookId, size+1, (page-totalPages-1)*size + lastCount);
+        result = await dao.getShortsDetailToCategoryExcludeBook(category, bookId, size+1, (page-totalPages-1)*size + lastCount);
         hasNext = result.length > size;
         if(hasNext) result.pop();
+    } else if(page == 1) {
+        result = await dao.getShortsDetailToShortsId(shortsId);
+        result.push(...await dao.getShortsDetailToBook(shortsId, bookId, size, (page-1)*size));
+
+        hasNext = result.length > size;
+        if(hasNext) result.pop();
+        else {
+            result.push(...await getShortsDetailToCategoryExcludeBook(category, bookId, size - result.length + 1, 0));
+            hasNext = result.length > size;
+            if(hasNext) result.pop();
+        }
     } else {
-        result = await getShortsDetailToBook(bookId, size+1, (page-1)*size);
+        result = await dao.getShortsDetailToBook(shortsId, bookId, size+1, (page-1)*size - 1);
         hasNext = result.length > size;
         if(hasNext) result.pop();
         else {
@@ -88,8 +115,8 @@ export const getShortsDetailBook = async (bookId, page, size) => {
 };
 
 // 유저 올린 쇼츠 > 쇼츠 상세 조회
-export const getShortsDetailUser = async (userId, page, size) => {
-    const result = await getShortsDetailToUser(userId, size+1, (page-1)*size);
+export const getShortsDetailUser = async (shortsId, userId, page, size) => {
+    const result = await dao.getShortsDetailToUser(shortsId, userId, size+1, (page-1)*size);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
@@ -97,8 +124,8 @@ export const getShortsDetailUser = async (userId, page, size) => {
 };
 
 // 유저 좋아요한 쇼츠 > 쇼츠 상세 조회
-export const getShortsDetailUserLike = async (userId, page, size) => {
-    const result = await getShortsDetailToUserLike(userId, size+1, (page-1)*size);
+export const getShortsDetailUserLike = async (shortsId, userId, page, size) => {
+    const result = await dao.getShortsDetailToUserLike(shortsId, userId, size+1, (page-1)*size);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
