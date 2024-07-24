@@ -1,6 +1,13 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { findOne, findUserShorts, findUserLikeShorts, findUserBooks, followNewUser } from "./users.service.js";
+import {
+    findOne,
+    findUserShorts,
+    findUserLikeShorts,
+    findUserBooks,
+    followNewUser,
+    searchUserByKeyword
+} from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
 
 
@@ -59,4 +66,9 @@ export const getUserBooks = async(req, res, next)=> {
 export const followUser = async(req, res, next)=>{
     const result= await  followNewUser (req.body, req.params.userId)
     res.send(response(status.SUCCESS, result))
+}
+
+// 유저 검색
+export const searchUser = async (req, res, next) => {
+    res.send(response(status.SUCCESS, await searchUserByKeyword(req.body, req.query.keyword)))
 }

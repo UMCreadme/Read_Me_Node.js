@@ -15,3 +15,6 @@ export const getImageById = "SELECT * FROM image WHERE image_id = ?";
 export const addFollowUser = "INSERT INTO follow(follower, user_id) VALUES(?, ?)";
 
 export const findFollowStatus = "SELECT * FROM follow WHERE follower = ? AND user_id = ?";
+
+export const findIfContainsKeyword = `SELECT * FROM users WHERE user_id = ? AND (account LIKE CONCAT('%', ?, '%')OR nickname LIKE CONCAT('%', ?, '%'));`
+

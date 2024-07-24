@@ -6,7 +6,7 @@ import {
     findUserLikeShortsById,
     findUserBooksById,
     findImageById,
-    followUserAdd
+    followUserAdd, findEachFollowerWithKeyword
 } from "./users.dao.js";
 import { userBookResponseDTO, userFollowResponseDTO, userInfoResponseDTO, userShortsResponseDTO } from "./users.dto.js";
 import { findBookById } from "../book/book.dao.js";
@@ -120,4 +120,14 @@ export const followNewUser = async(body, followUserId) =>{
     }
 
     return userFollowResponseDTO(userId, followingId)
+}
+
+// 유저 검색 기능 로직
+export const searchUserByKeyword = async (body, keyword) => {
+
+    const userId = body.id
+    const eachFollowUsersList = await findEachFollowerWithKeyword(userId, keyword);
+
+    console.log(eachFollowUsersList)
+
 }

@@ -8,7 +8,7 @@ import {
     getUserById,
     getUserLikeShortsIdById,
     getUserShortsById,
-    getImageById, addFollowUser, findFollowStatus
+    getImageById, addFollowUser, findFollowStatus, findIfContainsKeyword
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -152,6 +152,37 @@ export const followUserAdd = async(userId, followingId) => {
         conn.release();
 
         return true
+    }
+    catch (err){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 키워드 검색으로 조회되는 유저중 맞팔로우 되어있는 사람 찾기
+export const findEachFollowerWithKeyword = async(userId, keyword) =>{
+    try{
+        const conn = await pool.getConnection();
+        const [userFollowings] = await pool.query(getUserFollowings, userId);
+        const eachFollowIdList = []
+        const resultList = []
+
+        for (const userFollowing of userFollowings) {
+            const [eachFollowStatus] = await pool.query(findFollowStatus, [userFollowing.user_id, userId]);
+            if(eachFollowStatus[0]) {
+                eachFollowIdList.push(userFollowing.user_id);
+            }
+        }
+
+
+        for (const eachFollowUserId of eachFollowIdList) {
+            const [resultUser] = await pool.query(findIfContainsKeyword,[eachFollowUserId, keyword,keyword])
+            if(resultUser[0]){
+                resultList.push(resultUser[0])
+            }
+        }
+
+        return resultList
+
     }
     catch (err){
         throw new BaseError(status.BAD_REQUEST)
