@@ -13,8 +13,7 @@ export const getShortsByTitleKeyword =
 FROM SHORTS s
 LEFT JOIN BOOK b ON s.book_id = b.book_id
 LEFT JOIN IMAGE i ON s.image_id = i.image_id
-LEFT JOIN BOOK_CATEGORY bc ON b.book_id = bc.book_id
-LEFT JOIN CATEGORY c ON bc.category_id = c.category_id
+LEFT JOIN CATEGORY c ON b.category_id = c.category_id
 WHERE b.title REGEXP ?
 ORDER BY s.created_at DESC;`;
 
@@ -24,8 +23,7 @@ export const getShortsByAuthorKeyword =
 FROM SHORTS s
 LEFT JOIN BOOK b ON s.book_id = b.book_id
 LEFT JOIN IMAGE i ON s.image_id = i.image_id
-LEFT JOIN BOOK_CATEGORY bc ON b.book_id = bc.book_id
-LEFT JOIN CATEGORY c ON bc.category_id = c.category_id
+LEFT JOIN CATEGORY c ON b.category_id = c.category_id
 WHERE b.author REGEXP ? OR b.translator REGEXP ?
 ORDER BY s.created_at DESC;`;
 
@@ -35,7 +33,6 @@ export const getShortsByTagKeyword =
 FROM SHORTS s
 LEFT JOIN BOOK b ON s.book_id = b.book_id
 LEFT JOIN IMAGE i ON s.image_id = i.image_id
-LEFT JOIN BOOK_CATEGORY bc ON b.book_id = bc.book_id
-LEFT JOIN CATEGORY c ON bc.category_id = c.category_id
+LEFT JOIN CATEGORY c ON b.category_id = c.category_id
 WHERE s.tag REGEXP ?
 ORDER BY s.created_at DESC;`;

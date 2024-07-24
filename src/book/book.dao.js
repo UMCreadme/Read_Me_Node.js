@@ -1,4 +1,6 @@
 import { pool } from "../../config/db.config.js";
+import { BaseError } from "../../config/error.js";
+import { status } from "../../config/response.status.js";
 import { findCategoryNameByBookId, getBookById } from "./book.sql.js";
 
 export const findBookById = async (bookId) => {
