@@ -1,19 +1,12 @@
 export const getShortsDetailByCategory = 
-`-- 1. category_name으로 category_id를 찾는 CTE
-WITH category_id AS (
-    SELECT category_id
-    FROM CATEGORY
-    WHERE name = ?
-),
-
--- 2. 사용자의 팔로워 수를 계산하는 CTE
-followed_users AS (
+`-- 1. 사용자의 팔로워 수를 계산하는 CTE
+WITH followed_users AS (
     SELECT f.user_id AS followed_user_id, COUNT(f.follow_id) AS follower_count
     FROM FOLLOW f
     GROUP BY f.user_id
 ),
 
--- 3. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
+-- 2. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 shorts_with_followers AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_id,
         s.phrase, s.title, s.content, s.tag,
@@ -38,12 +31,12 @@ shorts_with_followers AS (
             SELECT s.shorts_id
             FROM SHORTS s
             JOIN BOOK b ON s.book_id = b.book_id
-            JOIN BOOK_CATEGORY bc ON b.book_id = bc.book_id
-            JOIN category_id c ON bc.category_id = c.category_id
+            JOIN CATEGORY c ON b.category_id = c.category_id
+            WHERE c.name = ?
         )
 )
 
--- 4. 최종 결과를 가져오는 쿼리
+-- 3. 최종 결과를 가져오는 쿼리
 SELECT
     s.user_id, u.account, i.url AS profile_img,
     s.phrase, s.title, s.content, s.tag,
@@ -57,21 +50,14 @@ ORDER BY s.follower_count DESC, s.like_count DESC
 LIMIT ? OFFSET ?;`;
 
 export const getShortsDetailByCategoryExcludeBook =
-`-- 1. category_name으로 category_id를 찾는 CTE
-WITH category_id AS (
-    SELECT category_id
-    FROM CATEGORY
-    WHERE name = ?
-),
-
--- 2. 사용자의 팔로워 수를 계산하는 CTE
-followed_users AS (
+`-- 1. 사용자의 팔로워 수를 계산하는 CTE
+WITH followed_users AS (
     SELECT f.user_id AS followed_user_id, COUNT(f.follow_id) AS follower_count
     FROM FOLLOW f
     GROUP BY f.user_id
 ),
 
--- 3. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
+-- 2. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 shorts_with_followers AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_id,
         s.phrase, s.title, s.content, s.tag,
@@ -96,13 +82,12 @@ shorts_with_followers AS (
             SELECT s.shorts_id
             FROM SHORTS s
             JOIN BOOK b ON s.book_id = b.book_id
-            JOIN BOOK_CATEGORY bc ON b.book_id = bc.book_id
-            JOIN category_id c ON bc.category_id = c.category_id
-            WHERE s.book_id != ?
+            JOIN CATEGORY c ON b.category_id = c.category_id
+            WHERE c.name = ? AND s.book_id != ?
         )
 )
 
--- 4. 최종 결과를 가져오는 쿼리
+-- 3. 최종 결과를 가져오는 쿼리
 SELECT
     s.user_id, u.account, i.url AS profile_img,
     s.phrase, s.title, s.content, s.tag,
