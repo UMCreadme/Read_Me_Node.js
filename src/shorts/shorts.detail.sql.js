@@ -1,3 +1,26 @@
+// 쇼츠 ID에 해당하는 쇼츠 상세 정보를 가져오는 쿼리
+export const getShortsDetailById =
+`SELECT
+    s.user_id, u.account, i.url AS profile_img,
+    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    likes.like_count, comments.comment_count, s.book_id
+FROM SHORTS s
+JOIN USERS u ON s.user_id = u.user_id
+JOIN IMAGE i ON u.image_id = i.image_id
+JOIN IMAGE si ON s.image_id = si.image_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS like_count
+    FROM LIKE_SHORTS
+    GROUP BY shorts_id
+) likes ON s.shorts_id = likes.shorts_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS comment_count
+    FROM COMMENT
+    GROUP BY shorts_id
+) comments ON s.shorts_id = comments.shorts_id
+WHERE s.shorts_id = ?;`;
+
+// 카테고리별 쇼츠 상세 정보를 가져오는 쿼리
 export const getShortsDetailByCategory = 
 `-- 1. 사용자의 팔로워 수를 계산하는 CTE
 WITH followed_users AS (
@@ -45,6 +68,7 @@ FROM shorts_with_followers s
 JOIN USERS u ON s.user_id = u.user_id
 JOIN IMAGE i ON u.image_id = i.image_id
 JOIN IMAGE si ON s.image_id = si.image_id
+WHERE s.shorts_id != ?
 GROUP BY s.shorts_id, u.user_id, i.url, si.url
 ORDER BY s.follower_count DESC, s.like_count DESC
 LIMIT ? OFFSET ?;`;
@@ -146,6 +170,7 @@ FROM shorts_with_followers s
 JOIN USERS u ON s.user_id = u.user_id
 JOIN IMAGE i ON u.image_id = i.image_id
 JOIN IMAGE si ON s.image_id = si.image_id
+WHERE s.shorts_id != ?
 GROUP BY s.shorts_id, u.user_id, i.url, si.url
 ORDER BY s.follower_count DESC, s.like_count DESC
 LIMIT ? OFFSET ?;`;
@@ -184,9 +209,10 @@ export const getShortsDetailByUserLike =
     COALESCE(comments.comment_count, 0) AS comment_count,
     s.book_id
 FROM SHORTS s
-JOIN USERS u ON s.user_id = u.user_id
-JOIN IMAGE i ON u.image_id = i.image_id
-JOIN IMAGE si ON s.image_id = si.image_id
+INNER JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id AND ls.user_id = ?
+LEFT JOIN USERS u ON s.user_id = u.user_id
+LEFT JOIN IMAGE i ON u.image_id = i.image_id
+LEFT JOIN IMAGE si ON s.image_id = si.image_id
 LEFT JOIN (
     SELECT shorts_id, COUNT(*) AS like_count
     FROM LIKE_SHORTS
@@ -197,11 +223,7 @@ LEFT JOIN (
     FROM COMMENT
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
-WHERE s.shorts_id IN (
-    SELECT shorts_id
-    FROM LIKE_SHORTS
-    WHERE user_id = ?
-)
-GROUP BY s.shorts_id, u.user_id, i.url, si.url
-ORDER BY s.created_at DESC
+WHERE ls.created_at <= (SELECT created_at FROM LIKE_SHORTS WHERE user_id = ? AND shorts_id = ?)
+GROUP BY s.shorts_id, u.user_id, i.url, si.url, ls.created_at
+ORDER BY ls.created_at DESC
 LIMIT ? OFFSET ?;`;
