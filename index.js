@@ -31,16 +31,29 @@ app.use('/home', homeRouter);
 app.use('/books', bookRouter);
 app.use('/groups', groupRouter);
 
+app.get('/check-db', (req, res) => {
+    connection.query('SELECT 1 + 1 AS solution', (error, results) => {
+      if (error) {
+        res.status(500).send('Database connection failed');
+        console.error('Error executing query:', error.stack);
+        return;
+      }
+      res.send(`Database connection is successful. Solution is: ${results[0].solution}`);
+    });
+  });
+  
+
 // index.js
 app.use((req, res, next) => {
     const err = new BaseError(status.NOT_FOUND);
     next(err);
 });
 
+
 // error handling
 app.use((err, req, res, next) => {
     console.log(err);
-    
+
     // 템플릿 엔진 변수 설정
     res.locals.message = err.message;
     // 개발환경이면 에러를 출력하고 아니면 출력하지 않기
