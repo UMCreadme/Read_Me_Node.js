@@ -6,6 +6,17 @@ import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js"
 
 // 쇼츠 검색
 export const getSearchShorts = async (keyword, page, size) => {
+    let result = await getSearchShortsNoPaging(keyword);
+    result = result.slice((page-1)*size, (page-1)*size + size + 1);
+    
+    const hasNext = result.length > size;
+    if(hasNext) result.pop();
+
+    return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+};
+
+// 쇼츠 검색 (페이징 처리 x)
+export const getSearchShortsNoPaging = async (keyword, shortsId=null) => {
     const shortsTitle = await getShortsToTitleKeyword(keyword);
     const shortsAuthor = await getShortsToAuthorKeyword(keyword);
     const shortsTag = await getShortsToTagKeyword(keyword);
@@ -17,14 +28,17 @@ export const getSearchShorts = async (keyword, page, size) => {
     // 정렬된 순서대로 배열 합치기
     let result = [...arrays[0].data, ...arrays[1].data, ...arrays[2].data];
 
-    // shorts_id 값 중복되는 것 제거 & 페이징 처리
+    // shorts_id 값 중복되는 것 제거
     result = result.filter((short, index) => result.findIndex(s => s.shorts_id === short.shorts_id) === index);
-    result = result.slice((page-1)*size, (page-1)*size + size + 1);
-    
-    const hasNext = result.length > size;
-    if(hasNext) result.pop();
 
-    return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+    if(shortsId != null) {
+        // shortsId에 해당하는 값부터 반환
+        const idx = result.findIndex(short => short.shorts_id === shortsId);
+        if(idx != -1) {
+            result = result.slice(idx);
+        }
+    }
+    return result;
 };
 
 // 메인 화면 > 쇼츠 상세 조회
@@ -56,15 +70,16 @@ export const getShortsDetailSearch = async (shortsId, category, keyword, page, s
     const totalPages = Math.ceil(SEARCHSIZE / size);
     const lastCount = SEARCHSIZE % size;
 
-    const keywordShorts = await dao.getShortsDetailToKeyword(keyword, SEARCHSIZE, 0);
+    let keywordShorts = await getSearchShortsNoPaging(keyword, shortsId);
+    keywordShorts = keywordShorts.slice(0, SEARCHSIZE);
 
     if (page > totalPages) {
-        result = await getShortsDetailToCategoryExcludeKeyword(category, keywordShorts.map(short => short.shorts_id), size+1, (page-totalPages-1)*size + lastCount);
+        result = await dao.getShortsDetailToCategoryExcludeKeyword(category, keywordShorts.map(short => short.shorts_id), size+1, (page-totalPages-1)*size + lastCount);
         hasNext = result.length > size;
         if(hasNext) result.pop();
     } else {
         result = keywordShorts.slice((page-1)*size, (page-1)*size + Math.min(size, SEARCHSIZE));
-        result.push(...await getShortsDetailToCategoryExcludeKeyword(category, result.map(short => short.shorts_id), size - result.length + 1, 0));
+        result.push(...await dao.getShortsDetailToCategoryExcludeKeyword(category, result.map(short => short.shorts_id), size - result.length + 1, 0));
         hasNext = result.length > size;
         if(hasNext) result.pop();
     }

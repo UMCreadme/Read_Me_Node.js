@@ -192,32 +192,25 @@ export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, 
     }
 };
 
-export const getShortsDetailToKeyword = async (keyword, size, offset, userId=null) => {
-    try {
-        const conn = await pool.getConnection();
-
-        // TODO: 검색 dao 호출
-        const searchResult = [];
-
-        conn.release();
-
-        return searchResult;
-    }
-    catch (err) {
-        console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
-        }
-    }
-};
-
 export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordShorts, size, offset, userId=null) => {
     try {
         const conn = await pool.getConnection();
-        // TODO: 검색 기능 먼저 구현 후 개발
-        const shorts = [];
+
+        // 플레이스홀더 생성
+        const placeholders = keywordShorts.map(() => '?').join(',');
+        const query = sql.getShortsDetailByCategoryExcludeKeyword.replace('<<placeholder>>', placeholders);
+
+        const [shorts] = await conn.query(query, [category, ...keywordShorts, size, offset]);
+
+        if(userId != null) {
+            for(const short of shorts) {
+                const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
+
+                short.isLike = isLike;
+                short.isFollow = isFollow;
+            }
+        }
 
         conn.release();
 
