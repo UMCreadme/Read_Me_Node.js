@@ -134,10 +134,10 @@ export const getShortsDetailToCategoryExcludeBook = async (category, bookId, siz
     }
 };
 
-export const getShortsDetailToUser = async (userId, size, offset, myId=null) => {
+export const getShortsDetailToUser = async (shortsId, userId, size, offset, myId=null) => {
     try {
         const conn = await pool.getConnection();
-        const [shorts] = await conn.query(sql.getShortsDetailByUser, [userId, size, offset]);
+        const [shorts] = await conn.query(sql.getShortsDetailByUser, [userId, shortsId, size, offset]);
 
         if (myId != null) {
             for(const short of shorts) {
