@@ -41,3 +41,12 @@ export const userFollowResponseDTO = (userId, followingId) =>{
         "followingUserId" : followingId
     }
 }
+
+export const userSearchResponseDTO = (userData, profileImg) => {
+    return {
+        "userId" : userData.user_id,
+        "profileImg": profileImg,
+        "account" : userData.account,
+        "nickname" : userData.nickname
+    }
+}

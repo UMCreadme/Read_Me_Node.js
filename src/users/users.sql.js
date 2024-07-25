@@ -16,5 +16,6 @@ export const addFollowUser = "INSERT INTO follow(follower, user_id) VALUES(?, ?)
 
 export const findFollowStatus = "SELECT * FROM follow WHERE follower = ? AND user_id = ?";
 
-export const findIfContainsKeyword = `SELECT * FROM users WHERE user_id = ? AND (account LIKE CONCAT('%', ?, '%')OR nickname LIKE CONCAT('%', ?, '%'));`
+export const findIfContainsKeywordWithUserId = `SELECT * FROM users WHERE user_id = ? AND ( (CASE WHEN ? = 'account' THEN account ELSE nickname END) LIKE CONCAT('%', ?, '%') )`;
 
+export const findAllIfContainsKeyword =  `SELECT * FROM users WHERE ( (CASE WHEN ? = 'account' THEN account ELSE nickname END) LIKE CONCAT('%', ?, '%') )`;
