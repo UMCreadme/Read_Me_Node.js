@@ -30,17 +30,6 @@ app.use('/shorts', shortsRouter);
 app.use('/home', homeRouter);
 app.use('/books', bookRouter);
 app.use('/groups', groupRouter);
-
-app.get('/check-db', (req, res) => {
-    connection.query('SELECT 1 + 1 AS solution', (error, results) => {
-      if (error) {
-        res.status(500).send('Database connection failed');
-        console.error('Error executing query:', error.stack);
-        return;
-      }
-      res.send(`Database connection is successful. Solution is: ${results[0].solution}`);
-    });
-  });
   
 
 // index.js
