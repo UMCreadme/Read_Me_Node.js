@@ -1,12 +1,16 @@
 import {
     findById,
+    findEachFollowWithKeyword,
     findFollowerNumByUserId,
     findFollowingNumByUserId,
-    findUserShortsById,
-    findUserLikeShortsById,
-    findUserBooksById,
     findImageById,
-    followUserAdd, findEachFollowWithKeyword, findMyFollowWithKeyword, findMeFollowWithKeyword, findUsersWithKeyword
+    findMeFollowWithKeyword,
+    findMyFollowWithKeyword,
+    findUserBooksById,
+    findUserLikeShortsById,
+    findUserShortsById,
+    findUsersWithKeyword,
+    followUserAdd
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
@@ -15,9 +19,9 @@ import {
     userSearchResponseDTO,
     userShortsResponseDTO
 } from "./users.dto.js";
-import { findBookById } from "../book/book.dao.js";
-import { status } from "../../config/response.status.js";
-import { BaseError } from "../../config/error.js";
+import {findBookById} from "../book/book.dao.js";
+import {status} from "../../config/response.status.js";
+import {BaseError} from "../../config/error.js";
 
 // 유저 정보 조회 로직
 export const findOne = async(body) => {
@@ -198,7 +202,7 @@ export const searchUserByKeyword = async (body, keyword) => {
 
     for (const combinedListElement of combinedList) {
         let profileImg = await findImageById(combinedListElement.image_id)
-        userSearchResponseDTOList.push(userSearchResponseDTO(combinedListElement, profileImg))
+        userSearchResponseDTOList.push(userSearchResponseDTO(combinedListElement, profileImg.url))
     }
 
     return userSearchResponseDTOList

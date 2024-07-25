@@ -97,7 +97,7 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
             userLikeShorts.push(userLikeShort[0])
         }
 
-
+        conn.release();
         return userLikeShorts;
     }
     catch (err) {
@@ -118,6 +118,7 @@ export const findUserBooksById = async(userId, offset, limit) => {
             userBooks.push(userBook[0])
         }
 
+        conn.release();
         return userBooks;
     }
     catch(err){
@@ -131,6 +132,7 @@ export const findImageById = async(imageId) => {
         const conn = await pool.getConnection();
         const [image] = await pool.query(getImageById, imageId)
 
+        conn.release();
         return image[0]
     }
 
