@@ -1,6 +1,7 @@
 import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
+import { insertObject } from "../common/common.dao.js";
 import { getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
 
 // 책 제목으로 쇼츠 검색
@@ -56,6 +57,36 @@ export const getShortsToTagKeyword = async (keyword) => {
             throw err;
         } else {
             throw new BaseError(status.PARAMETER_IS_WRONG);
+        }
+    }
+};
+
+// 쇼츠 생성
+export const createShorts = async (shorts) => {
+    const conn = await pool.getConnection();
+
+    try {
+        await conn.query('BEGIN');
+        
+        // 쇼츠 정보 저장
+        const shortsId = await insertObject(conn, 'SHORTS', shorts);
+
+        // 책 읽음 표시
+        await insertObject(conn, 'USER_BOOK', {user_id: shorts.user_id, book_id: shorts.book_id});
+
+        await conn.query('COMMIT');
+        conn.release();
+
+        return shortsId;
+    } catch (err) {
+        await conn.query('ROLLBACK');
+        conn.release();
+
+        console.log(err);
+        if (err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
