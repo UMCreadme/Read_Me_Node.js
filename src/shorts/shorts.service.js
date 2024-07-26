@@ -1,7 +1,9 @@
+import { BaseError } from "../../config/error.js";
 import { pageInfo } from "../../config/pageInfo.js";
-import { findBookById, getBookCategory } from "../book/book.dao.js";
-import { getShortsToAuthorKeyword, getShortsToTagKeyword, getShortsToTitleKeyword } from "./shorts.dao.js";
-import * as dao from "./shorts.detail.dao.js";
+import { status } from "../../config/response.status.js";
+import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategoryIdByName } from "../book/book.dao.js";
+import * as shortsDao from "./shorts.dao.js";
+import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
 
 // 쇼츠 검색
@@ -17,9 +19,9 @@ export const getSearchShorts = async (keyword, page, size) => {
 
 // 쇼츠 검색 (페이징 처리 x)
 export const getSearchShortsNoPaging = async (keyword, shortsId=null) => {
-    const shortsTitle = await getShortsToTitleKeyword(keyword);
-    const shortsAuthor = await getShortsToAuthorKeyword(keyword);
-    const shortsTag = await getShortsToTagKeyword(keyword);
+    const shortsTitle = await shortsDao.getShortsToTitleKeyword(keyword);
+    const shortsAuthor = await shortsDao.getShortsToAuthorKeyword(keyword);
+    const shortsTag = await shortsDao.getShortsToTagKeyword(keyword);
 
     // shortsTitle, shortsAuthor, shortsTag 중 길이가 가장 긴 배열 순서대로 합치기
     const arrays = [ { data: shortsTitle }, { data: shortsAuthor }, { data: shortsTag } ];
@@ -47,13 +49,13 @@ export const getShortsDetailHome = async (shortsId, category, page, size) => {
     
     // 첫 번째 페이지일 경우 누른 쇼츠 정보를 먼저 조회
     if (page == 1) {
-        result = await dao.getShortsDetailToShortsId(shortsId);
-        result.push(...await dao.getShortsDetailToCategory(shortsId, category, size, (page-1)*size));
+        result = await shortsDetailDao.getShortsDetailToShortsId(shortsId);
+        result.push(...await shortsDetailDao.getShortsDetailToCategory(shortsId, category, size, (page-1)*size));
 
         hasNext = result.length > size;
         if(hasNext) result.pop();
     } else {
-        result = await dao.getShortsDetailToCategory(shortsId, category, size+1, (page-1)*size - 1);
+        result = await shortsDetailDao.getShortsDetailToCategory(shortsId, category, size+1, (page-1)*size - 1);
         hasNext = result.length > size;
         if(hasNext) result.pop();
     }
@@ -74,12 +76,12 @@ export const getShortsDetailSearch = async (shortsId, category, keyword, page, s
     keywordShorts = keywordShorts.slice(0, SEARCHSIZE);
 
     if (page > totalPages) {
-        result = await dao.getShortsDetailToCategoryExcludeKeyword(category, keywordShorts.map(short => short.shorts_id), size+1, (page-totalPages-1)*size + lastCount);
+        result = await shortsDetailDao.getShortsDetailToCategoryExcludeKeyword(category, keywordShorts.map(short => short.shorts_id), size+1, (page-totalPages-1)*size + lastCount);
         hasNext = result.length > size;
         if(hasNext) result.pop();
     } else {
         result = keywordShorts.slice((page-1)*size, (page-1)*size + Math.min(size, SEARCHSIZE));
-        result.push(...await dao.getShortsDetailToCategoryExcludeKeyword(category, result.map(short => short.shorts_id), size - result.length + 1, 0));
+        result.push(...await shortsDetailDao.getShortsDetailToCategoryExcludeKeyword(category, result.map(short => short.shorts_id), size - result.length + 1, 0));
         hasNext = result.length > size;
         if(hasNext) result.pop();
     }
@@ -93,34 +95,34 @@ export const getShortsDetailBook = async (shortsId, bookId, page, size) => {
     const bookInfo = await findBookById(bookId);
     if(bookInfo.length == 0) return {"data": [], "pageInfo": pageInfo(page, 0, false)};
 
-    const totalPages = Math.ceil(await dao.countShortsDetailToBook(bookId) / size);
-    const lastCount = await dao.countShortsDetailToBook(bookId) % size;
+    const totalPages = Math.ceil(await shortsDetailDao.countShortsDetailToBook(bookId) / size);
+    const lastCount = await shortsDetailDao.countShortsDetailToBook(bookId) % size;
 
     const category = await getBookCategory(bookId);
     let result; let hasNext;
 
     // 전체 페이지 수보다 큰 페이지를 요청할 경우 (책에 해당하는 쇼츠 조회 끝난 경우), 책과 관련된 카테고리 쇼츠를 반환
     if(page > totalPages) {
-        result = await dao.getShortsDetailToCategoryExcludeBook(category, bookId, size+1, (page-totalPages-1)*size + lastCount);
+        result = await shortsDetailDao.getShortsDetailToCategoryExcludeBook(category, bookId, size+1, (page-totalPages-1)*size + lastCount);
         hasNext = result.length > size;
         if(hasNext) result.pop();
     } else if(page == 1) {
-        result = await dao.getShortsDetailToShortsId(shortsId);
-        result.push(...await dao.getShortsDetailToBook(shortsId, bookId, size, (page-1)*size));
+        result = await shortsDetailDao.getShortsDetailToShortsId(shortsId);
+        result.push(...await shortsDetailDao.getShortsDetailToBook(shortsId, bookId, size, (page-1)*size));
 
         hasNext = result.length > size;
         if(hasNext) result.pop();
         else {
-            result.push(...await getShortsDetailToCategoryExcludeBook(category, bookId, size - result.length + 1, 0));
+            result.push(...await shortsDetailDao.getShortsDetailToCategoryExcludeBook(category, bookId, size - result.length + 1, 0));
             hasNext = result.length > size;
             if(hasNext) result.pop();
         }
     } else {
-        result = await dao.getShortsDetailToBook(shortsId, bookId, size+1, (page-1)*size - 1);
+        result = await shortsDetailDao.getShortsDetailToBook(shortsId, bookId, size+1, (page-1)*size - 1);
         hasNext = result.length > size;
         if(hasNext) result.pop();
         else {
-            result.push(...await getShortsDetailToCategoryExcludeBook(category, bookId, size - result.length + 1, 0));
+            result.push(...await shortsDetailDao.getShortsDetailToCategoryExcludeBook(category, bookId, size - result.length + 1, 0));
             hasNext = result.length > size;
             if(hasNext) result.pop();
         }
@@ -131,7 +133,7 @@ export const getShortsDetailBook = async (shortsId, bookId, page, size) => {
 
 // 유저 올린 쇼츠 > 쇼츠 상세 조회
 export const getShortsDetailUser = async (shortsId, userId, page, size) => {
-    const result = await dao.getShortsDetailToUser(shortsId, userId, size+1, (page-1)*size);
+    const result = await shortsDetailDao.getShortsDetailToUser(shortsId, userId, size+1, (page-1)*size);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
@@ -140,9 +142,31 @@ export const getShortsDetailUser = async (shortsId, userId, page, size) => {
 
 // 유저 좋아요한 쇼츠 > 쇼츠 상세 조회
 export const getShortsDetailUserLike = async (shortsId, userId, page, size) => {
-    const result = await dao.getShortsDetailToUserLike(shortsId, userId, size+1, (page-1)*size);
+    const result = await shortsDetailDao.getShortsDetailToUserLike(shortsId, userId, size+1, (page-1)*size);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
     return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+};
+
+// 쇼츠 생성
+export const createShorts = async (book, shorts, category) => {
+    // ISBN 값으로 book_id 조회
+    let bookId = await getBookIdByISBN(book.ISBN);
+    
+    // book_id 값이 존재하지 않을 경우 책 정보 생성
+    if(bookId === undefined) {
+        console.log('category: ', category);
+        const categoryId = await getCategoryIdByName(category);
+        if(categoryId === undefined) {
+            throw new BaseError(status.CATEGORY_NOT_FOUND);
+        }
+
+        book.category_id = categoryId;
+        bookId = await createBook(book);
+    }
+
+    // 쇼츠 정보 생성
+    shorts.book_id = bookId;
+    return await shortsDao.createShorts(shorts);
 };
