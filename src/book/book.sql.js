@@ -5,3 +5,9 @@ export const findCategoryNameByBookId =
 `SELECT c.name FROM BOOK b
 JOIN CATEGORY c ON b.category_id = c.category_id
 WHERE b.book_id = ?;`;
+
+// ISBN으로 책 ID 조회
+export const findBookIdByISBN = "SELECT book_id FROM BOOK WHERE ISBN = ?;";
+
+// 카테고리 이름으로 카테고리 ID 조회
+export const findCategoryIdByName = "SELECT category_id FROM CATEGORY WHERE name = ?;";
