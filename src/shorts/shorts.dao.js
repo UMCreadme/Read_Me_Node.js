@@ -1,6 +1,7 @@
 import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
+import { isUserReadBookById } from "../book/book.sql.js";
 import { insertObject } from "../common/common.dao.js";
 import { getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
 
@@ -71,7 +72,13 @@ export const createShorts = async (shorts) => {
         // 쇼츠 정보 저장
         const shortsId = await insertObject(conn, 'SHORTS', shorts);
 
-        // 책 읽음 표시
+        // 이미 읽은 책인지 확인
+        const [isRead] = await conn.query(isUserReadBookById, [shorts.user_id, shorts.book_id]);
+        if (isRead.length !== 0) {
+            return shortsId;
+        }
+
+        // 아직 읽지 않은 책일 경우 책 읽음 표시
         await insertObject(conn, 'USER_BOOK', {user_id: shorts.user_id, book_id: shorts.book_id});
 
         await conn.query('COMMIT');
