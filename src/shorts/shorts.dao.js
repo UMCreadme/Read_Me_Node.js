@@ -75,6 +75,8 @@ export const createShorts = async (shorts) => {
         // 이미 읽은 책인지 확인
         const [isRead] = await conn.query(isUserReadBookById, [shorts.user_id, shorts.book_id]);
         if (isRead.length !== 0) {
+            await conn.query('COMMIT');
+            conn.release();
             return shortsId;
         }
 
