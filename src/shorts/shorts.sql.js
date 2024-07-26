@@ -9,30 +9,81 @@ export const getShortsById = "SELECT * FROM shorts WHERE shorts_id = ?";
 
 // 책 제목에서 키워드로 쇼츠 검색
 export const getShortsByTitleKeyword = 
-`SELECT s.shorts_id, s.phrase, s.tag, i.url AS shorts_img, b.title AS book_title, b.author, b.translator, c.name AS category
+`SELECT 
+    u.user_id, u.account, i.url AS profile_img,
+    s.shorts_id, si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    b.book_id, b.title AS book_title, b.author, b.translator, c.name AS category,
+    COALESCE(likes.like_count, 0) AS like_count, 
+    COALESCE(comments.comment_count, 0) AS comment_count
 FROM SHORTS s
+LEFT JOIN USERS u ON s.user_id = u.user_id
 LEFT JOIN BOOK b ON s.book_id = b.book_id
-LEFT JOIN IMAGE i ON s.image_id = i.image_id
+LEFT JOIN IMAGE i ON u.image_id = i.image_id
+LEFT JOIN IMAGE si ON s.image_id = si.image_id
 LEFT JOIN CATEGORY c ON b.category_id = c.category_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS like_count
+    FROM LIKE_SHORTS
+    GROUP BY shorts_id
+) likes ON s.shorts_id = likes.shorts_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS comment_count
+    FROM COMMENT
+    GROUP BY shorts_id
+) comments ON s.shorts_id = comments.shorts_id
 WHERE b.title REGEXP ?
 ORDER BY s.created_at DESC;`;
 
 // 저자에서 키워드로 쇼츠 검색
 export const getShortsByAuthorKeyword =
-`SELECT s.shorts_id, s.phrase, s.tag, i.url AS shorts_img, b.title AS book_title, b.author, b.translator, c.name AS category
+`SELECT 
+    u.user_id, u.account, i.url AS profile_img,
+    s.shorts_id, si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    b.book_id, b.title AS book_title, b.author, b.translator, c.name AS category,
+    COALESCE(likes.like_count, 0) AS like_count, 
+    COALESCE(comments.comment_count, 0) AS comment_count
 FROM SHORTS s
+LEFT JOIN USERS u ON s.user_id = u.user_id
 LEFT JOIN BOOK b ON s.book_id = b.book_id
-LEFT JOIN IMAGE i ON s.image_id = i.image_id
+LEFT JOIN IMAGE i ON u.image_id = i.image_id
+LEFT JOIN IMAGE si ON s.image_id = si.image_id
 LEFT JOIN CATEGORY c ON b.category_id = c.category_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS like_count
+    FROM LIKE_SHORTS
+    GROUP BY shorts_id
+) likes ON s.shorts_id = likes.shorts_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS comment_count
+    FROM COMMENT
+    GROUP BY shorts_id
+) comments ON s.shorts_id = comments.shorts_id
 WHERE b.author REGEXP ? OR b.translator REGEXP ?
 ORDER BY s.created_at DESC;`;
 
 // 태그에서 키워드로 쇼츠 검색
 export const getShortsByTagKeyword =
-`SELECT s.shorts_id, s.phrase, s.tag, i.url AS shorts_img, b.title AS book_title, b.author, b.translator, c.name AS category
+`SELECT 
+    u.user_id, u.account, i.url AS profile_img,
+    s.shorts_id, si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    b.book_id, b.title AS book_title, b.author, b.translator, c.name AS category,
+    COALESCE(likes.like_count, 0) AS like_count, 
+    COALESCE(comments.comment_count, 0) AS comment_count
 FROM SHORTS s
+LEFT JOIN USERS u ON s.user_id = u.user_id
 LEFT JOIN BOOK b ON s.book_id = b.book_id
-LEFT JOIN IMAGE i ON s.image_id = i.image_id
+LEFT JOIN IMAGE i ON u.image_id = i.image_id
+LEFT JOIN IMAGE si ON s.image_id = si.image_id
 LEFT JOIN CATEGORY c ON b.category_id = c.category_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS like_count
+    FROM LIKE_SHORTS
+    GROUP BY shorts_id
+) likes ON s.shorts_id = likes.shorts_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS comment_count
+    FROM COMMENT
+    GROUP BY shorts_id
+) comments ON s.shorts_id = comments.shorts_id
 WHERE s.tag REGEXP ?
 ORDER BY s.created_at DESC;`;

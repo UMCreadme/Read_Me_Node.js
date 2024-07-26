@@ -4,5 +4,5 @@ import { getShortsDetail, searchShorts } from './shorts.controller.js';
 
 export const shortsRouter = express.Router({mergeParams:true});
 
-shortsRouter.get('/detail', asyncHandler(getShortsDetail));
+shortsRouter.get('/:shortsId', asyncHandler(getShortsDetail));
 shortsRouter.get('', asyncHandler(searchShorts));
