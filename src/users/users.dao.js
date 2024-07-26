@@ -12,7 +12,11 @@ import {
     addFollowUser,
     findFollowStatus,
     findIfContainsKeywordWithUserId,
-    findAllIfContainsKeyword
+    findAllIfContainsKeyword,
+    getEachFollowIdList,
+    getMeFollowIdList,
+    getMyFollowIdList,
+    findAllIfContainsKeywordOrdered
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -164,23 +168,32 @@ export const followUserAdd = async(userId, followingId) => {
     }
 }
 
+// 키워드 검색으로 조회되는 나를 찾기
+export const findMeWithKeyword = async(userId, keyword) =>{
+    try{
+        const conn = await pool.getConnection();
+        const [findMeByAccount] = await pool.query(findIfContainsKeywordWithUserId, [userId, 'account', keyword]);
+        const [findMeByNickname] = await pool.query(findIfContainsKeywordWithUserId, [userId, 'nickname', keyword]);
+
+        conn.release()
+
+        return findMeByAccount[0] || findMeByNickname[0] || null;
+
+    }
+    catch (err){
+
+    }
+}
+
 // 키워드 검색으로 조회되는 유저중 맞팔로우 되어있는 사람 찾기
 export const findEachFollowWithKeyword = async(userId, keyword, target) =>{
     try{
         const conn = await pool.getConnection();
-        const [userFollowings] = await pool.query(getUserFollowings, userId);
-        const eachFollowIdList = []
+        const [eachFollowIdList] = await pool.query(getEachFollowIdList, [userId, userId]);
         const resultList = []
 
-        for (const userFollowing of userFollowings) {
-            const [eachFollowStatus] = await pool.query(findFollowStatus, [userFollowing.user_id, userId]);
-            if(eachFollowStatus[0]) {
-                eachFollowIdList.push(userFollowing.user_id);
-            }
-        }
-
         for (const eachFollowUserId of eachFollowIdList) {
-            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[eachFollowUserId, target, keyword])
+            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[eachFollowUserId.follower, target, keyword])
             if(resultUser[0]){
                 resultList.push(resultUser[0])
             }
@@ -200,19 +213,11 @@ export const findEachFollowWithKeyword = async(userId, keyword, target) =>{
 export const findMyFollowWithKeyword = async(userId, keyword, target)=>{
     try{
         const conn = await pool.getConnection();
-        const [userFollowings] = await pool.query(getUserFollowings, userId);
-        const myFollowIdList = []
+        const [myFollowIdList] = await pool.query(getMyFollowIdList, [userId, userId])
         const resultList = []
 
-        for (const userFollowing of userFollowings) {
-            const [eachFollowStatus] = await pool.query(findFollowStatus, [userFollowing.user_id, userId]);
-            if(!eachFollowStatus[0]) {
-                myFollowIdList.push(userFollowing.user_id);
-            }
-        }
-
         for (const myFollowUserId of myFollowIdList) {
-            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[myFollowUserId, target, keyword])
+            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[myFollowUserId.user_id, target, keyword])
             if(resultUser[0]){
                 resultList.push(resultUser[0])
             }
@@ -232,19 +237,11 @@ export const findMyFollowWithKeyword = async(userId, keyword, target)=>{
 export const findMeFollowWithKeyword = async (userId, keyword, target) => {
     try{
         const conn = await pool.getConnection()
-        const [userFollowers] = await pool.query(getUserFollowers, userId);
-        const meFollowIdList = []
+        const [meFollowIdList] = await pool.query(getMeFollowIdList, [userId, userId])
         const resultList = []
 
-        for (const userFollower of userFollowers) {
-            const [eachFollowStatus] =await pool.query(findFollowStatus, [userId, userFollower.follower]);
-            if(!eachFollowStatus[0]){
-                meFollowIdList.push(userFollower.follower)
-            }
-        }
-
         for (const meFollowUserId of meFollowIdList) {
-            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[meFollowUserId, target, keyword])
+            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[meFollowUserId.follower, target, keyword])
             if(resultUser[0]){
                 resultList.push(resultUser[0])
             }
@@ -260,10 +257,10 @@ export const findMeFollowWithKeyword = async (userId, keyword, target) => {
     }
 }
 
-// 키워드에 해당하는 모든 유저 찾기
+// 키워드에 해당하는 모든 유저 찾기 (팔로워 많은 순으로)
 export const findUsersWithKeyword = async (userId, keyword, target) => {
     const conn = await pool.getConnection()
-    const [allFindWithKeyword] = await pool.query(findAllIfContainsKeyword,[target, keyword])
+    const [allFindWithKeyword] = await pool.query(findAllIfContainsKeywordOrdered,[target, keyword])
 
     conn.release()
 

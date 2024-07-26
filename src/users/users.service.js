@@ -4,7 +4,7 @@ import {
     findFollowerNumByUserId,
     findFollowingNumByUserId,
     findImageById,
-    findMeFollowWithKeyword,
+    findMeFollowWithKeyword, findMeWithKeyword,
     findMyFollowWithKeyword,
     findUserBooksById,
     findUserLikeShortsById,
@@ -133,12 +133,12 @@ export const followNewUser = async(body, followUserId) =>{
 }
 
 // 유저 검색 기능 로직
-export const searchUserByKeyword = async (body, keyword) => {
+export const searchUserByKeyword = async (body, keyword, offset, size) => {
 
     const userId = body.id
 
     // 키워드에 나 자신의 이름이 섞이는 경우
-    const searchMySelf = await findById(userId);
+    const searchMySelf = await findMeWithKeyword(userId, keyword);
 
     // 키워드 + 맞팔인 사람 리스트 (account 기준)
     const eachFollowUsersListByAccount = await findEachFollowWithKeyword(userId, keyword, 'account');
@@ -154,7 +154,7 @@ export const searchUserByKeyword = async (body, keyword) => {
 
     // 키워드로 검색한 최종 유저 목록 (account 기준)
     const searchFollowUserByAccountList = eachFollowUsersListByAccount.concat(myFollowUsersListByAccount, meFollowUsersListByAccount)
-    searchFollowUserByAccountList.unshift(searchMySelf)
+    if(searchMySelf != null) searchFollowUserByAccountList.unshift(searchMySelf)
     const searchUserSet = new Set(searchFollowUserByAccountList.map(user => user.user_id));
     const uniqueUsers = allUsersListByAccount.filter(user => !searchUserSet.has(user.user_id));
     const searchUserByAccountList= [...searchFollowUserByAccountList, ...uniqueUsers];
@@ -174,36 +174,25 @@ export const searchUserByKeyword = async (body, keyword) => {
 
     // 키워드로 검색한 최종 유저 목록 (nickname 기준)
     const searchFollowUserByNicknameList = eachFollowUsersListByNickname.concat(myFollowUsersListByNickname, meFollowUsersListByNickname)
-    searchFollowUserByNicknameList.unshift(searchMySelf)
+    if(searchMySelf != null)searchFollowUserByNicknameList.unshift(searchMySelf)
     const searchUserSet2 = new Set(searchFollowUserByNicknameList.map(user => user.user_id));
     const uniqueUsers2 = allUsersListByNickname.filter(user => !searchUserSet2.has(user.user_id));
     const searchUserByNicknameList= [...searchFollowUserByNicknameList, ...uniqueUsers2];
 
-    function removeDuplicates(users) {
-        const seen = new Set();
-        const result = [];
 
-        for (const user of users) {
-            if (!seen.has(user.id)) {
-                seen.add(user.id);
-                result.push(user);
-            }
-        }
-
-        return result;
-    }
-
+    // 최종 리스트
     const mergedList = searchUserByAccountList.length >= searchUserByNicknameList.length
         ? [...searchUserByAccountList, ...searchUserByNicknameList]
         : [...searchUserByNicknameList, ...searchUserByAccountList];
 
     const combinedList = Array.from(new Map(mergedList.map(user => [user.user_id, user])).values());
-    const userSearchResponseDTOList = []
+    const paginatedList = combinedList.slice(offset, offset + size);
 
-    for (const combinedListElement of combinedList) {
-        let profileImg = await findImageById(combinedListElement.image_id)
-        userSearchResponseDTOList.push(userSearchResponseDTO(combinedListElement, profileImg.url))
+    const userSearchResponseDTOList = []
+    for (const paginatedListElement of paginatedList) {
+        let profileImg = await findImageById(paginatedListElement.image_id)
+        userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement, profileImg.url))
     }
 
-    return userSearchResponseDTOList
+    return {userSearchResponseDTOList, totalCount: combinedList.length}
 }

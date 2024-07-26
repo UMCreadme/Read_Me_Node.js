@@ -70,5 +70,14 @@ export const followUser = async(req, res, next)=>{
 
 // 유저 검색
 export const searchUser = async (req, res, next) => {
-    res.send(response(status.SUCCESS, await searchUserByKeyword(req.body, req.query.keyword)))
+
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 20;
+    const offset = (page - 1) * size;
+
+    const { userSearchResponseDTOList, totalCount } = await searchUserByKeyword(req.body, req.query.keyword, offset, size);
+
+    const hasNext = totalCount > offset + size;
+
+    res.send(response(status.SUCCESS, userSearchResponseDTOList, pageInfo(page, size, hasNext)))
 }
