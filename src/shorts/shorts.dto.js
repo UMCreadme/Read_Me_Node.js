@@ -46,7 +46,11 @@ export const getSearchShortsListDto = (data) => {
 
 export const shortsInfoDto = (data, imgUrl) => {
     if (data === undefined || imgUrl === undefined || data.phrase === undefined || data.shortsTitle === undefined || data.shortsTitle === undefined || data.content === undefined) {
-        throw new BaseError(status.PARAMETER_IS_WRONG)
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    if(imgUrl === null || imgUrl === "" || data.phrase === null || data.phrase === "" || data.shortsTitle === null || data.shortsTitle === "") {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
     return {

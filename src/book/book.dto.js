@@ -6,6 +6,12 @@ export const bookInfoDto = (data) => {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
+    if(data.ISBN === null || data.ISBN === "" || data.bookTitle === null || data.bookTitle === "" || 
+    data.category === null || data.category === "" || data.bookCover === null || data.bookCover === "" || 
+    data.author === null || data.author === "" || data.link === null || data.link === "") {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
     return {
         "ISBN": data.ISBN,
         "title": data.bookTitle,

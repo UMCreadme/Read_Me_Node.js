@@ -42,6 +42,10 @@ export const createShorts = async (req, res, next) => {
         }
 
         const book = bookInfoDto(req.body);
+
+        if(req.file === undefined || req.file.location === undefined) {
+            throw new BaseError(status.BAD_REQUEST);
+        }
         const shorts = shortsInfoDto(req.body, req.file.location);
 
         const shortsId = await service.createShorts(book, shorts, req.body.category);
