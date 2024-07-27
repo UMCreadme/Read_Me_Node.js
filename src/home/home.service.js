@@ -8,15 +8,18 @@ export const findCategoryShorts = async (keyword, offset, limit) => {
     const categoryShorts = await findShortsByCategory(keyword, offset, limit);
     const categoryShortsResponseDTOList = [];
 
-    for (const categoryShort of categoryShorts) {
-        let userData = await findUserById(categoryShort.userId);
-        let isLike = await findShortsisLike(categoryShort.userId, categoryShort.shortsId);
-        let likeCount = await findLikeCount(categoryShort.shortsId);
-        let commentCount = await findCommentCount(categoryShort.shortsId);
+    for (const shorts of categoryShorts) {
+        let userData = await findUserById(shorts.user_id);
+        let isLike = await findShortsisLike(shorts.user_id, shorts.shorts_id);
+        let likeCount = await findLikeCount(shorts.shorts_id);
+        let commentCount = await findCommentCount(shorts.shorts_id);
 
-        let result = categoryShortsResponseDTO(categoryShort, userData, isLike, likeCount, commentCount);
+        let result = categoryShortsResponseDTO(shorts, userData, isLike, likeCount, commentCount);
         categoryShortsResponseDTOList.push(result);
         }
 
         return categoryShortsResponseDTOList;
     }
+
+
+    

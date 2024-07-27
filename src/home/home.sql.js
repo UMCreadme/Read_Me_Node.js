@@ -1,4 +1,4 @@
-export const getShortsByCategory = "SELECT * FROM shorts JOIN book on shorts.book_id = book.book_id WHERE book.category = ? ORDER BY shorts.CREATED_AT DESC LIMIT ? OFFSET ?";
+export const getShortsByCategory = "SELECT * FROM shorts JOIN book on shorts.book_id = book.book_id JOIN category ON book.category = category.category_id WHERE category.name = ? ORDER BY shorts.CREATED_AT DESC LIMIT ? OFFSET ?";
 
 export const getUserById = "SELECT * FROM users WHERE user_id = ?";
 

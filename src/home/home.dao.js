@@ -4,7 +4,7 @@ import { pool } from "../../config/db.config.js";
 import { getShortsByCategory, getUserById,findIslike, getLikecount, getCommentcount } from "./home.sql.js";
 
 // 카테고리 별 쇼츠 조회
-export const findShortsByCategory = async (category, offset, limit) => {
+export const findShortsByCategory = async (category) => {
     try {
         const conn = await pool.getConnection();
         const [categoryShorts] = await pool.query(getShortsByCategory, [category, limit, offset]);
