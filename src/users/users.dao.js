@@ -8,7 +8,6 @@ import {
     getUserById,
     getUserLikeShortsIdById,
     getUserShortsById,
-    getImageById,
     addFollowUser,
     findFollowStatus,
     findIfContainsKeywordWithUserId,
