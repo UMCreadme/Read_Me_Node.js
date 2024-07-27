@@ -75,9 +75,9 @@ export const searchUser = async (req, res, next) => {
     const size = parseInt(req.query.size) || 20;
     const offset = (page - 1) * size;
 
-    const { userSearchResponseDTOList, totalCount } = await searchUserByKeyword(req.body, req.query.keyword, offset, size);
+    const { userSearchResponseDTOList, totalCount, currentSize } = await searchUserByKeyword(req.body, req.query.keyword, offset, size);
 
     const hasNext = totalCount > offset + size;
 
-    res.send(response(status.SUCCESS, userSearchResponseDTOList, pageInfo(page, size, hasNext)))
+    res.send(response(status.SUCCESS, userSearchResponseDTOList, pageInfo(page, currentSize, hasNext)))
 }

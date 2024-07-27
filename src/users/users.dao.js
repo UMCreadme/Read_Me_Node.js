@@ -131,19 +131,19 @@ export const findUserBooksById = async(userId, offset, limit) => {
 }
 
 // 이미지 아이디로 이미지 찾기 이후에 다른 도메인으로 수정할 필요가 있을듯..?
-export const findImageById = async(imageId) => {
-    try{
-        const conn = await pool.getConnection();
-        const [image] = await pool.query(getImageById, imageId)
-
-        conn.release();
-        return image[0]
-    }
-
-    catch (err) {
-        throw new BaseError(status.BAD_REQUEST)
-    }
-}
+// export const findImageById = async(imageId) => {
+//     try{
+//         const conn = await pool.getConnection();
+//         const [image] = await pool.query(getImageById, imageId)
+//
+//         conn.release();
+//         return image[0]
+//     }
+//
+//     catch (err) {
+//         throw new BaseError(status.BAD_REQUEST)
+//     }
+// }
 
 // 유저(본인)가 다른 유저 팔로잉
 export const followUserAdd = async(userId, followingId) => {

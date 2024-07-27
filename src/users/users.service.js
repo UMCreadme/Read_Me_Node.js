@@ -3,7 +3,6 @@ import {
     findEachFollowWithKeyword,
     findFollowerNumByUserId,
     findFollowingNumByUserId,
-    findImageById,
     findMeFollowWithKeyword, findMeWithKeyword,
     findMyFollowWithKeyword,
     findUserBooksById,
@@ -33,12 +32,12 @@ export const findOne = async(body) => {
         throw new BaseError(status.BAD_REQUEST)
     }
 
-    const profileImg = await findImageById(userData.image_id)
+    // const profileImg = await findImageById(userData.image_id)
 
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
 
-    return userInfoResponseDTO( userData, profileImg.url, followerNum, followingNum);
+    return userInfoResponseDTO( userData, followerNum, followingNum);
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
@@ -57,8 +56,8 @@ export const findUserShorts = async(body, offset, limit) => {
 
     for (const userShort of userShorts) {
         let userShortsBook = await findBookById(userShort.book_id);
-        let shortsImage = await findImageById(userShort.image_id);
-        let result = userShortsResponseDTO(userShort, shortsImage.url, userShortsBook.title, userShortsBook.author);
+        // let shortsImage = await findImageById(userShort.image_id);
+        let result = userShortsResponseDTO(userShort, userShortsBook.title, userShortsBook.author);
         userShortsResponseDTOList.push(result);
     }
 
@@ -80,8 +79,8 @@ export const findUserLikeShorts = async(body, offset, limit) => {
 
     for (const userLikeShort of userLikeShorts) {
         let userLikeShortsBook = await findBookById(userLikeShort.book_id);
-        let shortsImage = await findImageById(userLikeShort.image_id);
-        let result = userShortsResponseDTO(userLikeShort, shortsImage.url, userLikeShortsBook.title, userLikeShortsBook.author);
+        // let shortsImage = await findImageById(userLikeShort.image_id);
+        let result = userShortsResponseDTO(userLikeShort, userLikeShortsBook.title, userLikeShortsBook.author);
         userShortsResponseDTOList.push(result)
     }
 
@@ -102,8 +101,7 @@ export const findUserBooks = async(body, offset, limit) => {
     const userBookResponseDTOList = [];
 
     for (const userBook of userBooks) {
-        let bookImage = await findImageById(userBook.image_id);
-        let result = userBookResponseDTO(userBook, bookImage.url);
+        let result = userBookResponseDTO(userBook);
         userBookResponseDTOList.push(result);
     }
 
@@ -190,9 +188,9 @@ export const searchUserByKeyword = async (body, keyword, offset, size) => {
 
     const userSearchResponseDTOList = []
     for (const paginatedListElement of paginatedList) {
-        let profileImg = await findImageById(paginatedListElement.image_id)
-        userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement, profileImg.url))
+        // let profileImg = await findImageById(paginatedListElement.image_id)
+        userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement))
     }
 
-    return {userSearchResponseDTOList, totalCount: combinedList.length}
+    return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
 }
