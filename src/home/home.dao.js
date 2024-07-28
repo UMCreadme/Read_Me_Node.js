@@ -147,7 +147,7 @@ export const getShorts = async (offset, limit) => {
 
 
 // 팔로잉하는 유저들의 숏츠 리스트 가져오기
-const getFollowersFeeds = async (user_id, offset, limit) => {
+export const getFollowersFeeds = async (user_id, offset, limit) => {
     if (!user_id) return [];
     try {
         const conn = await pool.getConnection();
