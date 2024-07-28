@@ -28,7 +28,7 @@ export const getUserShorts = async(req, res, next)=> {
     const hasNext = result.length > size;
     if (hasNext) result.pop();
 
-    res.send(response(status.SUCCESS, result, pageInfo(page, size, hasNext)))
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
 
 }
 
@@ -44,7 +44,7 @@ export const getUserLikeShorts = async(req, res, next) => {
     const hasNext = result.length > size;
     if (hasNext) result.pop();
 
-    res.send(response(status.SUCCESS, result, pageInfo(page, size, hasNext)))
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
 }
 
 // 유저가 읽은 책 리스트 조회
@@ -59,7 +59,7 @@ export const getUserBooks = async(req, res, next)=> {
     const hasNext = result.length > size;
     if (hasNext) result.pop();
 
-    res.send(response(status.SUCCESS, result, pageInfo(page, size, hasNext)))
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
 }
 
 // 유저(본인)가 다른 유저 팔로우
