@@ -3,6 +3,11 @@ import { status } from "../../config/response.status.js";
 import { findOne, findUserShorts, findUserLikeShorts, findUserBooks, followNewUser } from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
 
+// 다른 유저 정보 조회
+export const getOtherUserInfo = async (req, res, next) => {
+    const requestedUserId = req.params.userId; // 요청된 사용자 ID
+    res.send(response(status.SUCCESS, await findOne(requestedUserId)));
+}
 
 // 유저 정보 조회
 export const getUserInfo = async (req, res, next) => {
