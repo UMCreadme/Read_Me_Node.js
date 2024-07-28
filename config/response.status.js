@@ -21,4 +21,11 @@ export const status = {
 
     // category err
     CATEGORY_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다."},
+
+    // shorts err
+    SHORTS_TAG_COUNT_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4001", "message": "태그는 10개 이내로 입력해주세요."},
+    SHORTS_TAG_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4002", "message": "태그는 10자 이내로 입력해주세요."},
+    SHORTS_TITLE_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4003", "message": "제목은 30자 이내로 입력해주세요."},
+    SHORTS_CONTENT_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4004", "message": "내용은 255자 이내로 입력해주세요."},
+    SHORTS_PHRASE_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4005", "message": "책 구절은 150자 이내로 입력해주세요."},
 };

@@ -58,7 +58,7 @@ export const shortsInfoDto = (data, imgUrl) => {
         "phrase": data.phrase,
         "title": data.shortsTitle,
         "content": data.content,
-        "tag": data.tags.join("|"),
+        "tag": data.tags,
         "user_id": 1 // TODO: 미들웨어 추가되면 수정
     };
 }

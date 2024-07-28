@@ -166,7 +166,27 @@ export const createShorts = async (book, shorts, category) => {
         bookId = await createBook(book);
     }
 
+    // 쇼츠 정보 글자수 제한 확인
+    if(shorts.title.length > 30) {
+        throw new BaseError(status.SHORTS_TITLE_TOO_LONG);
+    }
+    if(shorts.content.length > 255) {
+        throw new BaseError(status.SHORTS_CONTENT_TOO_LONG);
+    }
+    if(shorts.phrase.length > 150) {
+        throw new BaseError(status.SHORTS_PHRASE_TOO_LONG);
+    }
+    if(shorts.tag.length > 10) {
+        throw new BaseError(status.SHORTS_TAG_TOO_LONG);
+    }
+    for(const tag of shorts.tag) {
+        if(tag.length > 10) {
+            throw new BaseError(status.SHORTS_TAG_TOO_LONG);
+        }
+    }
+
     // 쇼츠 정보 생성
+    shorts.tag = shorts.tag.join("|");
     shorts.book_id = bookId;
     return await shortsDao.createShorts(shorts);
 };
