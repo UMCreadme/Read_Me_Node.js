@@ -1,4 +1,4 @@
-export const getBookById = "SELECT * FROM book WHERE book_id = ?";
+export const getBookById = "SELECT * FROM BOOK WHERE book_id = ?";
 
 // 책에 해당하는 카테고리 조회
 export const findCategoryNameByBookId = 
