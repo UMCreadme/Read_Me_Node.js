@@ -1,21 +1,21 @@
 // 홈에서 카테고리별 숏츠 리스트 조회시 반환값
-export const categoryShortsResponseDTO = (shorts, userData, isLike, likeCount, commentCount) => {
+export const categoryShortsResponseDTO = (shorts) => {
     return {
         "userId" : shorts.user_id,
-        "profileImg": userData.image_url,
-        "nickname": userData.nickname,
+        "profileImg": shorts.profileImg,
+        "nickname": shorts.nickname,
         "shortsId": shorts.shorts_id,
         "bookId": shorts.book_id,
-        "shortsImg": shorts.image_url,
+        "shortsImg": shorts.shortsImg,
         "phrase": shorts.phrase,
         "title": shorts.title,
         "content": shorts.content,
         "tags": shorts.tag ? shorts.tag.split("|") : [],
-        "isLike": Boolean(isLike),
-        "likeCnt": likeCount,
-        "commentCnt": commentCount,
+        "isLike": Boolean(shorts.isLike),
+        "likeCnt": shorts.likeCnt,
+        "commentCnt": shorts.commentCnt,
         "postingDate": shorts.created_at
-    };
+    }
 }
 
 export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
@@ -45,5 +45,4 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
             "commentCnt": feeds.commentCnt,
             "postingDate": feeds.created_at
         }))
-    };
-}
+    }}
