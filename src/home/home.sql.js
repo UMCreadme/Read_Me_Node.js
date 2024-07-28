@@ -14,9 +14,17 @@ ORDER BY s.created_at DESC
 LIMIT ? OFFSET ?;
 `;
 
-export const getUserCategories = "SELECT c.category_id, c.name, CASE WHEN uf.user_id IS NOT NULL THEN 0 ELSE 1 END AS sort_order FROM category c LEFT JOIN user_favorite uf ON c.category_id = uf.category_id AND uf.user_id = ? ORDER BY sort_order, c.name ASC";
+export const getUserCategories =
+`SELECT 
+c.name
+FROM CATEGORY c
+LEFT JOIN USER_FAVORITE uf ON c.category_id = uf.category_id AND uf.user_id = ?
+ORDER BY 
+  CASE WHEN uf.user_id IS NOT NULL THEN 0 ELSE 1 END, 
+  c.category_id;
+`;
 
-export const getAllCategories = "SELECT * FROM category ORDER BY name ASC";
+export const getAllCategories = "SELECT name FROM CATEGORY;";
 
 export const getUserRecommendedShorts = "SELECT s.shorts_id, s.image_url, s.phrase, s.title, s.author, s.translator, s.category FROM shorts s JOIN book b ON s.book_id = b.book_id JOIN category c ON b.category_id = c.category_id WHERE c.name IN (?) ORDER BY s.created_at DESC LIMIT ? OFFSET ?";
 

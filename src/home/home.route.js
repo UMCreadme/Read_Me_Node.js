@@ -1,6 +1,6 @@
 import express from 'express';
 import asyncHandler from 'express-async-handler';
-import { getCategoryShorts } from './home.controller.js';
+import { getCategoryShorts, getHomeInfo } from './home.controller.js';
 
 export const homeRouter = express.Router();
 

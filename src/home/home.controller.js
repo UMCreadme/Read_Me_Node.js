@@ -1,7 +1,7 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
 import { pageInfo } from "../../config/pageInfo.js";
-import { ShortsByCategory } from "./home.service.js";
+import { ShortsByCategory, getMainInfo } from "./home.service.js";
 
 // 카테고리 탭별 숏츠 리스트 조회
 export const getCategoryShorts = async (req, res, next) => {
