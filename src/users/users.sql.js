@@ -10,8 +10,6 @@ export const getUserLikeShortsIdById = "SELECT shorts_id FROM LIKE_SHORTS WHERE 
 
 export const getUserReadBooksIdById = "SELECT book_id FROM USER_BOOK WHERE user_id = ? ORDER BY CREATED_AT DESC LIMIT ? OFFSET ?";
 
-//export const getImageById = "SELECT * FROM IMAGE WHERE image_id = ?";
-
 export const addFollowUser = "INSERT INTO FOLLOW(follower, user_id) VALUES(?, ?)";
 
 export const findFollowStatus = "SELECT * FROM FOLLOW WHERE follower = ? AND user_id = ?";

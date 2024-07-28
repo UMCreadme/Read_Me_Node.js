@@ -56,7 +56,6 @@ export const findUserShorts = async(body, offset, limit) => {
 
     for (const userShort of userShorts) {
         let userShortsBook = await findBookById(userShort.book_id);
-        // let shortsImage = await findImageById(userShort.image_id);
         let result = userShortsResponseDTO(userShort, userShortsBook.title, userShortsBook.author);
         userShortsResponseDTOList.push(result);
     }
@@ -79,7 +78,6 @@ export const findUserLikeShorts = async(body, offset, limit) => {
 
     for (const userLikeShort of userLikeShorts) {
         let userLikeShortsBook = await findBookById(userLikeShort.book_id);
-        // let shortsImage = await findImageById(userLikeShort.image_id);
         let result = userShortsResponseDTO(userLikeShort, userLikeShortsBook.title, userLikeShortsBook.author);
         userShortsResponseDTOList.push(result)
     }
@@ -188,7 +186,6 @@ export const searchUserByKeyword = async (body, keyword, offset, size) => {
 
     const userSearchResponseDTOList = []
     for (const paginatedListElement of paginatedList) {
-        // let profileImg = await findImageById(paginatedListElement.image_id)
         userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement))
     }
 
