@@ -4,4 +4,4 @@ import { getCategoryShorts } from './home.controller.js';
 
 export const homeRouter = express.Router();
 
-homeRouter.get('/home/categories', asyncHandler(getCategoryShorts));
+homeRouter.get('/categories', asyncHandler(getCategoryShorts));
