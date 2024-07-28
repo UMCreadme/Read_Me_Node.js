@@ -8,7 +8,13 @@ import {
     getUserById,
     getUserLikeShortsIdById,
     getUserShortsById,
-    getImageById, addFollowUser, findFollowStatus
+    addFollowUser,
+    findFollowStatus,
+    findIfContainsKeywordWithUserId,
+    getEachFollowIdList,
+    getMeFollowIdList,
+    getMyFollowIdList,
+    findAllIfContainsKeywordOrdered
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -93,7 +99,7 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
             userLikeShorts.push(userLikeShort[0])
         }
 
-
+        conn.release();
         return userLikeShorts;
     }
     catch (err) {
@@ -114,23 +120,10 @@ export const findUserBooksById = async(userId, offset, limit) => {
             userBooks.push(userBook[0])
         }
 
+        conn.release();
         return userBooks;
     }
     catch(err){
-        throw new BaseError(status.BAD_REQUEST)
-    }
-}
-
-// 이미지 아이디로 이미지 찾기 이후에 다른 도메인으로 수정할 필요가 있을듯..?
-export const findImageById = async(imageId) => {
-    try{
-        const conn = await pool.getConnection();
-        const [image] = await pool.query(getImageById, imageId)
-
-        return image[0]
-    }
-
-    catch (err) {
         throw new BaseError(status.BAD_REQUEST)
     }
 }
@@ -156,4 +149,103 @@ export const followUserAdd = async(userId, followingId) => {
     catch (err){
         throw new BaseError(status.BAD_REQUEST)
     }
+}
+
+// 키워드 검색으로 조회되는 나를 찾기
+export const findMeWithKeyword = async(userId, keyword) =>{
+    try{
+        const conn = await pool.getConnection();
+        const [findMeByAccount] = await pool.query(findIfContainsKeywordWithUserId, [userId, 'account', keyword]);
+        const [findMeByNickname] = await pool.query(findIfContainsKeywordWithUserId, [userId, 'nickname', keyword]);
+
+        conn.release()
+
+        return findMeByAccount[0] || findMeByNickname[0] || null;
+
+    }
+    catch (err){
+
+    }
+}
+
+// 키워드 검색으로 조회되는 유저중 맞팔로우 되어있는 사람 찾기
+export const findEachFollowWithKeyword = async(userId, keyword, target) =>{
+    try{
+        const conn = await pool.getConnection();
+        const [eachFollowIdList] = await pool.query(getEachFollowIdList, [userId, userId]);
+        const resultList = []
+
+        for (const eachFollowUserId of eachFollowIdList) {
+            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[eachFollowUserId.follower, target, keyword])
+            if(resultUser[0]){
+                resultList.push(resultUser[0])
+            }
+        }
+
+        conn.release()
+
+        return resultList
+
+    }
+    catch (err){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 키워드 검색으로 조회되는 유저중 맞팔로우가 아닌 본인이 팔로우 하는 사람 찾기
+export const findMyFollowWithKeyword = async(userId, keyword, target)=>{
+    try{
+        const conn = await pool.getConnection();
+        const [myFollowIdList] = await pool.query(getMyFollowIdList, [userId, userId])
+        const resultList = []
+
+        for (const myFollowUserId of myFollowIdList) {
+            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[myFollowUserId.user_id, target, keyword])
+            if(resultUser[0]){
+                resultList.push(resultUser[0])
+            }
+        }
+
+        conn.release();
+
+        return resultList
+
+    }
+    catch (err){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 키워드 검색으로 조회되는 유저중 맞팔로우가 아닌 나를 팔로우 하는 사람 찾기
+export const findMeFollowWithKeyword = async (userId, keyword, target) => {
+    try{
+        const conn = await pool.getConnection()
+        const [meFollowIdList] = await pool.query(getMeFollowIdList, [userId, userId])
+        const resultList = []
+
+        for (const meFollowUserId of meFollowIdList) {
+            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[meFollowUserId.follower, target, keyword])
+            if(resultUser[0]){
+                resultList.push(resultUser[0])
+            }
+        }
+
+        conn.release();
+
+        return resultList
+
+    }
+    catch (err){
+       throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 키워드에 해당하는 모든 유저 찾기 (팔로워 많은 순으로)
+export const findUsersWithKeyword = async (userId, keyword, target) => {
+    const conn = await pool.getConnection()
+    const [allFindWithKeyword] = await pool.query(findAllIfContainsKeywordOrdered,[target, keyword])
+
+    conn.release()
+
+    return allFindWithKeyword;
 }
