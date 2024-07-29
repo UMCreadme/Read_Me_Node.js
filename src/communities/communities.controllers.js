@@ -2,6 +2,7 @@ import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
 import { searchCommunityService } from './communities.service.js';
 import { pageInfo } from '../../config/pageInfo.js'; // 경로는 실제 위치에 맞게 조정하세요
+import { getCommunitiesService } from './communities.service.js';
 
 export const searchCommunityController = async (req, res, next) => {
     const { keyword, page = 1, size = 10 } = req.query;
@@ -50,6 +51,18 @@ export const searchCommunityController = async (req, res, next) => {
             status.SUCCESS,
             result,
             totalElements > 0 ? "검색한 모임 리스트 불러오기 성공" : "검색 결과가 없습니다."
+};
+          
+export const getCommunitiesController = async (req, res, next) => {
+    const { page = 1, size = 10 } = req.query;  // req.body 대신 req.query 사용
+
+    try {
+        const communitiesData = await getCommunitiesService(parseInt(page), parseInt(size));
+
+        res.status(status.SUCCESS.status).send(response(
+            status.SUCCESS,
+            communitiesData,
+            "전체 모임 리스트 불러오기 성공"
         ));
     } catch (error) {
         next(error);
