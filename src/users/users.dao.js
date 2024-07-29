@@ -14,10 +14,36 @@ import {
     getEachFollowIdList,
     getMeFollowIdList,
     getMyFollowIdList,
-    findAllIfContainsKeywordOrdered
+    findAllIfContainsKeywordOrdered, save, getUserByUniqueId, updateRefreshToken
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
+
+// 유저 회원가입
+export const userSignUp = async (body, provider, refreshToken) => {
+    try{
+        const conn = await pool.getConnection();
+
+        // 이미 존재하는 유저 일시, refresh token update후 access token 발급을 위해 유저 정보를 넘겨줌.
+        const [user] = await pool.query(getUserByUniqueId, body.userId);
+        if(user.length !== 0){
+            const existUserId = user[0].user_id
+            await pool.query(updateRefreshToken, [refreshToken, existUserId])
+            conn.release()
+            return user[0]
+        }
+
+        // 디비에 처음 들어오는 유저 이면, 디비에 유저 정보 저장
+        const [result] = await pool.query(save, [body.userId, body.email, body.account, body.nickname, provider, refreshToken])
+        const [newUser] = await pool.query(getUserById, result.insertId)
+
+        conn.release()
+        return newUser[0];
+    }
+    catch (err){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+}
 
 // 유저 정보 조회
 export const findById = async (userId) => {

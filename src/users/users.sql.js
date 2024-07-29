@@ -1,3 +1,11 @@
+export const save = "INSERT INTO USERS(unique_id, email, account, nickname, provider, refresh_token) VALUES (?, ?, ?, ?, ?, ?)"
+
+export const getRefreshToken = "SELECT refresh_token FROM USERS WHERE user_id = ?"
+
+export const updateRefreshToken = "UPDATE USERS SET refresh_token = ? WHERE user_id = ?"
+
+export const getUserByUniqueId = "SELECT * FROM USERS WHERE unique_id = ?";
+
 export const getUserById = "SELECT * FROM USERS WHERE user_id = ?";
 
 export const getUserFollowings = "SELECT * FROM FOLLOW WHERE follower = ?";

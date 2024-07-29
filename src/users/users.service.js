@@ -9,7 +9,7 @@ import {
     findUserLikeShortsById,
     findUserShortsById,
     findUsersWithKeyword,
-    followUserAdd
+    followUserAdd, userSignUp
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
@@ -21,10 +21,29 @@ import {
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
+import {sign, refresh} from "../jwt/jwt-util.js";
+
+// 회원가입 후 토큰 반환
+export const join = async(body, provider) => {
+
+    // 프론트에서 소셜로그인 유저 정보를 받아 왔다고 가정. userId(우리 디비에 unique_id), email, nickname, account를 body로 넘겨받는다 가정
+    // 이미 존재하는 회원이었는지, 제대로 회원가입 되었는지 확인
+
+    // refresh token 만들기
+    const refreshToken = refresh()
+    const joiner = await userSignUp(body, provider, refreshToken);
+
+    // TODO : refreshToken joiner에서 이미 존재하는 사람이면, 기존 refreshToken을 redis 블랙리스트에 넣어줌
+
+    // access token 만들기
+    const user = {id: joiner.user_id, email: joiner.email}
+    const accessToken = sign(user)
+
+    return {accessToken, refreshToken}
+}
 
 // 유저 정보 조회 로직
-export const findOne = async(body) => {
-    const userId = body.id;
+export const findOne = async(userId) => {
     const userData = await findById(userId)
 
     // 없는 유저 확인

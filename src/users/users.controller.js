@@ -6,14 +6,20 @@ import {
     findUserLikeShorts,
     findUserBooks,
     followNewUser,
-    searchUserByKeyword
+    searchUserByKeyword, join
 } from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
+import axios from "axios";
 
+//카카오 소셜 로그인
+export const kakaoSignUp = async(req, res, next) => {
+    const result =  await join(req.body, 'kakao')
+    res.send(response(status.SUCCESS, result))
+}
 
 // 유저 정보 조회
 export const getUserInfo = async (req, res, next) => {
-    res.send(response(status.SUCCESS , await findOne(req.body)))
+    res.send(response(status.SUCCESS , await findOne(req.id)))
 }
 
 // 유저가 만든 쇼츠 리스트 조회
