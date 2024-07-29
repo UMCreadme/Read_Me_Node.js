@@ -3,7 +3,7 @@ import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { isUserReadBookById } from "../book/book.sql.js";
 import { insertObject } from "../common/common.dao.js";
-import { getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
+import { addComment, getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
 
 // 책 제목으로 쇼츠 검색
 export const getShortsToTitleKeyword = async (keyword) => {
@@ -99,3 +99,17 @@ export const createShorts = async (shorts) => {
         }
     }
 };
+
+
+// 쇼츠에 댓글 달기
+export const addCommentDao = async (shorts_id, user_id, content) => {
+    const conn = await pool.getConnection();
+    try{
+        await conn.query(addComment, [shorts_id, user_id, content]);
+        
+    } catch (err) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR, '데이터베이스 오류가 발생했습니다.')
+    } finally {
+        conn.release();
+    }
+}

@@ -5,6 +5,7 @@ import imgUploader from "../../config/s3.manager.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
 import { bookInfoDto } from "../book/book.dto.js";
+import { addCommentService } from "./shorts.service.js";
 
 export const getShortsDetail = async (req, res, next) => {
     const { category, keyword, book, user, like, page=1, size=10 } = req.query;
@@ -56,4 +57,21 @@ export const createShorts = async (req, res, next) => {
 
         res.send(response(status.CREATED));
     });
+}
+
+export const addComment = async (req, res, next) => {
+    const { shorts_id } = req.query;
+    const { user_id, content } = req.body;
+
+    if (!shorts_id || !user_id || !content) {
+        throw new BaseError(status.BAD_REQUEST, '잘못된 요청입니다.');
+    }
+
+    try {
+        await addCommentService(shorts_id, user_id, content);
+        res.send(response(status.CREATED, '댓글이 성공적으로 추가되었습니다.'));
+    }
+    catch (err) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
+    };
 }

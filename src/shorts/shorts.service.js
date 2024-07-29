@@ -5,6 +5,7 @@ import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategory
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
+import { addCommentDao } from "./shorts.dao.js";
 
 // 쇼츠 검색
 export const getSearchShorts = async (keyword, page, size) => {
@@ -190,3 +191,11 @@ export const createShorts = async (book, shorts, category) => {
     shorts.book_id = bookId;
     return await shortsDao.createShorts(shorts);
 };
+
+export const addCommentService = async (shorts_id, user_id, content) => {
+    try {
+        await addCommentDao(shorts_id, user_id, content);
+    } catch (err) {
+        throw new BaseError(status.BAD_REQUEST);
+    }
+}
