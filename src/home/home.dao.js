@@ -9,7 +9,7 @@ export const getShortsbyCategory = async (category_id, offset, limit) => {
         const conn = await pool.getConnection();
         const [categoryShorts] = await pool.query(getShortsByCategory, [category_id, limit, offset]);
 
-        conn.release();
+        conn.release(); 
 
         return categoryShorts;
     }
@@ -89,14 +89,15 @@ export const getFollowersFeeds = async (user_id, offset, limit) => {
     try {
         const conn = await pool.getConnection();
 
-        let followersFeeds = []
+        let followersFeeds = [];
         [followersFeeds] = await conn.query(getFollowerFeed, [user_id, user_id, limit, offset]);
 
         conn.release();
         return followersFeeds;
     }
-    catch(err){
-        throw new BaseError(status.BAD_REQUEST);
+    catch (err) {
+        console.error("Error fetching followers feeds:", err);
+        throw new BaseError(status.BAD_REQUEST, "잘못된 요청입니다.");
     }
     
 }

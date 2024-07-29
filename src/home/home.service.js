@@ -1,7 +1,7 @@
 import { status } from "../../config/response.status.js";
 import { BaseError } from "../../config/error.js";
 import { categoryShortsResponseDTO, HomeInfoResponseDTO } from "./home.dto.js";
-import { getShortsbyCategory, getAllCategory, getFollowersFeeds, getRecommendedShorts, getShorts } from "./home.dao.js";
+import { getShortsbyCategory, getAllCategory, getUserCategoriesById,getFollowersFeeds, getRecommendedShorts, getShorts } from "./home.dao.js";
 
 // 카테고리별 쇼츠 리스트 조회 로직
 export const ShortsByCategory = async (category_id, offset, limit) => {
