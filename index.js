@@ -10,7 +10,7 @@ import { userRouter } from './src/users/users.route.js';
 import { shortsRouter } from './src/shorts/shorts.route.js';
 import { homeRouter } from './src/home/home.route.js';
 import { bookRouter } from './src/book/book.route.js';
-import { groupRouter } from './src/group/group.route.js';
+import { communitiesRouter } from './src/communities/communities.route.js';
 
 dotenv.config();
 
@@ -29,8 +29,8 @@ app.use('/users', userRouter);
 app.use('/shorts', shortsRouter);
 app.use('/home', homeRouter);
 app.use('/books', bookRouter);
-app.use('/groups', groupRouter);
-  
+app.use('/communities', communitiesRouter);
+
 
 // index.js
 app.use((req, res, next) => {
