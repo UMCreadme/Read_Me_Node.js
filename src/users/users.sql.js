@@ -32,3 +32,12 @@ export const findAllIfContainsKeywordOrdered = `
   GROUP BY u.user_id
   ORDER BY follower_count DESC;
 `;
+
+// 가장 최신 게시물 시간 가져오기
+export const getLatestPostTime = `
+    SELECT created_at 
+    FROM SHORTS 
+    WHERE user_id = ? 
+    ORDER BY created_at DESC 
+    LIMIT 1;
+`;

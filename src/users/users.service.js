@@ -3,6 +3,7 @@ import {
     findEachFollowWithKeyword,
     findFollowerNumByUserId,
     findFollowingNumByUserId,
+    hasRecentPostForUser,
     findMeFollowWithKeyword, findMeWithKeyword,
     findMyFollowWithKeyword,
     findUserBooksById,
@@ -23,8 +24,7 @@ import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
 
 // 유저 정보 조회 로직
-export const findOne = async(body) => {
-    const userId = body.id;
+export const findOne = async(userId) => {
     const userData = await findById(userId)
 
     // 없는 유저 확인
@@ -34,10 +34,11 @@ export const findOne = async(body) => {
 
     // const profileImg = await findImageById(userData.image_id)
 
+    const isRecentPost = await hasRecentPostForUser(userId);
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
 
-    return userInfoResponseDTO( userData, followerNum, followingNum);
+    return userInfoResponseDTO( userData, isRecentPost, followerNum, followingNum);
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직

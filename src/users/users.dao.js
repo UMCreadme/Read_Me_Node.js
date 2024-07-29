@@ -14,7 +14,8 @@ import {
     getEachFollowIdList,
     getMeFollowIdList,
     getMyFollowIdList,
-    findAllIfContainsKeywordOrdered
+    findAllIfContainsKeywordOrdered,
+    getLatestPostTime
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -66,6 +67,24 @@ export const findFollowerNumByUserId = async (userId) => {
         throw new BaseError(status.BAD_REQUEST)
     }
 }
+
+// 유저 정보 조회시 필요한 최근 게시물 게시 여부
+export const hasRecentPostForUser = async (userId) => {
+    const conn = await pool.getConnection();
+    
+    try {
+        const [recent] = await conn.query(getLatestPostTime, [userId]);
+        const latestPostTime = recent.length > 0 ? recent[0].created_at : null;
+
+        // 프로필 띠 기능 - 현재 시간과 게시물 시간을 비교하여 24시간 이내인지 확인
+        const hasRecentPost = latestPostTime ? (new Date() - new Date(latestPostTime)) < 24 * 60 * 60 * 1000 : false;
+
+        return hasRecentPost;
+    } finally {
+        conn.release();
+    }
+};
+
 
 // 유저가 만든 쇼츠 리스트 조회
 export const findUserShortsById = async (userId, offset ,limit) => {
