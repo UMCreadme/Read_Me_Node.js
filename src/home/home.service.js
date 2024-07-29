@@ -1,7 +1,7 @@
 import { status } from "../../config/response.status.js";
 import { BaseError } from "../../config/error.js";
-import { categoryShortsResponseDTO } from "./home.dto.js";
-import { getShortsbyCategory } from "./home.dao.js";
+import { categoryShortsResponseDTO, HomeInfoResponseDTO } from "./home.dto.js";
+import { getShortsbyCategory, getAllCategory, getFollowersFeeds, getRecommendedShorts, getShorts } from "./home.dao.js";
 
 // 카테고리별 쇼츠 리스트 조회 로직
 export const ShortsByCategory = async (category_id, offset, limit) => {
@@ -27,13 +27,13 @@ export const getMainInfo = async(user_id, offset, limit) => {
 
     // 추천 숏츠 리스트 가져오기
     const shorts = user_id
-    ? await getRecommendedShorts(categories, offset, limit)
-    : await getShorts();
+    ? await getRecommendedShorts(user_id, offset, limit)
+    : await getShorts(offset, limit);
 
     // 팔로잉 유저들의 숏츠 리스트 가져오기
     const feeds = user_id
     ? await getFollowersFeeds(user_id, offset, limit)
-    : await getShorts();
+    : await getShorts(offset, limit);
 
 
     return HomeInfoResponseDTO(user_id, categories, shorts, feeds);

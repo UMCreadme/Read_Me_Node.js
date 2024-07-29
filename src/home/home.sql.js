@@ -26,8 +26,43 @@ ORDER BY
 
 export const getAllCategories = "SELECT name FROM CATEGORY;";
 
-export const getUserRecommendedShorts = "SELECT s.shorts_id, s.image_url, s.phrase, s.title, s.author, s.translator, s.category FROM shorts s JOIN book b ON s.book_id = b.book_id JOIN category c ON b.category_id = c.category_id WHERE c.name IN (?) ORDER BY s.created_at DESC LIMIT ? OFFSET ?";
+// 유저가 선택한 카테고리의 숏츠 반환 + 좋아요순 정렬
+export const getUserRecommendedShorts = 
+`SELECT s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name AS category, COUNT(ls.like_shorts_id) AS like_count
+FROM SHORTS s 
+JOIN BOOK b ON s.book_id = b.book_id 
+JOIN CATEGORY c ON b.category_id = c.category_id 
+JOIN USER_FAVORITE uf ON c.category_id = uf.category_id
+LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id
+WHERE uf.user_id = ?
+GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name
+ORDER BY like_count DESC, s.created_at DESC
+LIMIT ? OFFSET ?;
+`;
 
-export const getShort = "SELECT s.shorts_id, s.image_url, s.phrase, s.title, s.author, s.translator, s.category FROM shorts ORDER BY s.created_at DESC LIMIT ? OFFSET ?";
+// 전체 숏츠 조회 + 좋아요순으로 정렬
+export const getShort = 
+`SELECT s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name AS category, COUNT(ls.like_shorts_id) AS likeCnt
+FROM SHORTS s
+JOIN BOOK b ON s.book_id = b.book_id 
+JOIN CATEGORY c ON b.category_id = c.category_id
+LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id
+GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name
+ORDER BY likeCnt DESC, s.created_at DESC
+LIMIT ? OFFSET ?;
+`;
 
-export const getFollowerFeed = "SELECT u.user_id, u.image_url AS profileImg, u.nickname, s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, s.content, s.tags, (SELECT COUNT(*) FROM like_shorts ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt, (SELECT COUNT(*) FROM comment c WHERE c.shorts_id = s.shorts_id) AS commentCnt, s.created_at, EXISTS(SELECT 1 FROM like_shorts WHERE shorts_id = s.shorts_id AND user_id = ?) AS isLike FROM users u JOIN follow f on u.user_id = f.follower JOIN shorts s ON u.user_id = s.user_id WHERE f.user_id = ? ORDER BY likeCnt DESC LIMIT ? OFFSET ?";
+// 유저의 팔로워들이 올린 피드 리스트 반환
+export const getFollowerFeed = 
+`SELECT u.user_id, u.image_url AS profileImg, 
+u.nickname, s.shorts_id, s.image_url AS shortsImg, 
+s.phrase, s.title, s.content, s.tag, 
+(SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt, 
+(SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt, 
+s.created_at, 
+EXISTS(SELECT 1 FROM LIKE_SHORTS WHERE shorts_id = s.shorts_id AND user_id = ?) AS isLike FROM USERS u 
+JOIN FOLLOW f on u.user_id = f.follower 
+JOIN SHORTS s ON u.user_id = s.user_id 
+WHERE f.user_id = ?
+ORDER BY likeCnt DESC LIMIT ? OFFSET ?;
+`;

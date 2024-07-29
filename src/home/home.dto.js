@@ -39,7 +39,7 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
             "phrase": shorts.phrase,
             "title": shorts.title,
             "content": feeds.content,
-            "tags": feeds.tag ? feed.tag.split("|") : [],
+            "tags": feeds.tag ? feeds.tag.split("|") : [],
             "isLike": Boolean(feeds.isLike),
             "likeCnt": feeds.likeCnt,
             "commentCnt": feeds.commentCnt,

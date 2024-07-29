@@ -1,7 +1,7 @@
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { pool } from "../../config/db.config.js";
-import { getShortsByCategory } from "./home.sql.js";
+import { getShortsByCategory,getAllCategories, getFollowerFeed, getShort, getUserCategories, getUserRecommendedShorts } from "./home.sql.js";
 
 // 카테고리 별 쇼츠 조회
 export const getShortsbyCategory = async (category_id, offset, limit) => {
@@ -18,7 +18,7 @@ export const getShortsbyCategory = async (category_id, offset, limit) => {
     }
 }
 
-// 비회원일 시 카테고리 리스트 반환 - 가나다순
+// 비회원일 시 카테고리 리스트 반환 - 우선순위순
 export const getAllCategory = async () => {
     try {
         const conn = await pool.getConnection();
@@ -34,7 +34,7 @@ export const getAllCategory = async () => {
     }
 }
 
-// 회원일 시 맞춤 카테고리 리스트 반환 - 4개 우선 배정, 나머지 가나다순
+// 회원일 시 맞춤 카테고리 리스트 반환 - 맞춤카테고리 우선 배정, 나머지 우선순위순
 export const getUserCategoriesById = async(user_id) => {
     try {
         const conn = await pool.getConnection();
@@ -52,12 +52,12 @@ export const getUserCategoriesById = async(user_id) => {
 
 
 // 회원일 시 추천 숏츠 리스트 가져오기 - 맞춤 카테고리 내 숏츠 최신순
-export const getRecommendedShorts = async (categories, offset, limit) => {
+export const getRecommendedShorts = async (user_id, offset, limit) => {
     try {
         const conn = await pool.getConnection();
 
         let userRecommendedShorts = [];
-        [userRecommendedShorts] = await conn.query(getUserRecommendedShorts, [categories, offset, limit]);
+        [userRecommendedShorts] = await conn.query(getUserRecommendedShorts, [user_id, limit, offset]);
 
         conn.release();
         return userRecommendedShorts;
@@ -71,9 +71,8 @@ export const getRecommendedShorts = async (categories, offset, limit) => {
 export const getShorts = async (offset, limit) => {
     try {
         const conn = await pool.getConnection();
-
         let Shorts = [];
-        [Shorts] = await conn.query(getShort, [offset, limit]);
+        [Shorts] = await conn.query(getShort, [limit, offset]);
 
         conn.release();
         return Shorts;
@@ -91,13 +90,10 @@ export const getFollowersFeeds = async (user_id, offset, limit) => {
         const conn = await pool.getConnection();
 
         let followersFeeds = []
-        [followersFeeds] = await conn.query(getFollowerFeed, [user_id, user_id, offset, limit]);
+        [followersFeeds] = await conn.query(getFollowerFeed, [user_id, user_id, limit, offset]);
 
         conn.release();
-        return followersFeeds.map(followersFeed => ({
-            ...followersFeed,
-            isLike: !!followersFeed.isLike // Boolean 변환
-        }));
+        return followersFeeds;
     }
     catch(err){
         throw new BaseError(status.BAD_REQUEST);
