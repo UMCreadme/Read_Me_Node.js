@@ -5,6 +5,7 @@ import imgUploader from "../../config/s3.manager.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
 import { bookInfoDto } from "../book/book.dto.js";
+import { likeShortsService } from "./shorts.service.js";
 
 export const getShortsDetail = async (req, res, next) => {
     const { category, keyword, book, user, like, page=1, size=10 } = req.query;
@@ -56,4 +57,18 @@ export const createShorts = async (req, res, next) => {
 
         res.send(response(status.CREATED));
     });
+}
+
+
+export const likeShorts = async (req, res, next) => {
+    const shorts_id = req.params.shortsId;
+    const { user_id } = req.body;
+
+    if (!shorts_id || !user_id) {
+        return next(new BaseError(status.BAD_REQUEST));
+    }
+
+    const { likeCnt, action } = await likeShortsService(shorts_id, user_id);
+    const responseStatus = action === 'added' ? status.ADDED : status.DELETED;
+    res.send(response(responseStatus, likeCnt));
 }

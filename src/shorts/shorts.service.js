@@ -5,6 +5,7 @@ import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategory
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
+import { addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao} from "./shorts.dao.js";
 
 // 쇼츠 검색
 export const getSearchShorts = async (keyword, page, size) => {
@@ -189,4 +190,18 @@ export const createShorts = async (book, shorts, category) => {
     shorts.tag = shorts.tag.join("|");
     shorts.book_id = bookId;
     return await shortsDao.createShorts(shorts);
+};
+
+
+export const likeShortsService = async (shorts_id, user_id) => {
+    const isLiked = await checkLikeDao(shorts_id, user_id);
+
+    if (isLiked) {
+        await removeLikeDao(shorts_id, user_id);
+        return { likeCnt: await getLikeCntDao(shorts_id), action: 'remmoved'};
+    } else {
+        await addLikeDao(shorts_id, user_id);
+        return { likeCnt: await getLikeCntDao(shorts_id), action: 'added'};
+    }
+
 };
