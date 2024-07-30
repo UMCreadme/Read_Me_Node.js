@@ -37,26 +37,20 @@ export const searchShorts = async (req, res, next) => {
 };
 
 export const createShorts = async (req, res, next) => {
-    imgUploader.single('image')(req, res, async (err) => {
-        if (err) {
-            return next(new BaseError(status.BAD_REQUEST));
-        }
+    const book = bookInfoDto(req.body);
 
-        const book = bookInfoDto(req.body);
+    if(req.file === undefined) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
+    }
+    const shorts = shortsInfoDto(req.body, req.file.location);
 
-        if(req.file === undefined || req.file.location === undefined) {
-            throw new BaseError(status.BAD_REQUEST);
-        }
-        const shorts = shortsInfoDto(req.body, req.file.location);
+    const shortsId = await service.createShorts(book, shorts, req.body.category);
 
-        const shortsId = await service.createShorts(book, shorts, req.body.category);
+    if(shortsId === undefined) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
+    }
 
-        if(shortsId === undefined) {
-            return next(new BaseError(status.INTERNAL_SERVER_ERROR));
-        }
-
-        res.send(response(status.CREATED));
-    });
+    res.send(response(status.CREATED));
 }
 
 export const addComment = async (req, res, next) => {
