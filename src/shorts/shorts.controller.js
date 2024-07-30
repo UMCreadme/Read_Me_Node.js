@@ -36,9 +36,6 @@ export const searchShorts = async (req, res, next) => {
 };
 
 export const createShorts = async (req, res, next) => {
-    console.log(req.file.location);
-    console.log(req.body);
-
     const book = bookInfoDto(req.body);
 
     if(req.file === undefined) {
