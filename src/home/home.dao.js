@@ -23,8 +23,7 @@ export const getAllCategory = async () => {
     try {
         const conn = await pool.getConnection();
 
-        let allCategories = []
-        [allCategories] = await conn.query(getAllCategories);
+        const [allCategories] = await conn.query(getAllCategories);
 
         conn.release();
         return allCategories;

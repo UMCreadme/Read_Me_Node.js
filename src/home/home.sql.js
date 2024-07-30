@@ -28,7 +28,7 @@ export const getAllCategories = "SELECT name FROM CATEGORY;";
 
 // 유저가 선택한 카테고리의 숏츠 반환 + 좋아요순 정렬
 export const getUserRecommendedShorts = 
-`SELECT s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name AS category, COUNT(ls.like_shorts_id) AS like_count
+`SELECT s.shorts_id, s.image_url as shortsImg, s.phrase, s.title, b.author, b.translator, c.name AS category, COUNT(ls.like_shorts_id) AS like_count
 FROM SHORTS s 
 JOIN BOOK b ON s.book_id = b.book_id 
 JOIN CATEGORY c ON b.category_id = c.category_id 
