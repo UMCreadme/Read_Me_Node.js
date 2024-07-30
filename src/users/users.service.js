@@ -3,41 +3,55 @@ import {
     findEachFollowWithKeyword,
     findFollowerNumByUserId,
     findFollowingNumByUserId,
-    findMeFollowWithKeyword, findMeWithKeyword,
+    findMeFollowWithKeyword,
+    findMeWithKeyword,
     findMyFollowWithKeyword,
     findUserBooksById,
     findUserLikeShortsById,
     findUserShortsById,
     findUsersWithKeyword,
-    followUserAdd, userSignUp
+    followUserAdd,
+    userLogin,
+    userSignUp
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
     userFollowResponseDTO,
     userInfoResponseDTO,
     userSearchResponseDTO,
-    userShortsResponseDTO
+    userShortsResponseDTO,
+    userSignUpResponseDTO
 } from "./users.dto.js";
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
-import {sign, refresh} from "../jwt/jwt-util.js";
+import {refresh, sign} from "../jwt/jwt-util.js";
 
 // 회원가입 후 토큰 반환
 export const join = async(body, provider) => {
 
-    // 프론트에서 소셜로그인 유저 정보를 받아 왔다고 가정. userId(우리 디비에 unique_id), email, nickname, account를 body로 넘겨받는다 가정
-    // 이미 존재하는 회원이었는지, 제대로 회원가입 되었는지 확인
 
-    // refresh token 만들기
     const refreshToken = refresh()
-    const joiner = await userSignUp(body, provider, refreshToken);
+    const newUser = await userSignUp(body, provider, refreshToken);
 
-    // TODO : refreshToken joiner에서 이미 존재하는 사람이면, 기존 refreshToken을 redis 블랙리스트에 넣어줌
+    const tokenToUser = {id: newUser.user_id, email: newUser.email}
+    const accessToken = sign(tokenToUser)
 
-    // access token 만들기
-    const user = {id: joiner.user_id, email: joiner.email}
-    const accessToken = sign(user)
+    return userSignUpResponseDTO(newUser, body.categoryIdList, accessToken)
+}
+
+// 이미 존재하는 유저가 다시 로그인해서 토큰 값 줄때
+export const login = async(body, provider) => {
+
+    const refreshToken = refresh()
+    const foundUser = await userLogin(body, provider, refreshToken)
+
+    if(!foundUser){
+        return null
+    }
+
+    const tokenToUser = {id: foundUser.user_id, email: foundUser.email}
+    const accessToken = sign(tokenToUser)
 
     return {accessToken, refreshToken}
 }

@@ -52,3 +52,17 @@ export const userSearchResponseDTO =  (userData) => {
         "nickname" : userData.nickname
     }
 }
+
+// 유저 회원가입 성공시 반환 정보
+export const userSignUpResponseDTO = (userData,categoryIdList, accessToken) => {
+    return {
+        "user" : {
+            "userId" : userData.user_id,
+            "nickname" : userData.nickname,
+            "account" : userData.account,
+            "categoryIdList" : categoryIdList
+        },
+        "accessToken" : accessToken,
+        "refreshToken" : userData.refresh_token
+    }
+}

@@ -28,4 +28,12 @@ export const status = {
     SHORTS_TITLE_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4003", "message": "제목은 30자 이내로 입력해주세요."},
     SHORTS_CONTENT_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4004", "message": "내용은 255자 이내로 입력해주세요."},
     SHORTS_PHRASE_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4005", "message": "책 구절은 150자 이내로 입력해주세요."},
+
+    // token err
+    NOT_EXISTING_ACCESS_TOKEN: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4001", "message" : "존재하지 않는 엑세스 토큰 입니다."},
+    REFRESH_TOKEN_EXPIRED : {status: StatusCodes.BAD_REQUEST, "isSuccess" : false, "code" : "TOKEN4002", "message" : "만료된 리프레시 토큰 입니다."},
+    ACCESS_TOKEN_NOT_EXPIRED : {status: StatusCodes.BAD_REQUEST, "isSuccess" : false, "code" : "TOKEN4003", "message" : "엑세스 토큰이 만료되지 않았습니다."},
+    MISSING_TOKEN :{status:StatusCodes.BAD_REQUEST, "isSuccess" : false, "code" : "TOKEN4004", "message" : "헤더에 토큰 값이 존재하지 않습니다."},
+    ACCESS_TOKEN_EXPIRED : {status: StatusCodes.BAD_REQUEST, "isSuccess" : false, "code" : "TOKEN4005", "message" : "엑세스 토큰이 만료되었습니다."},
+
 };

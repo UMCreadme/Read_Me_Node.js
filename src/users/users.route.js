@@ -8,7 +8,7 @@ import {
     getUserBooks,
     followUser,
     searchUser,
-    kakaoSignUp
+    kakaoSignUp, kakaoLogin
 } from "./users.controller.js"
 import {authJWT} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
@@ -34,7 +34,10 @@ userRouter.post("/:userId/follow", asyncHandler(followUser));
 userRouter.get("", asyncHandler(searchUser));
 
 // 카카오 회원가입
-userRouter.post("", asyncHandler(kakaoSignUp));
+userRouter.post("/sign", asyncHandler(kakaoSignUp));
+
+//카카오 로그인
+userRouter.post("/login", asyncHandler(kakaoLogin));
 
 //액세스 토큰 만료, 리프레시 토큰을 이용해 엑세스토큰 재발급
 userRouter.get("/refresh", asyncHandler(refresh))

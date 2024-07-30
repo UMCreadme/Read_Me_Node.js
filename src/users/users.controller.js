@@ -6,15 +6,31 @@ import {
     findUserLikeShorts,
     findUserBooks,
     followNewUser,
-    searchUserByKeyword, join
+    searchUserByKeyword, join, login
 } from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import axios from "axios";
+import {BaseError} from "../../config/error.js";
 
-//카카오 소셜 로그인
+//카카오 로그인 후 처음 디비에 들어오는 사람일 경우
 export const kakaoSignUp = async(req, res, next) => {
     const result =  await join(req.body, 'kakao')
     res.send(response(status.SUCCESS, result))
+}
+
+// 카카오 로그인
+export const kakaoLogin = async (req,res, next) =>{
+
+    try {
+        const result = await login(req.body, 'kakao')
+        if (!result) {
+            return res.send(response(status.MEMBER_NOT_FOUND))
+        }
+        return res.send(response(status.SUCCESS, result))
+    }
+    catch (err){
+        return next(new BaseError(status.BAD_REQUEST))
+    }
 }
 
 // 유저 정보 조회

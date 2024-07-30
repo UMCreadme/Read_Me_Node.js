@@ -51,14 +51,14 @@ export const refreshVerify = async (token, userId) => {
         if (token === refreshToken) {
             try {
                 jwt.verify(token, secret);
-                return true;
+                return { ok: true };
             } catch (err) {
-                return false;
+                return { ok: false, message: err.message };
             }
         } else {
-            return false;
+            return { ok: false, message: 'Invalid refresh token' };
         }
     } catch (err) {
-        return false;
+        return { ok: false, message: err.message };
     }
 };
