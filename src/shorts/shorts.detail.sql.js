@@ -211,7 +211,7 @@ shorts_with_followers AS (
 -- 3. 최종 결과를 가져오는 쿼리
 SELECT
     s.user_id, u.account, u.image_url AS profile_img,
-    s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_followers s
 JOIN USERS u ON s.user_id = u.user_id
