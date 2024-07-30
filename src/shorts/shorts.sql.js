@@ -91,6 +91,6 @@ ORDER BY s.created_at DESC;`;
 // 쇼츠에 댓글 달기
 export const addComment = 
 `
-INSERT INTO COMMENT (shorts_id, user_id, comment, is_deleted, created_at)
-VALUES (?, ?, ?, 0, NOW());
+INSERT INTO COMMENT (shorts_id, user_id, comment)
+VALUES (?, ?, ?);
 `;

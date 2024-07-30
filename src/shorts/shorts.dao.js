@@ -104,12 +104,17 @@ export const createShorts = async (shorts) => {
 // 쇼츠에 댓글 달기
 export const addCommentDao = async (shorts_id, user_id, content) => {
     const conn = await pool.getConnection();
-    try{
-        await conn.query(addComment, [shorts_id, user_id, content]);
+    await conn.query(addComment, [shorts_id, user_id, content]);
         
-    } catch (err) {
-        throw new BaseError(status.INTERNAL_SERVER_ERROR, '데이터베이스 오류가 발생했습니다.')
-    } finally {
-        conn.release();
-    }
+    conn.release();
+}
+
+// shorts ID 존재 여부 확인
+export const doesShortExistDao = async (shorts_id) => {
+    const conn = await pool.getConnection();
+
+    const [result] = await conn.query('SELECT 1 FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+    return result.length > 0;
+
+    conn.release();
 }

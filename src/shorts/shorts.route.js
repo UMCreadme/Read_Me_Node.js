@@ -8,4 +8,4 @@ shortsRouter.get('/:shortsId', asyncHandler(getShortsDetail));
 shortsRouter.get('', asyncHandler(searchShorts));
 
 shortsRouter.post('', asyncHandler(createShorts));
-shortsRouter.post('/comments', asyncHandler(addComment));
+shortsRouter.post('/:shortsId/comments', asyncHandler(addComment));

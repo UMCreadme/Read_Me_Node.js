@@ -60,18 +60,14 @@ export const createShorts = async (req, res, next) => {
 }
 
 export const addComment = async (req, res, next) => {
-    const { shorts_id } = req.query;
-    const { user_id, content } = req.body;
+    const shorts_id = req.params.shortsId;
+    const { user_id, content } = req.body;   //TODO: 미들웨어 추가되면 수정
 
     if (!shorts_id || !user_id || !content) {
-        throw new BaseError(status.BAD_REQUEST, '잘못된 요청입니다.');
+        throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    try {
-        await addCommentService(shorts_id, user_id, content);
-        res.send(response(status.CREATED, '댓글이 성공적으로 추가되었습니다.'));
-    }
-    catch (err) {
-        throw new BaseError(status.INTERNAL_SERVER_ERROR);
-    };
+    await addCommentService(shorts_id, user_id, content);
+    res.send(response(status.CREATED));
+
 }
