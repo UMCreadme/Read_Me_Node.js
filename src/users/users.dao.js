@@ -15,7 +15,7 @@ import {
     getMeFollowIdList,
     getMyFollowIdList,
     findAllIfContainsKeywordOrdered,
-    getLatestPostTime
+    getLatestPostCount
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -68,18 +68,15 @@ export const findFollowerNumByUserId = async (userId) => {
     }
 }
 
-// 유저 정보 조회시 필요한 최근 게시물 게시 여부
+// 유저 정보 조회시 필요한 24h 이내 게시물 게시 여부
 export const hasRecentPostForUser = async (userId) => {
     const conn = await pool.getConnection();
     
     try {
-        const [recent] = await conn.query(getLatestPostTime, [userId]);
-        const latestPostTime = recent.length > 0 ? recent[0].created_at : null;
+        const [recent] = await conn.query(getLatestPostCount, [userId]);
 
-        // 프로필 띠 기능 - 현재 시간과 게시물 시간을 비교하여 24시간 이내인지 확인
-        const hasRecentPost = latestPostTime ? (new Date() - new Date(latestPostTime)) < 24 * 60 * 60 * 1000 : false;
-
-        return hasRecentPost;
+        // 24시간 이내 게시된 게시물 수가 0개 초과인지 반환
+        return recent[0].count > 0;
     } finally {
         conn.release();
     }

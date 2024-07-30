@@ -33,11 +33,9 @@ export const findAllIfContainsKeywordOrdered = `
   ORDER BY follower_count DESC;
 `;
 
-// 가장 최신 게시물 시간 가져오기
-export const getLatestPostTime = `
-    SELECT created_at 
-    FROM SHORTS 
-    WHERE user_id = ? 
-    ORDER BY created_at DESC 
-    LIMIT 1;
+// 최근 24시간 이내의 게시물 수를 가져오는 쿼리
+export const getLatestPostCount = `
+  SELECT COUNT(*) AS count
+  FROM SHORTS
+  WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
 `;
