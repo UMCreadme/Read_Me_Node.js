@@ -101,6 +101,14 @@ export const createShorts = async (shorts) => {
     }
 };
 
+// 존재하는 쇼츠인 지 확인
+export const checkShortsExistenceDao = async (shorts_id) => {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+    return rows[0].count > 0;
+
+    conn.release();
+}
 
 // 좋아요 누른 상태인 지 확인
 export const checkLikeDao = async (shorts_id, user_id) => {

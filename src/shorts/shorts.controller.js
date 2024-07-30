@@ -62,13 +62,13 @@ export const createShorts = async (req, res, next) => {
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id } = req.body;
+    const { user_id } = req.body;   // TODO : 추후 유저 인가 구현 이후 수정
 
     if (!shorts_id || !user_id) {
         return next(new BaseError(status.BAD_REQUEST));
     }
 
     const { likeCnt, action } = await likeShortsService(shorts_id, user_id);
-    const responseStatus = action === 'added' ? status.ADDED : status.DELETED;
+    const responseStatus = action === 'added' ? status.CREATED : status.SUCCESS;
     res.send(response(responseStatus, likeCnt));
 }
