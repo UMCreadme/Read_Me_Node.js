@@ -156,7 +156,6 @@ export const createShorts = async (book, shorts, category) => {
     
     // book_id 값이 존재하지 않을 경우 책 정보 생성
     if(bookId === undefined) {
-        console.log('category: ', category);
         const categoryId = await getCategoryIdByName(category);
         if(categoryId === undefined) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
