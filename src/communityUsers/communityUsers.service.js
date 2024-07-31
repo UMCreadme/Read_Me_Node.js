@@ -5,10 +5,12 @@ export const joinCommunityService = async (joinCommunityDTO) => {
 
     try {
         const result = await joinCommunity(community_id, user_id);
+        const joinedAt = new Date().toISOString(); // 참여 일자를 ISO 형식으로 생성
+
         return {
-            community_id,
-            user_id,
-            result
+            groupId: parseInt(community_id, 10),
+            userId: parseInt(user_id, 10),
+            joinedAt
         };
     } catch (error) {
         // Error 메시지를 명확하게 전달
