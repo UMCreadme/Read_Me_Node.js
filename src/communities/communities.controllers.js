@@ -28,8 +28,8 @@ export const createCommunityController = async (req, res, next) => {
         // 성공 응답 전송
         res.status(status.SUCCESS.status).send(response(
             status.SUCCESS,
-            communityData,
-            "커뮤니티 개설 성공"
+            { community: communityData },
+            "" // pageInfo를 빈 문자열로 설정
         ));
     } catch (error) {
         // 에러를 에러 처리 미들웨어로 전달
