@@ -6,7 +6,7 @@ const secret = process.env.SECRET_KEY;
 
 export const sign = (user) => { // access token 발급
     const payload = { // access token에 들어갈 payload
-        id: user.id,
+        user_id: user.user_id,
         email: user.email
     };
 
@@ -22,7 +22,7 @@ export const verify = (token) => { // access token 검증
         decoded = jwt.verify(token, secret);
         return {
             ok: true,
-            id: decoded.id,
+            user_id: decoded.user_id,
             email: decoded.email,
         };
     } catch (err) {

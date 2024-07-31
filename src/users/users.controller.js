@@ -35,7 +35,7 @@ export const kakaoLogin = async (req,res, next) =>{
 
 // 유저 정보 조회
 export const getUserInfo = async (req, res, next) => {
-    res.send(response(status.SUCCESS , await findOne(req.id)))
+    res.send(response(status.SUCCESS , await findOne(req.user_id)))
 }
 
 // 유저가 만든 쇼츠 리스트 조회
@@ -45,7 +45,7 @@ export const getUserShorts = async(req, res, next)=> {
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
 
-    const result = await findUserShorts(req.id, offset, size+1)
+    const result = await findUserShorts(req.user_id, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -61,7 +61,7 @@ export const getUserLikeShorts = async(req, res, next) => {
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
 
-    const result = await findUserLikeShorts(req.id, offset, size+1)
+    const result = await findUserLikeShorts(req.user_id, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -76,7 +76,7 @@ export const getUserBooks = async(req, res, next)=> {
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
 
-    const result = await findUserBooks(req.id, offset, size+1)
+    const result = await findUserBooks(req.user_id, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -86,7 +86,7 @@ export const getUserBooks = async(req, res, next)=> {
 
 // 유저(본인)가 다른 유저 팔로우
 export const followUser = async(req, res, next)=>{
-    const result= await  followNewUser (req.id, req.params.userId)
+    const result= await  followNewUser (req.user_id, req.params.userId)
     return res.send(response(status.SUCCESS, result))
 }
 
@@ -97,7 +97,7 @@ export const searchUser = async (req, res, next) => {
     const size = parseInt(req.query.size) || 20;
     const offset = (page - 1) * size;
 
-    const { userSearchResponseDTOList, totalCount, currentSize } = await searchUserByKeyword(req.id || null, req.query.keyword, offset, size);
+    const { userSearchResponseDTOList, totalCount, currentSize } = await searchUserByKeyword(req.user_id || null, req.query.keyword, offset, size);
 
     const hasNext = totalCount > offset + size;
 

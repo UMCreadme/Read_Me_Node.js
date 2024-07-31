@@ -34,7 +34,7 @@ export const join = async(body, provider) => {
     const refreshToken = refresh()
     const newUser = await userSignUp(body, provider, refreshToken);
 
-    const tokenToUser = {id: newUser.user_id, email: newUser.email}
+    const tokenToUser = {user_id: newUser.user_id, email: newUser.email}
     const accessToken = sign(tokenToUser)
 
     return userSignUpResponseDTO(newUser, body.categoryIdList, accessToken)
@@ -50,7 +50,7 @@ export const login = async(body, provider) => {
         return null
     }
 
-    const tokenToUser = {id: foundUser.user_id, email: foundUser.email}
+    const tokenToUser = {user_id: foundUser.user_id, email: foundUser.email}
     const accessToken = sign(tokenToUser)
 
     return {accessToken, refreshToken}
@@ -62,7 +62,7 @@ export const findOne = async(userId) => {
 
     // 없는 유저 확인
     if(userData === -1){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
     // const profileImg = await findImageById(userData.image_id)
@@ -79,7 +79,7 @@ export const findUserShorts = async(userId, offset, limit) => {
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
     const userShorts = await findUserShortsById(userId, offset, limit);
@@ -101,7 +101,7 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
     const userLikeShorts = await findUserLikeShortsById(userId, offset, limit);
@@ -122,7 +122,7 @@ export const findUserBooks = async(userId, offset, limit) => {
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
     const userBooks = await findUserBooksById(userId, offset, limit);
@@ -143,7 +143,7 @@ export const followNewUser = async(userId, followUserId) =>{
     const userData = await findById(userId)
     const followUserData = await findById(followUserId)
     if((userData === -1) || (followUserData === -1)){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
     const followingId = parseInt(followUserId, 10)
