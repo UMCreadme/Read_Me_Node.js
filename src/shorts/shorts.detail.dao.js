@@ -27,7 +27,7 @@ export const getShortsDetailToShortsId = async (shortsId, userId=null) => {
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -56,7 +56,7 @@ export const getShortsDetailToCategory = async (shortsId, category, size, offset
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -84,7 +84,7 @@ export const getShortsDetailToBook = async (shortsId, bookId, size, offset, user
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -101,7 +101,7 @@ export const countShortsDetailToBook = async (bookId) => {
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -129,7 +129,7 @@ export const getShortsDetailToCategoryExcludeBook = async (category, bookId, siz
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -158,7 +158,7 @@ export const getShortsDetailToUser = async (shortsId, userId, size, offset, myId
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -187,7 +187,7 @@ export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, 
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -196,11 +196,16 @@ export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordS
     try {
         const conn = await pool.getConnection();
 
-        // 플레이스홀더 생성
-        const placeholders = keywordShorts.map(() => '?').join(',');
-        const query = sql.getShortsDetailByCategoryExcludeKeyword.replace('<<placeholder>>', placeholders);
+        // 키워드 값에 따라 placeholder를 생성하여 쿼리를 생성
+        let shorts;
+        if(keywordShorts.length === 0) {
+            [shorts] = await conn.query(sql.getShortsDetailByCategory, [category, -1, size, offset]);
+        } else {
+            const placeholders = keywordShorts.map(() => '?').join(',');
+            const query = sql.getShortsDetailByCategoryExcludeKeyword.replace('<<placeholder>>', placeholders);
 
-        const [shorts] = await conn.query(query, [category, ...keywordShorts, size, offset]);
+            [shorts] = await conn.query(query, [category, ...keywordShorts, size, offset]);
+        }
 
         if(userId != null) {
             for(const short of shorts) {
@@ -221,7 +226,7 @@ export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordS
         if(err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
