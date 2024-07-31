@@ -74,8 +74,7 @@ export const findOne = async(userId) => {
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
-export const findUserShorts = async(body, offset, limit) => {
-    const userId = body.id;
+export const findUserShorts = async(userId, offset, limit) => {
 
     // 없는 유저 확인
     const userData = await findById(userId)
@@ -97,8 +96,7 @@ export const findUserShorts = async(body, offset, limit) => {
 }
 
 // 유저가 찜한 쇼츠 리스트 조회 로직
-export const findUserLikeShorts = async(body, offset, limit) => {
-    const userId = body.id
+export const findUserLikeShorts = async(userId, offset, limit) => {
 
     // 없는 유저 확인
     const userData = await findById(userId)
@@ -119,8 +117,7 @@ export const findUserLikeShorts = async(body, offset, limit) => {
 }
 
 // 유저가 읽은 책 리스트 조회 로직
-export const findUserBooks = async(body, offset, limit) => {
-    const userId = body.id
+export const findUserBooks = async(userId, offset, limit) => {
 
     // 없는 유저 확인
     const userData = await findById(userId)
@@ -140,8 +137,7 @@ export const findUserBooks = async(body, offset, limit) => {
 }
 
 // 유저(본인)가 다른 유저 팔로우하는 로직
-export const followNewUser = async(body, followUserId) =>{
-    const userId = body.id
+export const followNewUser = async(userId, followUserId) =>{
 
     // 없는 유저 확인
     const userData = await findById(userId)
@@ -162,9 +158,7 @@ export const followNewUser = async(body, followUserId) =>{
 }
 
 // 유저 검색 기능 로직
-export const searchUserByKeyword = async (body, keyword, offset, size) => {
-
-    const userId = body.id
+export const searchUserByKeyword = async (userId, keyword, offset, size) => {
 
     // 키워드에 나 자신의 이름이 섞이는 경우
     const searchMySelf = await findMeWithKeyword(userId, keyword);

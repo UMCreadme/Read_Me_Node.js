@@ -17,11 +17,11 @@ export const authJWT = (req, res, next) => {
                 res.send(response(status.ACCESS_TOKEN_EXPIRED))
             }
             else {
-                res.send(response(status.BAD_REQUEST, null));
+                res.send(response(status.BAD_REQUEST));
             }
         }
     }
     else {
-        res.send(response(status.MISSING_TOKEN, null));
+        res.send(response(status.MISSING_TOKEN));
     }
 };

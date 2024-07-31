@@ -45,7 +45,7 @@ export const getUserShorts = async(req, res, next)=> {
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
 
-    const result = await findUserShorts(req.body, offset, size+1)
+    const result = await findUserShorts(req.id, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -61,7 +61,7 @@ export const getUserLikeShorts = async(req, res, next) => {
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
 
-    const result = await findUserLikeShorts(req.body, offset, size+1)
+    const result = await findUserLikeShorts(req.id, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -76,7 +76,7 @@ export const getUserBooks = async(req, res, next)=> {
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
 
-    const result = await findUserBooks(req.body, offset, size+1)
+    const result = await findUserBooks(req.id, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -86,8 +86,8 @@ export const getUserBooks = async(req, res, next)=> {
 
 // 유저(본인)가 다른 유저 팔로우
 export const followUser = async(req, res, next)=>{
-    const result= await  followNewUser (req.body, req.params.userId)
-    res.send(response(status.SUCCESS, result))
+    const result= await  followNewUser (req.id, req.params.userId)
+    return res.send(response(status.SUCCESS, result))
 }
 
 // 유저 검색
@@ -97,7 +97,7 @@ export const searchUser = async (req, res, next) => {
     const size = parseInt(req.query.size) || 20;
     const offset = (page - 1) * size;
 
-    const { userSearchResponseDTOList, totalCount, currentSize } = await searchUserByKeyword(req.body, req.query.keyword, offset, size);
+    const { userSearchResponseDTOList, totalCount, currentSize } = await searchUserByKeyword(req.id || null, req.query.keyword, offset, size);
 
     const hasNext = totalCount > offset + size;
 
