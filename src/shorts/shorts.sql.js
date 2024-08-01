@@ -81,3 +81,10 @@ LEFT JOIN (
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE s.tag REGEXP ?
 ORDER BY s.created_at DESC;`;
+
+
+export const checkLike = "SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts_id = ? AND user_id = ?";
+
+export const addLike = "INSERT INTO LIKE_SHORTS (shorts_id, user_id) VALUES (?, ?)";
+
+export const removeLike = "DELETE FROM LIKE_SHORTS WHERE shorts_id = ? AND user_id = ?";

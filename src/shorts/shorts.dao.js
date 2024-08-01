@@ -4,6 +4,7 @@ import { status } from "../../config/response.status.js";
 import { isUserReadBookById } from "../book/book.sql.js";
 import { insertObject } from "../common/common.dao.js";
 import { getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
+import { checkLike, removeLike, addLike } from "./shorts.sql.js";
 
 // 책 제목으로 쇼츠 검색
 export const getShortsToTitleKeyword = async (keyword) => {
@@ -99,3 +100,51 @@ export const createShorts = async (shorts) => {
         }
     }
 };
+
+// 존재하는 쇼츠인 지 확인
+export const checkShortsExistenceDao = async (shorts_id) => {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+
+    conn.release();
+    return rows[0].count > 0;
+}
+
+// 좋아요 누른 상태인 지 확인
+export const checkLikeDao = async (shorts_id, user_id) => {
+    const conn = await pool.getConnection();
+
+    const [rows] = await conn.query(checkLike, [shorts_id, user_id]);
+
+    conn.release();
+    return rows[0].count > 0;
+
+}
+
+// 좋아요 추가
+export const addLikeDao = async (shorts_id, user_id) => {
+    const conn = await pool.getConnection();
+
+    await conn.query(addLike, [shorts_id, user_id]);
+    
+    conn.release();
+}
+
+// 좋아요 삭제
+export const removeLikeDao = async (shorts_id, user_id) => {
+    const conn = await pool.getConnection();
+
+    await conn.query(removeLike, [shorts_id, user_id]);
+
+    conn.release();
+}
+
+// 좋아요 수 조회
+export const getLikeCntDao = async (shorts_id) => {
+    const conn = await pool.getConnection();
+
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts_id = ?', [shorts_id]);
+
+    conn.release();
+    return rows[0].count;
+}
