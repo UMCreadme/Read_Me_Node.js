@@ -56,7 +56,7 @@ export const createShorts = async (req, res, next) => {
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id } = req.id;   // TODO : 추후 유저 인가 구현 이후 수정
+    const { user_id } = req.user_id;   // TODO : 추후 유저 인가 구현 이후 수정
 
     if (!shorts_id || !user_id) {
         return next(new BaseError(status.BAD_REQUEST));
