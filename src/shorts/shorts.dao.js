@@ -4,7 +4,6 @@ import { status } from "../../config/response.status.js";
 import { isUserReadBookById } from "../book/book.sql.js";
 import { insertObject } from "../common/common.dao.js";
 import { addComment, getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
-import { getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
 import { checkLike, removeLike, addLike } from "./shorts.sql.js";
 
 
@@ -119,7 +118,7 @@ export const doesShortExistDao = async (shorts_id) => {
     const [result] = await conn.query('SELECT 1 FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
     conn.release();
     return result.length > 0;
-
+}
 // 존재하는 쇼츠인 지 확인
 export const checkShortsExistenceDao = async (shorts_id) => {
     const conn = await pool.getConnection();

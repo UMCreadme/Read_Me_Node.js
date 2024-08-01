@@ -2,7 +2,13 @@ import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { insertObject } from "../common/common.dao.js";
-import { findBookIdByISBN, findCategoryIdByName, findCategoryNameByBookId, getBookById } from "./book.sql.js";
+import {
+    findBookIdByISBN,
+    findCategoryIdByName,
+    findCategoryNameByBookId,
+    getBookById,
+    getUserRecentBookList
+} from "./book.sql.js";
 
 export const findBookById = async (bookId) => {
 
@@ -87,5 +93,28 @@ export const createBook = async (book) => {
         } else {
             throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
+    }
+}
+
+export const findUserRecentBookList = async (userId, offset, limit) => {
+    try {
+        const conn = await pool.getConnection()
+        const [userRecentBookList] = await pool.query(getUserRecentBookList, [userId, limit, offset])
+
+        const uniqueBookList = [];
+        const bookIdSet = new Set();
+
+        for (const book of userRecentBookList) {
+            if (!bookIdSet.has(book.book_id)) {
+                bookIdSet.add(book.book_id);
+                uniqueBookList.push(book);
+            }
+        }
+
+        conn.release()
+        return uniqueBookList;
+    }
+    catch (err){
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }

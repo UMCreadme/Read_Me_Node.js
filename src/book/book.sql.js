@@ -14,3 +14,22 @@ export const findCategoryIdByName = "SELECT category_id FROM CATEGORY WHERE name
 
 // 유저가 읽은 책 ID 조회 TODO: 추후 유저 도메인으로 옮기기
 export const isUserReadBookById = "SELECT book_id FROM USER_BOOK WHERE user_id = ? AND book_id = ?;";
+
+// 유저가 쇼츠 생성시 선택했던 책 최근 리스트 조회
+export const getUserRecentBookList = `
+SELECT 
+    s.book_id,
+    b.image_url,
+    b.title,
+    b.author,
+    b.translator
+FROM 
+    SHORTS s
+JOIN 
+    BOOK b ON s.book_id = b.book_id
+WHERE 
+    s.user_id = ?
+ORDER BY 
+    s.created_at DESC
+LIMIT ? OFFSET ?
+`;
