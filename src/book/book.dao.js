@@ -2,7 +2,7 @@ import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { insertObject } from "../common/common.dao.js";
-import { findBookIdByISBN, findCategoryIdByName, findCategoryNameByBookId, getBookById, isUserReadBookById } from "./book.sql.js";
+import { deleteUserBook, findBookIdByISBN, findCategoryIdByName, findCategoryNameByBookId, getBookById, isUserReadBookById, updateUserBook } from "./book.sql.js";
 
 // bookId로 책 정보 조회
 export const findBookById = async (bookId) => {
@@ -112,3 +112,39 @@ export const findIsReadById = async (userId, bookId) => {
         }
     }
 }
+
+// 책 읽음 여부 업데이트
+export const updateBookIsReadToUser = async (userId, bookId) => {
+    try {
+        const conn = await pool.getConnection();
+        await conn.query(updateUserBook, [userId, bookId]);
+
+        conn.release();
+        return;
+    } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+        }
+    }
+}
+
+// 책 읽음 여부 삭제
+export const deleteBookIsReadToUser = async (userId, bookId) => {
+    try {
+        const conn = await pool.getConnection();
+        await conn.query(deleteUserBook, [userId, bookId]);
+
+        conn.release();
+        return;
+    } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+        }
+    }
+};

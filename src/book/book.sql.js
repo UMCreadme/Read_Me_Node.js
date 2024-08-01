@@ -14,3 +14,7 @@ export const findCategoryIdByName = "SELECT category_id FROM CATEGORY WHERE name
 
 // 유저가 읽은 책 ID 조회
 export const isUserReadBookById = "SELECT book_id FROM USER_BOOK WHERE user_id = ? AND book_id = ?;";
+
+// 유저가 읽은 책 정보 업데이트
+export const updateUserBook = "INSERT INTO USER_BOOK (user_id, book_id) VALUES (?, ?);";
+export const deleteUserBook = "DELETE FROM USER_BOOK WHERE user_id = ? AND book_id = ?;";
