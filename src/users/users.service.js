@@ -37,7 +37,7 @@ export const join = async(body, provider) => {
     const tokenToUser = {user_id: newUser.user_id, email: newUser.email}
     const accessToken = sign(tokenToUser)
 
-    return userSignUpResponseDTO(newUser, body.categoryIdList, accessToken)
+    return userSignUpResponseDTO(accessToken, newUser.refresh_token)
 }
 
 // 이미 존재하는 유저가 다시 로그인해서 토큰 값 줄때
