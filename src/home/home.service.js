@@ -2,14 +2,12 @@ import { status } from "../../config/response.status.js";
 import { BaseError } from "../../config/error.js";
 import { categoryShortsResponseDTO, HomeInfoResponseDTO } from "./home.dto.js";
 import { getShortsbyCategory, getAllCategory, getUserCategoriesById,getFollowersFeeds, getRecommendedShorts, getShorts } from "./home.dao.js";
+import { getCategoryIdByName } from "../book/book.dao.js";
 
 // 카테고리별 쇼츠 리스트 조회 로직
-export const ShortsByCategory = async (category_id, offset, limit) => {
+export const ShortsByCategory = async (category_name, offset, limit) => {
 
-    // 카테고리 아이디가 1~18 사이의 값인지 확인
-    if (category_id < 1 || category_id > 18) {
-        throw new BaseError(status.CATEGORY_NOT_FOUND);
-    }
+    const category_id = await getCategoryIdByName(category_name);
 
     const categoryShorts = await getShortsbyCategory(category_id, offset, limit);
     const categoryShortsDTOList = [];
