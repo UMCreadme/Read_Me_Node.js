@@ -5,7 +5,8 @@ import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategory
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
-import { addCommentDao } from "./shorts.dao.js";
+import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao} from "./shorts.dao.js";
+
 
 // 쇼츠 검색
 export const getSearchShorts = async (keyword, page, size) => {
@@ -191,6 +192,7 @@ export const createShorts = async (book, shorts, category) => {
     return await shortsDao.createShorts(shorts);
 };
 
+
 export const addCommentService = async (shorts_id, user_id, content) => {
     const isShortsExist = await shortsDao.doesShortExistDao(shorts_id);
     if (!isShortsExist) {
@@ -199,3 +201,22 @@ export const addCommentService = async (shorts_id, user_id, content) => {
     await addCommentDao(shorts_id, user_id, content);
 
 }
+
+export const likeShortsService = async (shorts_id, user_id) => {
+    const exists = await checkShortsExistenceDao(shorts_id);
+    if (!exists) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    const isLiked = await checkLikeDao(shorts_id, user_id);
+
+    if (isLiked) {
+        await removeLikeDao(shorts_id, user_id);
+        return { likeCnt: await getLikeCntDao(shorts_id), action: 'remmoved'};
+    } else {
+        await addLikeDao(shorts_id, user_id);
+        return { likeCnt: await getLikeCntDao(shorts_id), action: 'added'};
+    }
+
+};
+
