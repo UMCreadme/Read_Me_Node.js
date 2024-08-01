@@ -114,7 +114,6 @@ export const doesShortExistDao = async (shorts_id) => {
     const conn = await pool.getConnection();
 
     const [result] = await conn.query('SELECT 1 FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
-    return result.length > 0;
-
     conn.release();
+    return result.length > 0;
 }

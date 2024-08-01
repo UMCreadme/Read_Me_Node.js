@@ -194,7 +194,7 @@ export const createShorts = async (book, shorts, category) => {
 export const addCommentService = async (shorts_id, user_id, content) => {
     const isShortsExist = await shortsDao.doesShortExistDao(shorts_id);
     if (!isShortsExist) {
-        throw new BaseError(status.BAD_REQUEST, '유효하지 않은 shorts_id입니다.');
+        throw new BaseError(status.BAD_REQUEST);
     }
     await addCommentDao(shorts_id, user_id, content);
 
