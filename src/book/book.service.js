@@ -1,7 +1,7 @@
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
-import { createBook, deleteBookIsReadToUser, findIsReadById, getBookIdByISBN, updateBookIsReadToUser } from "./book.dao.js"
+import { createBook, deleteBookIsReadToUser, findIsReadById, getBookIdByISBN, getCategoryIdByAladinCid, updateBookIsReadToUser } from "./book.dao.js"
 import { bookDetailDto } from "./book.dto.js";
 
 export const getBookDetailInfo = async (ISBN, page, size, userId) => {
@@ -24,16 +24,22 @@ export const getBookDetailInfo = async (ISBN, page, size, userId) => {
     return {"data": bookDetailDto(isRead, shorts), "pageInfo": pageInfo(page, shorts.length, hasNext)};
 };
 
-export const updateBookIsRead = async (book, userId) => {
+export const updateBookIsRead = async (book, cid, userId) => {
     // 책 ID 조회
     let bookId = await getBookIdByISBN(book.ISBN);
 
     // 책이 저장되지 않았을 경우 책 저장
     if(!bookId) {
+        const categoryId = await getCategoryIdByAladinCid(cid);
+        if(!categoryId) {
+            throw new BaseError(status.CATEGORY_NOT_FOUND);
+        }
+
+        book.category_id = categoryId;
         bookId = await createBook(book);
     }
 
-    const isRead = await findIsReadById(bookId, userId);
+    const isRead = await findIsReadById(userId, bookId);
     // 읽은 책일 경우 삭제
     if(isRead) {
         await deleteBookIsReadToUser(userId, bookId);

@@ -19,5 +19,5 @@ export const updateIsRead = async (req, res, next) => {
 
     const book = bookInfoDto(req.body);
 
-    res.send(response(await updateBookIsRead(book, userId)));
+    res.send(response(await updateBookIsRead(book, req.body.cid, userId)));
 };
