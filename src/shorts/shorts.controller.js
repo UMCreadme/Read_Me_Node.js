@@ -24,7 +24,7 @@ export const getShortsDetail = async (req, res, next) => {
     } else if (category !== undefined) {
         shorts = await service.getShortsDetailHome(parseInt(shortsId), category, parseInt(page), parseInt(size));
     } else {
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
     res.send(response(status.SUCCESS, shorts.data, shorts.pageInfo));

@@ -178,7 +178,7 @@ export const createShorts = async (book, shorts, cid) => {
         throw new BaseError(status.SHORTS_PHRASE_TOO_LONG);
     }
     if(shorts.tag.length > 10) {
-        throw new BaseError(status.SHORTS_TAG_TOO_LONG);
+        throw new BaseError(status.SHORTS_TAG_COUNT_TOO_LONG);
     }
     for(const tag of shorts.tag) {
         if(tag.length > 10) {
