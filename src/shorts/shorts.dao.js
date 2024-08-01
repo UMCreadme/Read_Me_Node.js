@@ -105,9 +105,9 @@ export const createShorts = async (shorts) => {
 export const checkShortsExistenceDao = async (shorts_id) => {
     const conn = await pool.getConnection();
     const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
-    return rows[0].count > 0;
 
     conn.release();
+    return rows[0].count > 0;
 }
 
 // 좋아요 누른 상태인 지 확인
@@ -115,9 +115,10 @@ export const checkLikeDao = async (shorts_id, user_id) => {
     const conn = await pool.getConnection();
 
     const [rows] = await conn.query(checkLike, [shorts_id, user_id]);
-    return rows[0].count > 0;
 
     conn.release();
+    return rows[0].count > 0;
+
 }
 
 // 좋아요 추가
@@ -143,7 +144,7 @@ export const getLikeCntDao = async (shorts_id) => {
     const conn = await pool.getConnection();
 
     const [rows] = await conn.query('SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts_id = ?', [shorts_id]);
-    return rows[0].count;
 
     conn.release();
+    return rows[0].count;
 }
