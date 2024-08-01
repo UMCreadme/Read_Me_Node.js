@@ -15,7 +15,7 @@ export const refresh = async (req, res) => {
             return res.send(response(status.NOT_EXISTING_ACCESS_TOKEN));
         }
 
-        const refreshResult = await refreshVerify(refreshToken, decoded.id);
+        const refreshResult = await refreshVerify(refreshToken, decoded.user_id);
 
         if (authResult.ok === false && authResult.message === 'jwt expired') {
             // refresh token도 만료된 경우
