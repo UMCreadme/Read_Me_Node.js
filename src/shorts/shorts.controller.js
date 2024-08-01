@@ -56,7 +56,8 @@ export const createShorts = async (req, res, next) => {
 
 export const addComment = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id, content } = req.user_id;   //TODO: 미들웨어 추가되면 수정
+    const { content } = req.body;
+    const { user_id } = req.user_id;
 
     const MAX_COMMENT_LENGTH = 200; 
     
@@ -70,11 +71,12 @@ export const addComment = async (req, res, next) => {
 
     await addCommentService(shorts_id, user_id, content);
     res.send(response(status.CREATED));
+}
 
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id } = req.user_id;   // TODO : 추후 유저 인가 구현 이후 수정
+    const { user_id } = req.user_id;
 
     if (!shorts_id || !user_id) {
         return next(new BaseError(status.BAD_REQUEST));
