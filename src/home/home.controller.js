@@ -14,7 +14,7 @@ export const getCategoryShorts = async (req, res, next) => {
     const hasNext = result.length > size;
     if (hasNext) result.pop();
 
-    res.send(response(status.SUCCESS, result, pageInfo(page, size, hasNext)));
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)));
 };
 
 // 메인 화면 정보 조회
@@ -29,5 +29,5 @@ export const getHomeInfo = async(req, res, next) => {
     const hasNext = result.length > size;
     if (hasNext) result.pop();
 
-    res.send(response(status.SUCCESS, result, pageInfo(page, size, hasNext)));
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)));
 };
