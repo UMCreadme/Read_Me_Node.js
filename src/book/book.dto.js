@@ -25,4 +25,4 @@ export const bookDetailDto = (isRead, data) => {
             phrase: short.phrase
         }))
     };
-}
+};
