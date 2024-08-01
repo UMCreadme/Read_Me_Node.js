@@ -55,7 +55,7 @@ export const createShorts = async (req, res, next) => {
 
 export const addComment = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id, content } = req.body;   //TODO: 미들웨어 추가되면 수정
+    const { user_id, content } = req.id;   //TODO: 미들웨어 추가되면 수정
 
     const MAX_COMMENT_LENGTH = 200; 
     
