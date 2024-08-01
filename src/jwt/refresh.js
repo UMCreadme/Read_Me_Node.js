@@ -20,6 +20,9 @@ export const refresh = async (req, res) => {
         if (authResult.ok === false && authResult.message === 'jwt expired') {
             // refresh token도 만료된 경우
             if (refreshResult.ok === false) {
+                if(refreshResult.message) {
+                    return res.send(response(status.INVALID_REFRESH_TOKEN))
+                }
                 return res.send(response(status.REFRESH_TOKEN_EXPIRED));
             }
             else {

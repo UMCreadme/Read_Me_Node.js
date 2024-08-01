@@ -44,7 +44,13 @@ export const refreshVerify = async (token, userId) => {
     const conn = await pool.getConnection();
     const [refreshTokenResult] = await conn.query(getRefreshToken, [userId]);
 
+    if(refreshTokenResult[0].refresh_token === undefined){
+        conn.release();
+        return {ok: false, message: '유효하지 않은 리프레시 토큰입니다.'}
+    }
+
     const refreshToken = refreshTokenResult[0].refresh_token;
+
     conn.release();
 
     try {
@@ -56,7 +62,7 @@ export const refreshVerify = async (token, userId) => {
                 return { ok: false, message: err.message };
             }
         } else {
-            return { ok: false, message: 'Invalid refresh token' };
+            return { ok: false, message: '유효하지 않은 리프레시 토큰입니다.' };
         }
     } catch (err) {
         return { ok: false, message: err.message };
