@@ -1,19 +1,20 @@
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { pool } from "../../config/db.config.js";
-import { getShortsByCategory,getAllCategories, getFollowerFeed, getShort, getUserCategories, getUserRecommendedShorts } from "./home.sql.js";
+import { getShortsByCategory, getAllCategories, getFollowerFeed, getShort, getUserCategories, getUserRecommendedShorts } from "./home.sql.js";
 
 // 카테고리 별 쇼츠 조회
 export const getShortsbyCategory = async (category_id, offset, limit) => {
     try {
         const conn = await pool.getConnection();
-        const [categoryShorts] = await pool.query(getShortsByCategory, [category_id, limit, offset]);
+        const [categoryShorts] = await pool.query(getShortsByCategory, [category_id, category_id]);
 
         conn.release(); 
 
         return categoryShorts;
     }
     catch(err){
+        console.error('Error fetching recommended shorts:', err); 
         throw new BaseError(status.BAD_REQUEST);
     }
 }
@@ -50,7 +51,7 @@ export const getUserCategoriesById = async(user_id) => {
 }
 
 
-// 회원일 시 추천 숏츠 리스트 가져오기 - 맞춤 카테고리 내 숏츠 인기순 랜덤 1개씩
+// 회원일 시 추천 숏츠 리스트 가져오기 - 맞춤 카테고리 내 숏츠 인기순 랜덤 1개씩 + TODO: 나중에 인기순 기준 좋아요 100개로 변경
 export const getRecommendedShorts = async (user_id) => {
     try {
         const conn = await pool.getConnection();

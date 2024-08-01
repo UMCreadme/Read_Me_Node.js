@@ -1,17 +1,45 @@
 export const getShortsByCategory = 
-`SELECT
-    u.user_id, u.image_url AS profileImg, u.nickname,
-    s.shorts_id, s.book_id, s.image_url AS shortsImg,
-    s.phrase, s.title, s.content, s.tag AS tags,
-    (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
-    (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
-    s.created_at
+`WITH FilteredShorts AS (
+    SELECT u.user_id, u.image_url AS profileImg, u.nickname,
+           s.shorts_id, s.book_id, s.image_url AS shortsImg,
+           s.phrase, s.title, s.content, s.tag AS tags,
+           (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
+           (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
+           s.created_at
+    FROM USERS u
+    JOIN SHORTS s ON u.user_id = s.user_id
+    JOIN BOOK b ON s.book_id = b.book_id
+    WHERE b.category_id = ?
+    GROUP BY u.user_id, u.image_url, u.nickname,
+             s.shorts_id, s.book_id, s.image_url,
+             s.phrase, s.title, s.content, s.tag, s.created_at
+    HAVING likeCnt >= 100
+),
+RankedShorts AS (
+    SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
+           phrase, title, content, tags, likeCnt, commentCnt, created_at,
+           ROW_NUMBER() OVER (ORDER BY RAND()) AS RN
+    FROM FilteredShorts
+)
+SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
+       phrase, title, content, tags, likeCnt, commentCnt, created_at
+FROM RankedShorts
+WHERE RN <= 20
+
+UNION ALL
+
+SELECT u.user_id, u.image_url AS profileImg, u.nickname,
+       s.shorts_id, s.book_id, s.image_url AS shortsImg,
+       s.phrase, s.title, s.content, s.tag AS tags,
+       (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
+       (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
+       s.created_at
 FROM USERS u
 JOIN SHORTS s ON u.user_id = s.user_id
 JOIN BOOK b ON s.book_id = b.book_id
-WHERE b.category_id = ?
-ORDER BY s.created_at DESC
-LIMIT ? OFFSET ?;
+WHERE b.category_id = ? AND s.shorts_id NOT IN (SELECT shorts_id FROM RankedShorts)
+ORDER BY likeCnt DESC, RAND()
+LIMIT 20;
 `;
 
 export const getUserCategories =
