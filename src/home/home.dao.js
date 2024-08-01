@@ -50,13 +50,13 @@ export const getUserCategoriesById = async(user_id) => {
 }
 
 
-// 회원일 시 추천 숏츠 리스트 가져오기 - 맞춤 카테고리 내 숏츠 최신순
-export const getRecommendedShorts = async (user_id, offset, limit) => {
+// 회원일 시 추천 숏츠 리스트 가져오기 - 맞춤 카테고리 내 숏츠 인기순 랜덤 1개씩
+export const getRecommendedShorts = async (user_id) => {
     try {
         const conn = await pool.getConnection();
 
         let userRecommendedShorts = [];
-        [userRecommendedShorts] = await conn.query(getUserRecommendedShorts, [user_id, limit, offset]);
+        [userRecommendedShorts] = await conn.query(getUserRecommendedShorts, [user_id]);
 
         conn.release();
         return userRecommendedShorts;

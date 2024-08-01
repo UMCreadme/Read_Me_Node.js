@@ -28,16 +28,26 @@ export const getAllCategories = "SELECT name FROM CATEGORY;";
 
 // 유저가 선택한 카테고리의 숏츠 반환 + 좋아요순 정렬
 export const getUserRecommendedShorts = 
-`SELECT s.shorts_id, s.image_url as shortsImg, s.phrase, s.title, b.author, b.translator, c.name AS category, COUNT(ls.like_shorts_id) AS like_count
-FROM SHORTS s 
-JOIN BOOK b ON s.book_id = b.book_id 
-JOIN CATEGORY c ON b.category_id = c.category_id 
-JOIN USER_FAVORITE uf ON c.category_id = uf.category_id
-LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id
-WHERE uf.user_id = ?
-GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name
-ORDER BY like_count DESC, s.created_at DESC
-LIMIT ? OFFSET ?;
+`WITH FilteredShorts AS (
+    SELECT s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, b.author, b.translator, c.name AS category, c.category_id, COUNT(ls.like_shorts_id) AS likeCnt
+    FROM SHORTS s
+    JOIN BOOK b ON s.book_id = b.book_id
+    JOIN CATEGORY c ON b.category_id = c.category_id
+    JOIN USER_FAVORITE uf ON c.category_id = uf.category_id
+    LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id
+    WHERE uf.user_id = ?
+    GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name
+    HAVING COUNT(ls.like_shorts_id) >= 1
+),
+RankedShorts AS (
+    SELECT shorts_id, shortsImg, phrase, title, author, translator, category, category_id,likeCnt,
+        ROW_NUMBER() OVER (PARTITION BY category ORDER BY RAND()) AS RN
+    FROM FilteredShorts
+)
+SELECT shorts_id, shortsImg, phrase, title, author, translator, category, likeCnt
+FROM RankedShorts
+WHERE rn = 1
+ORDER BY category_id;
 `;
 
 // 전체 숏츠 조회 + 좋아요순으로 정렬
