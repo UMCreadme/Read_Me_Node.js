@@ -28,6 +28,7 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
             "bookTitle": shorts.title,
             "author": shorts.author,
             "translator": shorts.translator,
+            "likeCnt":shorts.likeCnt,
             "category": shorts.category
         })),
         "feeds": feeds.map(feeds => ({
