@@ -20,7 +20,7 @@ export const categoryShortsResponseDTO = (shorts) => {
 
 export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
     return {
-        "categories": categories,
+        "categories": categories.map(category => category.name),
         "shorts": shorts.map(shorts => ({
             "shorts_id": shorts.shorts_id,
             "shortsImg": shorts.shortsImg,

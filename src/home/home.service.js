@@ -28,7 +28,7 @@ export const getMainInfo = async(user_id, offset, limit) => {
     // 추천 숏츠 리스트 가져오기
     const shorts = user_id
     ? await getRecommendedShorts(user_id, offset, limit)
-    : await getShorts(offset, limit);
+    : null;
 
     // 팔로잉 유저들의 숏츠 리스트 가져오기
     const feeds = user_id
