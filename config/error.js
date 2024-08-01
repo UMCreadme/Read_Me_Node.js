@@ -2,7 +2,7 @@ import { status } from "./response.status.js";
 
 export class BaseError extends Error {
     constructor(data){
-        if(data == null || data == undefined) {
+        if(!data) {
             data = status.INTERNAL_SERVER_ERROR;
         };
         
