@@ -17,17 +17,12 @@ export const bookInfoDto = (data) => {
 };
 
 export const bookDetailDto = (isRead, data) => {
-    const bookShortsList = [];
-    for (const shorts of data) {
-        bookShortsList.push({
-            "shortsId": shorts.shorts_id,
-            "shortsImg": shorts.shorts_img,
-            "phrase": shorts.phrase
-        });
-    }
-
     return {
         "isRead": Boolean(isRead),
-        "shorts": bookShortsList
+        "shorts": data.map(short => ({
+            shortsId: short.shorts_id,
+            shortsImg: short.shorts_img,
+            phrase: short.phrase
+        }))
     };
 }
