@@ -54,7 +54,7 @@ ORDER BY
 
 export const getAllCategories = "SELECT name FROM CATEGORY;";
 
-// 유저가 선택한 카테고리의 숏츠 반환 + 좋아요순 정렬
+// 유저가 선택한 카테고리의 숏츠 1개씩 반환 + 인기쇼츠 중 랜덤
 export const getUserRecommendedShorts = 
 `WITH FilteredShorts AS (
     SELECT s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, b.author, b.translator, c.name AS category, c.category_id, COUNT(ls.like_shorts_id) AS likeCnt
@@ -92,16 +92,22 @@ LIMIT ? OFFSET ?;
 
 // 유저의 팔로워들이 올린 피드 리스트 반환
 export const getFollowerFeed = 
-`SELECT u.user_id, u.image_url AS profileImg, 
+`SELECT 
+u.user_id, u.image_url AS profileImg, 
 u.nickname, s.shorts_id, s.image_url AS shortsImg, 
 s.phrase, s.title, s.content, s.tag, 
-(SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt, 
-(SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt, 
+COUNT(ls.like_shorts_id) AS likeCnt, 
+COUNT(c.comment_id) AS commentCnt, 
 s.created_at, 
-EXISTS(SELECT 1 FROM LIKE_SHORTS WHERE shorts_id = s.shorts_id AND user_id = ?) AS isLike FROM USERS u 
-JOIN FOLLOW f on u.user_id = f.follower 
+EXISTS(SELECT 1 FROM LIKE_SHORTS WHERE shorts_id = s.shorts_id AND user_id = ?) AS isLike 
+FROM USERS u 
+JOIN FOLLOW f ON u.user_id = f.follower 
 JOIN SHORTS s ON u.user_id = s.user_id 
-WHERE f.user_id = ?
+LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id 
+LEFT JOIN COMMENT c ON s.shorts_id = c.shorts_id 
+WHERE f.user_id = ? 
 AND s.created_at >= NOW() - INTERVAL 24 HOUR
-ORDER BY likeCnt DESC LIMIT ? OFFSET ?;
+GROUP BY u.user_id, u.image_url, u.nickname, s.shorts_id, s.image_url, s.phrase, s.title, s.content, s.tag, s.created_at
+ORDER BY likeCnt DESC 
+LIMIT ? OFFSET ?;
 `;
