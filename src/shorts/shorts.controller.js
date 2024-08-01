@@ -56,11 +56,11 @@ export const createShorts = async (req, res, next) => {
 
 export const addComment = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const {content} = req.body;
-    const {user_id} = req.user_id;
+    const { content } = req.body;
+    const { user_id } = req.user_id;
 
-    const MAX_COMMENT_LENGTH = 200;
-
+    const MAX_COMMENT_LENGTH = 200; 
+    
     if (!shorts_id || !user_id || !content) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
@@ -72,6 +72,7 @@ export const addComment = async (req, res, next) => {
     await addCommentService(shorts_id, user_id, content);
     res.send(response(status.CREATED));
 }
+
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
