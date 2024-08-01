@@ -119,6 +119,7 @@ export const doesShortExistDao = async (shorts_id) => {
     conn.release();
     return result.length > 0;
 }
+
 // 존재하는 쇼츠인 지 확인
 export const checkShortsExistenceDao = async (shorts_id) => {
     const conn = await pool.getConnection();
