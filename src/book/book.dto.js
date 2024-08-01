@@ -30,4 +30,4 @@ export const bookDetailDto = (isRead, data) => {
         "isRead": Boolean(isRead),
         "shorts": bookShortsList
     };
-}
+};
