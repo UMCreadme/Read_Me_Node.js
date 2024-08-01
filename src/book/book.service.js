@@ -14,7 +14,7 @@ export const getBookDetailInfo = async (ISBN, page, size, userId) => {
     }
 
     // 책 읽음 여부 업데이트 (회원인 경우 DB 조회 / 비회원인 경우 false)
-    const isRead = userId ? await findIsReadById(bookId, userId) : false;
+    const isRead = userId ? await findIsReadById(userId, bookId) : false;
     // 책에 해당하는 쇼츠 조회
     const shorts = await getShortsDetailToBook(-1, bookId, size+1, (page-1)*size);
 

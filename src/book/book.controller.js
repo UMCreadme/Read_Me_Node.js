@@ -8,7 +8,7 @@ export const getBookDetail = async (req, res, next) => {
     const { page=1, size=10 } = req.query;
     const userId = 1; // TODO: 유저 인가 구현 후 수정
     
-    const book = await getBookDetailInfo(parseInt(ISBN), parseInt(page), parseInt(size), userId);
+    const book = await getBookDetailInfo(ISBN, parseInt(page), parseInt(size), userId);
 
     res.send(response(status.SUCCESS, book.data, book.pageInfo));
 };
