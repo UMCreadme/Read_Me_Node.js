@@ -5,6 +5,7 @@ import imgUploader from "../../config/s3.manager.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
 import { bookInfoDto } from "../book/book.dto.js";
+import { addCommentService } from "./shorts.service.js";
 import { likeShortsService } from "./shorts.service.js";
 
 export const getShortsDetail = async (req, res, next) => {
@@ -53,6 +54,23 @@ export const createShorts = async (req, res, next) => {
     res.send(response(status.CREATED));
 }
 
+export const addComment = async (req, res, next) => {
+    const shorts_id = req.params.shortsId;
+    const { user_id, content } = req.user_id;   //TODO: 미들웨어 추가되면 수정
+
+    const MAX_COMMENT_LENGTH = 200; 
+    
+    if (!shorts_id || !user_id || !content) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    if (content.length > MAX_COMMENT_LENGTH) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    await addCommentService(shorts_id, user_id, content);
+    res.send(response(status.CREATED));
+
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
@@ -65,4 +83,5 @@ export const likeShorts = async (req, res, next) => {
     const { likeCnt, action } = await likeShortsService(shorts_id, user_id);
     const responseStatus = action === 'added' ? status.CREATED : status.SUCCESS;
     res.send(response(responseStatus, likeCnt));
+
 }
