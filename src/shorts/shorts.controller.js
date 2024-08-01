@@ -40,19 +40,19 @@ export const searchShorts = async (req, res, next) => {
 export const createShorts = async (req, res, next) => {
     const book = bookInfoDto(req.body);
 
-    if(req.file === undefined) {
+    if(!req.file) {
         throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
     const shorts = shortsInfoDto(req.body, req.file.location);
 
-    const shortsId = await service.createShorts(book, shorts, req.body.category);
+    const shortsId = await service.createShorts(book, shorts, req.body.cid);
 
-    if(shortsId === undefined) {
+    if(!shortsId) {
         throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 
     res.send(response(status.CREATED));
-}
+};
 
 export const addComment = async (req, res, next) => {
     const shorts_id = req.params.shortsId;

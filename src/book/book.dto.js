@@ -2,7 +2,7 @@ import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 
 export const bookInfoDto = (data) => {
-    if (!data || !data.ISBN || !data.bookTitle || !data.category || !data.bookCover || !data.author || !data.link) {
+    if (!data || !data.ISBN || !data.bookTitle || !data.cid || !data.bookCover || !data.author || !data.link) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
