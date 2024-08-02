@@ -40,7 +40,9 @@ jobs:
       # .env 파일 복사
       - name: Create .env file
         run: |
+          touch .env
           echo ${{secrets.DOT_ENV}} >> .env
+          cat .env
 
       - name: Run Build
         run: npm run build # 빌드
