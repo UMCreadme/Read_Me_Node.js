@@ -34,6 +34,8 @@ app.use('/communities', communitiesRouter);
 app.use('/health', healthRouter)
 
 
+
+
 // index.js
 app.use((req, res, next) => {
     const err = new BaseError(status.NOT_FOUND);

@@ -17,3 +17,33 @@ export const categoryShortsResponseDTO = (shorts) => {
         "postingDate": shorts.created_at
     }
 }
+
+export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
+    return {
+        "categories": categories.map(category => category.name),
+        "shorts": shorts.map(shorts => ({
+            "shorts_id": shorts.shorts_id,
+            "shortsImg": shorts.shortsImg,
+            "phrase": shorts.phrase,
+            "bookTitle": shorts.title,
+            "author": shorts.author,
+            "translator": shorts.translator,
+            "likeCnt":shorts.likeCnt,
+            "category": shorts.category
+        })),
+        "feeds": feeds.map(feeds => ({
+            "user_id": feeds.user_id,
+            "profileImg": feeds.profileImg,
+            "nickname": feeds.nickname,
+            "shorts_id": feeds.shorts_id,
+            "shortsImg": feeds.shortsImg,
+            "phrase": feeds.phrase,
+            "title": feeds.title,
+            "content": feeds.content,
+            "tags": feeds.tag ? feeds.tag.split("|") : [],
+            "isLike": Boolean(feeds.isLike),
+            "likeCnt": feeds.likeCnt,
+            "commentCnt": feeds.commentCnt,
+            "postingDate": feeds.created_at
+        }))
+    }}
