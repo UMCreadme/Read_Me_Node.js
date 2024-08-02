@@ -8,10 +8,8 @@ export const getRecentResearch = async (user_id) => {
         const conn = await pool.getConnection();
         const [queries] = await conn.query(getQueriesbyId, [user_id]);
 
-        const queryList = queries.map(queryObj => queryObj.query);
-
         conn.release();
-        return queryList;
+        return queries;
 
     
     } catch (err) {

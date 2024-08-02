@@ -1,7 +1,7 @@
 export const getQueriesbyId = `
-SELECT query 
+SELECT query, search_type
 FROM RECENT_SEARCHES 
-WHERE user_id = ? AND is_deleted = 0
+WHERE user_id = ?
 ORDER BY timestamp DESC
 LIMIT 15;
 `

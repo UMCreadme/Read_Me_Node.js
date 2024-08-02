@@ -5,8 +5,7 @@ import { RecentResearchService } from "./research.service.js";
 
 
 export const getRecentSearches = async (req, res) => {
-    const { user_id } = req.user_id;
-    console.log('getRecentResearch called with user_id:', user_id);
+    const { user_id } = req.body;
 
     const result = await RecentResearchService(user_id);
     res.send(response(status.SUCCESS, result));
