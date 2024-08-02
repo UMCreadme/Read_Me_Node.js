@@ -5,6 +5,8 @@ import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategory
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
+import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao} from "./shorts.dao.js";
+
 
 // 쇼츠 검색
 export const getSearchShorts = async (keyword, page, size) => {
@@ -156,7 +158,6 @@ export const createShorts = async (book, shorts, category) => {
     
     // book_id 값이 존재하지 않을 경우 책 정보 생성
     if(bookId === undefined) {
-        console.log('category: ', category);
         const categoryId = await getCategoryIdByName(category);
         if(categoryId === undefined) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
@@ -190,3 +191,32 @@ export const createShorts = async (book, shorts, category) => {
     shorts.book_id = bookId;
     return await shortsDao.createShorts(shorts);
 };
+
+
+export const addCommentService = async (shorts_id, user_id, content) => {
+    const isShortsExist = await shortsDao.doesShortExistDao(shorts_id);
+    if (!isShortsExist) {
+        throw new BaseError(status.BAD_REQUEST);
+    }
+    await addCommentDao(shorts_id, user_id, content);
+
+}
+
+export const likeShortsService = async (shorts_id, user_id) => {
+    const exists = await checkShortsExistenceDao(shorts_id);
+    if (!exists) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    const isLiked = await checkLikeDao(shorts_id, user_id);
+
+    if (isLiked) {
+        await removeLikeDao(shorts_id, user_id);
+        return { likeCnt: await getLikeCntDao(shorts_id), action: 'remmoved'};
+    } else {
+        await addLikeDao(shorts_id, user_id);
+        return { likeCnt: await getLikeCntDao(shorts_id), action: 'added'};
+    }
+
+};
+

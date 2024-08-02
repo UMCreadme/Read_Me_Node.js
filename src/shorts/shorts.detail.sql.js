@@ -1,13 +1,13 @@
 // 쇼츠 ID에 해당하는 쇼츠 상세 정보를 가져오는 쿼리
 export const getShortsDetailById =
 `SELECT
-    s.user_id, u.account, i.url AS profile_img,
-    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
-    likes.like_count, comments.comment_count, s.book_id
+    s.user_id, u.account, u.image_url AS profile_img,
+    s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    COALESCE(likes.like_count, 0) AS like_count, 
+    COALESCE(comments.comment_count, 0) AS comment_count,
+    s.book_id
 FROM SHORTS s
 JOIN USERS u ON s.user_id = u.user_id
-JOIN IMAGE i ON u.image_id = i.image_id
-JOIN IMAGE si ON s.image_id = si.image_id
 LEFT JOIN (
     SELECT shorts_id, COUNT(*) AS like_count
     FROM LIKE_SHORTS
@@ -31,7 +31,7 @@ WITH followed_users AS (
 
 -- 2. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 shorts_with_followers AS (
-    SELECT s.shorts_id, s.user_id, s.book_id, s.image_id,
+    SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count,
@@ -61,15 +61,13 @@ shorts_with_followers AS (
 
 -- 3. 최종 결과를 가져오는 쿼리
 SELECT
-    s.user_id, u.account, i.url AS profile_img,
-    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.user_id, u.account, u.image_url AS profile_img,
+    s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_followers s
 JOIN USERS u ON s.user_id = u.user_id
-JOIN IMAGE i ON u.image_id = i.image_id
-JOIN IMAGE si ON s.image_id = si.image_id
 WHERE s.shorts_id != ?
-GROUP BY s.shorts_id, u.user_id, i.url, si.url
+GROUP BY s.shorts_id, u.user_id
 ORDER BY s.follower_count DESC, s.like_count DESC
 LIMIT ? OFFSET ?;`;
 
@@ -84,7 +82,7 @@ WITH followed_users AS (
 
 -- 2. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 shorts_with_followers AS (
-    SELECT s.shorts_id, s.user_id, s.book_id, s.image_id,
+    SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count,
@@ -114,15 +112,13 @@ shorts_with_followers AS (
 
 -- 3. 최종 결과를 가져오는 쿼리
 SELECT
-    s.user_id, u.account, i.url AS profile_img,
-    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.user_id, u.account, u.image_url AS profile_img,
+    s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_followers s
 JOIN USERS u ON s.user_id = u.user_id
-JOIN IMAGE i ON u.image_id = i.image_id
-JOIN IMAGE si ON s.image_id = si.image_id
 WHERE s.shorts_id NOT IN (<<placeholder>>)
-GROUP BY s.shorts_id, u.user_id, i.url, si.url
+GROUP BY s.shorts_id, u.user_id
 ORDER BY s.follower_count DESC, s.like_count DESC
 LIMIT ? OFFSET ?;`;
 
@@ -137,7 +133,7 @@ WITH followed_users AS (
 
 -- 2. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 shorts_with_followers AS (
-    SELECT s.shorts_id, s.user_id, s.book_id, s.image_id,
+    SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count,
@@ -167,14 +163,12 @@ shorts_with_followers AS (
 
 -- 3. 최종 결과를 가져오는 쿼리
 SELECT
-    s.user_id, u.account, i.url AS profile_img,
-    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.user_id, u.account, u.image_url AS profile_img,
+    s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_followers s
 JOIN USERS u ON s.user_id = u.user_id
-JOIN IMAGE i ON u.image_id = i.image_id
-JOIN IMAGE si ON s.image_id = si.image_id
-GROUP BY s.shorts_id, u.user_id, i.url, si.url
+GROUP BY s.shorts_id, u.user_id
 ORDER BY s.follower_count DESC, s.like_count DESC
 LIMIT ? OFFSET ?;`;
 
@@ -189,7 +183,7 @@ WITH followed_users AS (
 
 -- 2. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 shorts_with_followers AS (
-    SELECT s.shorts_id, s.user_id, s.book_id, s.image_id,
+    SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count,
@@ -211,37 +205,33 @@ shorts_with_followers AS (
         s.shorts_id IN (
             SELECT s.shorts_id
             FROM SHORTS s
-            JOIN book b ON s.book_id = b.book_id
+            JOIN BOOK b ON s.book_id = b.book_id
             WHERE b.book_id = ?
         )
 )
 
 -- 3. 최종 결과를 가져오는 쿼리
 SELECT
-    s.user_id, u.account, i.url AS profile_img,
-    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.user_id, u.account, u.image_url AS profile_img,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_followers s
 JOIN USERS u ON s.user_id = u.user_id
-JOIN IMAGE i ON u.image_id = i.image_id
-JOIN IMAGE si ON s.image_id = si.image_id
 WHERE s.shorts_id != ?
-GROUP BY s.shorts_id, u.user_id, i.url, si.url
+GROUP BY s.shorts_id, u.user_id
 ORDER BY s.follower_count DESC, s.like_count DESC
 LIMIT ? OFFSET ?;`;
 
 // 사용자가 작성한 쇼츠 상세 정보를 가져오는 쿼리
 export const getShortsDetailByUser =
 `SELECT 
-    s.user_id, u.account, i.url AS profile_img,
-    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.user_id, u.account, u.image_url AS profile_img,
+    s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count,
     s.book_id
 FROM SHORTS s
 JOIN USERS u ON s.user_id = u.user_id
-JOIN IMAGE i ON u.image_id = i.image_id
-JOIN IMAGE si ON s.image_id = si.image_id
 LEFT JOIN (
     SELECT shorts_id, COUNT(*) AS like_count
     FROM LIKE_SHORTS
@@ -253,23 +243,21 @@ LEFT JOIN (
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE s.user_id = ? AND s.created_at <= (SELECT created_at FROM SHORTS WHERE shorts_id = ?)
-GROUP BY s.shorts_id, u.user_id, i.url, si.url
+GROUP BY s.shorts_id, u.user_id
 ORDER BY s.created_at DESC
 LIMIT ? OFFSET ?;`;
 
 // 사용자가 좋아요한 쇼츠 상세 정보를 가져오는 쿼리
 export const getShortsDetailByUserLike =
 `SELECT 
-    s.user_id, u.account, i.url AS profile_img,
-    si.url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.user_id, u.account, u.image_url AS profile_img,
+    s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count,
     s.book_id
 FROM SHORTS s
 INNER JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id AND ls.user_id = ?
 LEFT JOIN USERS u ON s.user_id = u.user_id
-LEFT JOIN IMAGE i ON u.image_id = i.image_id
-LEFT JOIN IMAGE si ON s.image_id = si.image_id
 LEFT JOIN (
     SELECT shorts_id, COUNT(*) AS like_count
     FROM LIKE_SHORTS
@@ -281,6 +269,6 @@ LEFT JOIN (
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE ls.created_at <= (SELECT created_at FROM LIKE_SHORTS WHERE user_id = ? AND shorts_id = ?)
-GROUP BY s.shorts_id, u.user_id, i.url, si.url, ls.created_at
+GROUP BY s.shorts_id, u.user_id, ls.created_at
 ORDER BY ls.created_at DESC
 LIMIT ? OFFSET ?;`;
