@@ -26,7 +26,6 @@ import {BaseError} from "../../config/error.js";
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
     const userData = await findById(userId)
-
     // 없는 유저 확인
     if(userData === -1){
         throw new BaseError(status.BAD_REQUEST)
@@ -42,9 +41,8 @@ export const findOne = async(userId) => {
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
-export const findUserShorts = async(body, offset, limit) => {
-    const userId = body.id;
-
+export const findUserShorts = async(userId, offset, limit) => {
+    
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -65,8 +63,7 @@ export const findUserShorts = async(body, offset, limit) => {
 }
 
 // 유저가 찜한 쇼츠 리스트 조회 로직
-export const findUserLikeShorts = async(body, offset, limit) => {
-    const userId = body.id
+export const findUserLikeShorts = async(userId, offset, limit) => {
 
     // 없는 유저 확인
     const userData = await findById(userId)
@@ -87,9 +84,8 @@ export const findUserLikeShorts = async(body, offset, limit) => {
 }
 
 // 유저가 읽은 책 리스트 조회 로직
-export const findUserBooks = async(body, offset, limit) => {
-    const userId = body.id
-
+export const findUserBooks = async(userId, offset, limit) => {
+    
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){

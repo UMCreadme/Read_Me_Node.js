@@ -1,6 +1,6 @@
 import express from "express";
 import asyncHandler from "express-async-handler"
-import {getUserInfo, getOtherUserInfo, getUserShorts, getUserLikeShorts, getUserBooks, followUser } from "./users.controller.js"
+import {getUserInfo, getOtherUserInfo, getUserShorts, getUserLikeShorts, getUserBooks, followUser, getUserShortsForGuest, getUserLikeShortsForGuest, getUserBooksForGuest } from "./users.controller.js"
 
 export const userRouter = express.Router({mergeParams:true});
 
@@ -24,6 +24,6 @@ userRouter.post("/:userId/follow", asyncHandler(followUser));
 userRouter.get('/:userId', asyncHandler(getOtherUserInfo));
 
 // 다른 유저의 피드 조회 (로그인 필요 X)
-userRouter.get('/:userId/shorts', asyncHandler(getUserShorts));
-userRouter.get('/:userId/likes', asyncHandler(getUserLikeShorts));
-userRouter.get('/:userId/books', asyncHandler(getUserBooks));
+userRouter.get('/:userId/shorts', asyncHandler(getUserShortsForGuest));
+userRouter.get('/:userId/likes', asyncHandler(getUserLikeShortsForGuest));
+userRouter.get('/:userId/books', asyncHandler(getUserBooksForGuest));
