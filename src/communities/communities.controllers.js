@@ -9,10 +9,10 @@ export const getCommunitiesController = async (req, res, next) => {
 
     try {
         // 서비스에서 커뮤니티 데이터 및 총 요소 수를 가져옴
-        const { groupList, totalElements, hasNext } = await getCommunitiesService(page, size);
+        const { communityList, totalElements, hasNext } = await getCommunitiesService(page, size);
         
         // 실제 반환된 데이터 개수
-        const actualSize = groupList.length;
+        const actualSize = communityList.length;
 
         // 총 페이지 수 계산
         const totalPages = Math.ceil(totalElements / size);
@@ -25,7 +25,7 @@ export const getCommunitiesController = async (req, res, next) => {
             code: status.SUCCESS.code,
             message: "전체 모임 리스트 불러오기 성공",
             pageInfo: pageInfoData,
-            result: groupList
+            result: communityList
         });
     } catch (error) {
         next(error);
