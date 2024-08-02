@@ -1,29 +1,19 @@
-import { getCommunities } from './communities.dao.js';
-import { getCommunitiesDto } from './communities.dto.js';
-import { createCommunity, addAdminToCommunity } from './communities.dao.js';
-import { createCommunityDto } from './communities.dto.js';
+import { joinCommunity } from './communities.dao.js';
 
-// 커뮤니티 생성
-export const createCommunityService = async (userId, bookId, address, tag, capacity) => {
-    // 커뮤니티 생성
-    const communityId = await createCommunity(userId, bookId, address, tag, capacity);
+export const joinCommunityService = async (joinCommunityDTO) => {
+    const { community_id, user_id } = joinCommunityDTO;
 
-    // 방장을 커뮤니티에 추가
-    await addAdminToCommunity(communityId, userId);
+    try {
+        const result = await joinCommunity(community_id, user_id);
+        const joinedAt = new Date().toISOString(); // 참여 일자를 ISO 형식으로 생성
 
-    return createCommunityDto({
-        communityId,
-        userId,
-        bookId,
-        address,
-        tag,
-        capacity
-    });
-
-
-// 전체 모임 리스트 조회
-export const getCommunitiesService = async (page, size) => {
-    const communities = await getCommunities(page, size);
-    return getCommunitiesDto(communities, page, size);
-
+        return {
+            communityId: parseInt(community_id, 10),
+            userId: parseInt(user_id, 10),
+            joinedAt
+        };
+    } catch (error) {
+        // Error 메시지를 명확하게 전달
+        throw new Error(`Service error: ${error.message}`);
+    }
 };

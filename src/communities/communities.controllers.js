@@ -1,53 +1,59 @@
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
+import { joinCommunityService } from './communities.service.js';
+import { JoinCommunityDTO } from './communities.dto.js';
 
-import { createCommunityService } from './communities.service.js';
-
-export const createCommunityController = async (req, res, next) => {
-    const { userId, bookId, address, tag, capacity } = req.body;
-
-    // 누락된 파라미터 확인
-    const missingParams = [];
-    if (!userId) missingParams.push('userId');
-    if (!bookId) missingParams.push('bookId');
-    if (!address) missingParams.push('address');
-    if (!capacity) missingParams.push('capacity');
-
-    // 누락된 정보가 있을 경우
-    if (missingParams.length > 0) {
-        return res.status(status.BAD_REQUEST.status).send(response(
-            status.BAD_REQUEST,
-            "",
-            `필요한 정보가 누락되었습니다: ${missingParams.join(', ')}`
-        ));
-    }
-
+// 커뮤니티 가입 컨트롤러
+export const joinCommunityController = async (req, res, next) => {
     try {
-        // 커뮤니티 생성 및 DTO 반환
-        const communityData = await createCommunityService(userId, bookId, address, tag, capacity);
+        const { community_id } = req.body; // community_id는 요청 본문에서 받음
+        const user_id = req.user.id; // 미들웨어에서 설정된 사용자 ID 사용
 
-        // 성공 응답 전송
-        res.status(status.SUCCESS.status).send(response(
-            status.SUCCESS,
-            communityData,
-            "커뮤니티 개설 성공"
+        if (!community_id) {
+            return res.status(status.BAD_REQUEST.status).send(response(
+                status.BAD_REQUEST,
+                null,
+                `필요한 정보가 누락되었습니다: ${status.BAD_REQUEST.message}`
+            ));
+        }
+
+        const joinCommunityDTO = new JoinCommunityDTO(community_id, user_id);
+        const result = await joinCommunityService(joinCommunityDTO);
+
+        // 성공 응답
+        res.status(status.JOINED.status).send(response(
+            status.JOINED,
+            {
+                communityId: result.communityId,
+                userId: result.userId,
+                joinedAt: result.joinedAt // 참여 일자
+            }
         ));
     } catch (error) {
+        console.error('Controller error:', error.message);
 
-import { getCommunitiesService } from './communities.service.js';
+        let errorMessage = status.INTERNAL_SERVER_ERROR.message; // 기본 에러 메시지
+        let statusCode = status.INTERNAL_SERVER_ERROR.status; // 기본 상태 코드
+        let errorCode = status.INTERNAL_SERVER_ERROR.code; // 기본 에러 코드
 
-export const getCommunitiesController = async (req, res, next) => {
-    const { page = 1, size = 10 } = req.query;  // req.body 대신 req.query 사용
+        if (error.message.includes('User already in the community')) {
+            errorMessage = `이미 이 커뮤니티에 참여 중입니다. (${status.BAD_REQUEST.message})`;
+            statusCode = status.BAD_REQUEST.status;
+            errorCode = status.BAD_REQUEST.code;
+        } else if (error.message.includes('Community has reached its capacity')) {
+            errorMessage = `참여 인원 초과로 참여하실 수 없습니다. (${status.BAD_REQUEST.message})`;
+            statusCode = status.BAD_REQUEST.status;
+            errorCode = status.BAD_REQUEST.code;
+        }
 
-    try {
-        const communitiesData = await getCommunitiesService(parseInt(page), parseInt(size));
+        // 에러 응답
+        res.status(statusCode).send(response(
+            {
+                isSuccess: false,
+                code: errorCode,
+                message: errorMessage
+            }
 
-        res.status(status.SUCCESS.status).send(response(
-            status.SUCCESS,
-            communitiesData,
-            "전체 모임 리스트 불러오기 성공"
         ));
-    } catch (error) {
-        next(error);
     }
 };

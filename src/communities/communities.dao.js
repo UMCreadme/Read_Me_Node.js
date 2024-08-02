@@ -1,28 +1,42 @@
-import { pool } from '../../config/db.config.js';
+// communityUsers.dao.js
+import { pool } from "../../config/db.config.js";
+import { GET_COMMUNITY_CURRENT_COUNT, GET_COMMUNITY_CAPACITY, IS_USER_ALREADY_IN_COMMUNITY, JOIN_COMMUNITY } from './communities.sql.js';
 
-
-// 커뮤니티 생성
-export const createCommunity = async (userId, bookId, address, tag, capacity) => {
-    const [result] = await pool.query(
-        "INSERT INTO COMMUNITY (user_id, book_id, address, tag, capacity) VALUES (?, ?, ?, ?, ?)",
-        [userId, bookId, address, tag, capacity]
-    );
-    return result.insertId;
+// 커뮤니티의 현재 참여자 수를 조회하는 함수
+const getCommunityCurrentCount = async (community_id) => {
+    const [result] = await pool.query(GET_COMMUNITY_CURRENT_COUNT, [community_id]);
+    return result[0].count;
 };
 
-// 방장을 커뮤니티에 추가하는 함수
-export const addAdminToCommunity = async (communityId, userId) => {
-    const query = 'INSERT INTO COMMUNITY_USERS (community_id, user_id) VALUES (?, ?)';
-    const values = [communityId, userId];
-    const [result] = await pool.query(query, values);
-    return result;
-import { GET_COMMUNITIES, COUNT_COMMUNITIES } from './communities.sql.js';
+// 커뮤니티의 최대 인원수를 조회하는 함수
+const getCommunityCapacity = async (community_id) => {
+    const [result] = await pool.query(GET_COMMUNITY_CAPACITY, [community_id]);
+    return result[0].capacity;
+};
 
-// 모임 리스트 조회
-export const getCommunities = async (page, size) => {
-    const offset = (page - 1) * size;
-    const limit = parseInt(size) + 1;  // 요청한 size보다 하나 더 조회
-    const [rows] = await pool.query(GET_COMMUNITIES, [limit, parseInt(offset)]);
-    const [countResult] = await pool.query(COUNT_COMMUNITIES);
-    return { communities: rows, totalElements: countResult[0].count };
+// 사용자가 이미 커뮤니티에 참여하고 있는지 확인하는 함수
+const isUserAlreadyInCommunity = async (community_id, user_id) => {
+    const [result] = await pool.query(IS_USER_ALREADY_IN_COMMUNITY, [community_id, user_id]);
+    return result[0].count > 0;
+};
+
+export const joinCommunity = async (community_id, user_id) => {
+    try {
+        if (await isUserAlreadyInCommunity(community_id, user_id)) {
+            throw new Error('User already in the community');
+        }
+
+        const currentCount = await getCommunityCurrentCount(community_id);
+        const capacity = await getCommunityCapacity(community_id);
+
+        if (currentCount >= capacity) {
+            throw new Error('Community has reached its capacity');
+        }
+
+        const [result] = await pool.query(JOIN_COMMUNITY, [community_id, user_id]);
+        return result;
+
+    } catch (error) {
+        throw new Error(`DAO error: ${error.message}`);
+    }
 };

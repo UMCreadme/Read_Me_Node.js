@@ -1,33 +1,14 @@
+export class JoinCommunityDTO {
+    constructor(community_id, user_id) {
+        this.community_id = community_id;
+        this.user_id = user_id;
+    }
 
-import { pageInfo } from '../../config/pageInfo.js';  // 적절한 경로로 수정
-
-export const createCommunityDto = (data) => ({
-    communityId: data.communityId,  // DTO에 필요한 ID만 포함
-    userId: data.userId,
-    bookId: data.bookId,
-    address: data.address.split('|'),
-    tag: data.tag ? data.tag.split('|') : [],
-    capacity: data.capacity
-});
-
-export const getCommunitiesDto = (data, page, size) => {
-    const hasNext = data.communities.length > size;
-    const communities = hasNext ? data.communities.slice(0, size) : data.communities; // size보다 하나 더 조회된 경우 자르기
-
-    return {
-        pageInfo: pageInfo(page, communities.length, hasNext),
-        result: {
-            groupList: communities.map(community => ({
-                groupId: community.community_id,
-                userId: community.user_id,
-                bookId: community.book_id,
-                address: community.address.split('|'),
-                tags: community.tag ? community.tag.split('|') : [],
-                capacity: community.capacity,
-                createdAt: community.created_at,
-                updatedAt: community.updated_at
-            }))
+    static fromQuery(query) {
+        const { community_id, user_id } = query;
+        if (!community_id || !user_id) {
+            throw new Error(`필요한 정보가 누락되었습니다: ${!community_id ? 'community_id' : ''} ${!user_id ? 'user_id' : ''}`);
         }
-    };
-};
-
+        return new JoinCommunityDTO(community_id, user_id);
+    }
+}

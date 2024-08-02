@@ -4,6 +4,7 @@ export const status = {
     // success
     SUCCESS: {status: StatusCodes.OK, "isSuccess": true, "code": 2000, "message": "SUCCESS!"},
     CREATED: {status: StatusCodes.CREATED, "isSuccess": true, "code": 2010, "message": "CREATED!"},
+    JOINED: {status: StatusCodes.CREATED, "isSuccess": true, "code": 2020, "message": "JOINED!"},
 
     // error
 		// common err
