@@ -2,7 +2,6 @@ import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { RecentSearchesDTO } from "./research.dto.js";
-import { searchUser } from "../users/users.controller.js";
 import { deleteSearch, SearchUser, getQueriesbyId } from "./research.sql.js";
 
 
@@ -18,6 +17,7 @@ export const deleteRecentSearch = async (research_id, currentUserId) => {
 
     // 유저 아이디가 일치할 경우, 검색어 삭제
     await conn.query(deleteSearch, [research_id]);
+}
 
 
 
@@ -38,5 +38,5 @@ export const getRecentResearch = async (user_id) => {
             throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
-}}
+}
 
