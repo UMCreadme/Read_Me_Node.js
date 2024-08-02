@@ -6,4 +6,4 @@ export const researchRouter = express.Router({mergeParams:true});
 
 
 // 최근 검색어 삭제
-researchRouter.delete('/delete', asyncHandler(deleteRecentSearchController));
+researchRouter.delete('/:recent_research_id/delete', asyncHandler(deleteRecentSearchController));

@@ -5,9 +5,9 @@ import { deleteSearch } from "./research.sql.js";
 
 
 // 검색어 삭제
-export const deleteRecentSearch = async (user_id, query) => {
+export const deleteRecentSearch = async (research_id) => {
     const conn = await pool.getConnection();
-    await conn.query(deleteSearch, [user_id, query]);
+    await conn.query(deleteSearch, [research_id]);
 
     conn.release();
 }

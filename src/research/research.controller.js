@@ -5,12 +5,12 @@ import { deleteSearchService } from "./research.service.js";
 
 export const deleteRecentSearchController = async (req, res) => {
     const { user_id } = req.body;  //수정
-    const { query } = req.body;
+    const { recent_research_id } = req.params;
 
-    if (!user_id || !query ) {
+    if ( !recent_research_id ) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    await deleteSearchService(user_id, query);
+    await deleteSearchService(recent_research_id);
     res.send(response(status.SUCCESS));
 }
