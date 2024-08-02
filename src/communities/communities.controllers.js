@@ -1,7 +1,7 @@
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
-import { searchCommunityService, getCommunitiesService } from './communities.service.js';
-import { pageInfo } from '../../config/pageInfo.js'; // 경로는 실제 위치에 맞게 조정하세요
+import { searchCommunityService } from './communities.service.js';
+import { pageInfo } from '../../config/pageInfo.js';
 
 export const searchCommunityController = async (req, res, next) => {
     const { keyword, page = 1, size = 10 } = req.query;
@@ -10,65 +10,50 @@ export const searchCommunityController = async (req, res, next) => {
     const pageNumber = parseInt(page, 10);
     const pageSize = parseInt(size, 10);
 
-    if (isNaN(pageNumber) || pageNumber < 1) {
-        return res.status(status.BAD_REQUEST.status).send(response(
-            status.BAD_REQUEST,
-            "",
-            "유효한 페이지 번호를 입력해 주세요."
-        ));
-    }
-
     if (isNaN(pageSize) || pageSize < 1) {
-        return res.status(status.BAD_REQUEST.status).send(response(
-            status.BAD_REQUEST,
-            "",
-            "유효한 페이지 크기를 입력해 주세요."
-        ));
+        return res.status(status.BAD_REQUEST.status).send({
+            isSuccess: false,
+            code: status.BAD_REQUEST.code,
+            message: "유효한 페이지 크기를 입력해 주세요.",
+            pageInfo: null,
+            result: null
+        });
     }
 
-    if (!keyword) {
-        return res.status(status.BAD_REQUEST.status).send(response(
-            status.BAD_REQUEST,
-            "",
-            "검색어가 필요합니다."
-        ));
+    if (!keyword || keyword.trim() === "") {
+        return res.status(status.BAD_REQUEST.status).send({
+            isSuccess: false,
+            code: status.BAD_REQUEST.code,
+            message: "검색어가 필요합니다.",
+
+        });
     }
 
     try {
-        const communities = await searchCommunityService(keyword);
-        const totalElements = communities.length;
-        const totalPages = totalElements > 0 ? Math.ceil(totalElements / pageSize) : 0;
-        const offset = (pageNumber - 1) * pageSize;
-        const paginatedCommunities = communities.slice(offset, offset + pageSize);
-        const hasNext = pageNumber < totalPages;
-        const adjustedSize = paginatedCommunities.length; // 실제로 출력된 결과 수
+        // 검색 서비스를 호출하여 전체 결과 및 페이지네이션 처리를 담당
+        const { totalElements, communities } = await searchCommunityService(keyword, pageNumber, pageSize);
 
+        // 페이지 정보 계산
+        const totalPages = Math.ceil(totalElements / pageSize);
+        const hasNext = pageNumber < totalPages;
+        const adjustedSize = communities.length;
+
+        // 페이지 정보와 결과를 포함하는 응답 객체 생성
+        const pageInfoData = pageInfo(pageNumber, adjustedSize, hasNext);
         const result = {
-            pageInfo: pageInfo(pageNumber, adjustedSize, hasNext),
-            categoryList: paginatedCommunities
+            communityList: communities
         };
 
-        res.status(status.SUCCESS.status).send(response(
-            status.SUCCESS,
-            result,
-            totalElements > 0 ? "검색한 모임 리스트 불러오기 성공" : "검색 결과가 없습니다."
-        ));
-    } catch (error) {
-        next(error);
-    }
-};
+        const message = totalElements > 0 ? "검색한 모임 리스트 불러오기 성공" : "검색 결과가 없습니다.";
 
-export const getCommunitiesController = async (req, res, next) => {
-    const { page = 1, size = 10 } = req.query;  // req.body 대신 req.query 사용
-
-    try {
-        const communitiesData = await getCommunitiesService(parseInt(page), parseInt(size));
-
-        res.status(status.SUCCESS.status).send(response(
-            status.SUCCESS,
-            communitiesData,
-            "전체 모임 리스트 불러오기 성공"
-        ));
+        // 응답 전송
+        res.status(status.SUCCESS.status).send({
+            isSuccess: true,
+            code: status.SUCCESS.code,
+            message: message,
+            pageInfo: pageInfoData,
+            result: result
+        });
     } catch (error) {
         next(error);
     }
