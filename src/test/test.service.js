@@ -1,8 +1,11 @@
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
+import { daoErrorTest } from "./test.dao.js";
 
-export const getErrorTest = async (body) => {
-    if (true) throw new BaseError(status.BAD_REQUEST);
+export const getErrorTest = async (condition) => {
+    if (condition === "service") {
+        throw new BaseError(status.CATEGORY_NOT_FOUND);
+    }
 
-    return "ERROR TEST";
+    return await daoErrorTest(condition);
 }
