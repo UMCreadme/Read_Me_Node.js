@@ -28,8 +28,8 @@ export const createCommunityController = async (req, res, next) => {
         const communityData = await createCommunityService(userId, bookId, address, tag, capacity);
 
         // 성공 응답 전송
-        res.status(status.SUCCESS.status).send(response(
-            status.SUCCESS,
+        res.status(status.CREATED.status).send(response(
+            status.CREATED,
             { community: communityData }
         ));
     } catch (error) {
