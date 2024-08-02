@@ -4,7 +4,6 @@ import { BaseError } from "../../config/error.js";
 import { deleteSearchService } from "./research.service.js";
 
 export const deleteRecentSearchController = async (req, res) => {
-    const { user_id } = req.body;  //수정
     const { recent_research_id } = req.params;
 
     if ( !recent_research_id ) {
