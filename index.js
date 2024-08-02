@@ -11,6 +11,9 @@ import { shortsRouter } from './src/shorts/shorts.route.js';
 import { homeRouter } from './src/home/home.route.js';
 import { bookRouter } from './src/book/book.route.js';
 import { communitiesRouter } from './src/communities/communities.route.js';
+import { researchRouter } from './src/research/research.route.js';
+import { healthRouter } from './src/health/health.route.js';
+
 
 dotenv.config();
 
@@ -30,6 +33,9 @@ app.use('/shorts', shortsRouter);
 app.use('/home', homeRouter);
 app.use('/books', bookRouter);
 app.use('/communities', communitiesRouter);
+app.use('/recent-searches', researchRouter);
+app.use('/health', healthRouter)
+
 
 
 // index.js
