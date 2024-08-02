@@ -64,6 +64,7 @@ jobs:
           cp package.json dist/package.json
           cp package-lock.json dist/package-lock.json
           cp Procfile dist/Procfile
+          cp .env dist/.env
           cd dist
           zip -r deploy.zip .
       
