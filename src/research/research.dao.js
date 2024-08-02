@@ -21,3 +21,11 @@ export const getRecentResearch = async (user_id) => {
         }
     }
 };
+
+// 검색어 저장 공통 함수 (책, 유저, 쇼츠)
+export const addRecentSearch = async (keyword, user_id, search_type) => {
+    const conn = await pool.getConnection();
+    await conn.query(addSearch, [keyword, user_id, search_type]);
+    
+    conn.release();
+}
