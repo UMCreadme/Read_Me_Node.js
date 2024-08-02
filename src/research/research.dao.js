@@ -18,7 +18,7 @@ export const getRecentResearch = async (user_id) => {
         if (err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
