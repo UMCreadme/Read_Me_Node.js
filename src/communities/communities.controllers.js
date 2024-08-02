@@ -1,6 +1,8 @@
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
 import { createCommunityService } from './communities.service.js';
+import { getCommunitiesService } from './communities.service.js';
+
 
 export const createCommunityController = async (req, res, next) => {
     const { userId, bookId, address, tag, capacity } = req.body;
@@ -31,9 +33,9 @@ export const createCommunityController = async (req, res, next) => {
             { community: communityData }
         ));
     } catch (error) {
-      // 에러를 에러 처리 미들웨어로 전달
+        next(error);
+    }}
 
-import { getCommunitiesService } from './communities.service.js';
 
 export const getCommunitiesController = async (req, res, next) => {
     const { page = 1, size = 10 } = req.query;  // req.body 대신 req.query 사용

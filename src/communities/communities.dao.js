@@ -1,4 +1,5 @@
 import { pool } from '../../config/db.config.js';
+import { GET_COMMUNITIES, COUNT_COMMUNITIES } from './communities.sql.js';
 
 // 커뮤니티 생성
 export const createCommunity = async (userId, bookId, address, tag, capacity) => {
@@ -15,8 +16,7 @@ export const addAdminToCommunity = async (communityId, userId) => {
     const values = [communityId, userId, 'admin'];
     const [result] = await pool.query(query, values);
     return result;
-
-import { GET_COMMUNITIES, COUNT_COMMUNITIES } from './communities.sql.js';
+}
 
 // 모임 리스트 조회
 export const getCommunities = async (page, size) => {
