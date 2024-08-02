@@ -14,11 +14,11 @@ export const createCommunityController = async (req, res, next) => {
 
     // 누락된 정보가 있을 경우
     if (missingParams.length > 0) {
-        return res.status(status.BAD_REQUEST.status).send(response(
-            status.BAD_REQUEST,
-            "",
-            `필요한 정보가 누락되었습니다: ${missingParams.join(', ')}`
-        ));
+        return res.status(400).send({
+            isSuccess: false,
+            code: "COMMON001",
+            message: `필요한 정보가 누락되었습니다: ${missingParams.join(', ')}`
+        });
     }
 
     try {
@@ -28,8 +28,7 @@ export const createCommunityController = async (req, res, next) => {
         // 성공 응답 전송
         res.status(status.SUCCESS.status).send(response(
             status.SUCCESS,
-            { community: communityData },
-            "" // pageInfo를 빈 문자열로 설정
+            { community: communityData }
         ));
     } catch (error) {
         // 에러를 에러 처리 미들웨어로 전달
