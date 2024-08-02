@@ -9,13 +9,13 @@ export const getShortsDetailListDto = (data) => {
             "userId": short.user_id,
             "userAccount": short.account,
             "profileImg": short.profile_img,
-            "isFollow": short.isFollow === undefined ? false : Boolean(short.isFollow),
+            "isFollow": short.isFollow ? Boolean(short.isFollow) : false,
             "shortsImg": short.shorts_img,
             "phrase": short.phrase,
             "title": short.title,
             "content": short.content,
             "tags": short.tag ? short.tag.split("|") : [],
-            "isLike": short.isLike === undefined ? false : Boolean(short.isLike),
+            "isLike": short.isLike ? Boolean(short.isLike) : false,
             "likeCnt": short.like_count,
             "commentCnt": short.comment_count,
             "bookId": short.book_id
@@ -45,11 +45,7 @@ export const getSearchShortsListDto = (data) => {
 };
 
 export const shortsInfoDto = (data, imgUrl) => {
-    if (data === undefined || imgUrl === undefined || data.phrase === undefined || data.shortsTitle === undefined || data.shortsTitle === undefined || data.content === undefined) {
-        throw new BaseError(status.PARAMETER_IS_WRONG);
-    }
-
-    if(imgUrl === null || imgUrl === "" || data.phrase === null || data.phrase === "" || data.shortsTitle === null || data.shortsTitle === "") {
+    if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.shortsTitle || !data.content) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
