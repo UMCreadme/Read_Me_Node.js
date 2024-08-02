@@ -5,6 +5,8 @@ import imgUploader from "../../config/s3.manager.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
 import { bookInfoDto } from "../book/book.dto.js";
+import { addCommentService } from "./shorts.service.js";
+import { likeShortsService } from "./shorts.service.js";
 
 export const getShortsDetail = async (req, res, next) => {
     const { category, keyword, book, user, like, page=1, size=10 } = req.query;
@@ -36,24 +38,52 @@ export const searchShorts = async (req, res, next) => {
 };
 
 export const createShorts = async (req, res, next) => {
-    imgUploader.single('image')(req, res, async (err) => {
-        if (err) {
-            return next(new BaseError(status.BAD_REQUEST));
-        }
+    const book = bookInfoDto(req.body);
 
-        const book = bookInfoDto(req.body);
+    if(req.file === undefined) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
+    }
+    const shorts = shortsInfoDto(req.body, req.file.location);
 
-        if(req.file === undefined || req.file.location === undefined) {
-            throw new BaseError(status.BAD_REQUEST);
-        }
-        const shorts = shortsInfoDto(req.body, req.file.location);
+    const shortsId = await service.createShorts(book, shorts, req.body.category);
 
-        const shortsId = await service.createShorts(book, shorts, req.body.category);
+    if(shortsId === undefined) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
+    }
 
-        if(shortsId === undefined) {
-            return next(new BaseError(status.INTERNAL_SERVER_ERROR));
-        }
+    res.send(response(status.CREATED));
+}
 
-        res.send(response(status.CREATED));
-    });
+export const addComment = async (req, res, next) => {
+    const shorts_id = req.params.shortsId;
+    const { content } = req.body;
+    const { user_id } = req.user_id;
+
+    const MAX_COMMENT_LENGTH = 200; 
+    
+    if (!shorts_id || !user_id || !content) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    if (content.length > MAX_COMMENT_LENGTH) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    await addCommentService(shorts_id, user_id, content);
+    res.send(response(status.CREATED));
+}
+
+
+export const likeShorts = async (req, res, next) => {
+    const shorts_id = req.params.shortsId;
+    const { user_id } = req.user_id;
+
+    if (!shorts_id || !user_id) {
+        return next(new BaseError(status.BAD_REQUEST));
+    }
+
+    const { likeCnt, action } = await likeShortsService(shorts_id, user_id);
+    const responseStatus = action === 'added' ? status.CREATED : status.SUCCESS;
+    res.send(response(responseStatus, likeCnt));
+
 }
