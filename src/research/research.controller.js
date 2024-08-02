@@ -10,4 +10,3 @@ export const getRecentSearches = async (req, res) => {
     const result = await RecentResearchService(user_id);
     res.send(response(status.SUCCESS, result));
 }
-

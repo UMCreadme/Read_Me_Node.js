@@ -1,6 +1,7 @@
 import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
+import { RecentSearchesDTO } from "./research.dto.js";
 import { getQueriesbyId } from "./research.sql.js";
 
 export const getRecentResearch = async (user_id) => {
@@ -9,7 +10,7 @@ export const getRecentResearch = async (user_id) => {
         const [queries] = await conn.query(getQueriesbyId, [user_id]);
 
         conn.release();
-        return queries;
+        return queries.map(row => new RecentSearchesDTO(row));
 
     
     } catch (err) {
