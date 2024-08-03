@@ -16,12 +16,17 @@ import {
     userBookResponseDTO,
     userFollowResponseDTO,
     userInfoResponseDTO,
+    otherUserInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO
 } from "./users.dto.js";
+
+import { findFollowStatus } from "../users/users.sql.js";
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
+import { pool } from "../../config/db.config.js";
+
 
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
@@ -38,6 +43,25 @@ export const findOne = async(userId) => {
     const followerNum = await findFollowerNumByUserId(userId);
 
     return userInfoResponseDTO( userData, isRecentPost, followerNum, followingNum);
+}
+
+// 다른 유저 정보 조회 로직
+export const findOneOther = async(userId) => {
+    const userData = await findById(userId)
+    // 없는 유저 확인
+    if(userData === -1){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+
+    // const profileImg = await findImageById(userData.image_id)
+
+    const isRecentPost = await hasRecentPostForUser(userId);
+    const [followStatus] = await pool.query(findFollowStatus, [1, userId]) // 현재 접속한 사람의 id는 jwt 토큰으로 알 수 있다 : 추후 수정
+    const isFollowed = followStatus.length > 0;
+    const followingNum = await findFollowingNumByUserId(userId);
+    const followerNum = await findFollowerNumByUserId(userId);
+
+    return otherUserInfoResponseDTO(userData, isRecentPost, isFollowed, followerNum, followingNum);
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직

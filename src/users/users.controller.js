@@ -2,6 +2,7 @@ import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
 import {
     findOne,
+    findOneOther,
     findUserShorts,
     findUserLikeShorts,
     findUserBooks,
@@ -12,7 +13,7 @@ import { pageInfo } from "../../config/pageInfo.js";
 
 // 다른 유저 정보 조회
 export const getOtherUserInfo = async (req, res, next) => {
-    res.send(response(status.SUCCESS, await findOne(parseInt(req.params.userId))));
+    res.send(response(status.SUCCESS, await findOneOther(parseInt(req.params.userId))));
 }
 
 // 유저 정보 조회
