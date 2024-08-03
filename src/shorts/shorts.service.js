@@ -1,7 +1,7 @@
 import { BaseError } from "../../config/error.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
-import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategoryIdByName } from "../book/book.dao.js";
+import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
@@ -152,14 +152,14 @@ export const getShortsDetailUserLike = async (shortsId, userId, page, size) => {
 };
 
 // 쇼츠 생성
-export const createShorts = async (book, shorts, category) => {
+export const createShorts = async (book, shorts, cid) => {
     // ISBN 값으로 book_id 조회
     let bookId = await getBookIdByISBN(book.ISBN);
     
     // book_id 값이 존재하지 않을 경우 책 정보 생성
-    if(bookId === undefined) {
-        const categoryId = await getCategoryIdByName(category);
-        if(categoryId === undefined) {
+    if(!bookId) {
+        const categoryId = await getCategoryIdByAladinCid(cid);
+        if(!categoryId) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
         }
 
@@ -178,7 +178,7 @@ export const createShorts = async (book, shorts, category) => {
         throw new BaseError(status.SHORTS_PHRASE_TOO_LONG);
     }
     if(shorts.tag.length > 10) {
-        throw new BaseError(status.SHORTS_TAG_TOO_LONG);
+        throw new BaseError(status.SHORTS_TAG_COUNT_TOO_LONG);
     }
     for(const tag of shorts.tag) {
         if(tag.length > 10) {
@@ -200,7 +200,7 @@ export const addCommentService = async (shorts_id, user_id, content) => {
     }
     await addCommentDao(shorts_id, user_id, content);
 
-}
+};
 
 export const likeShortsService = async (shorts_id, user_id) => {
     const exists = await checkShortsExistenceDao(shorts_id);
