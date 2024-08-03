@@ -5,7 +5,7 @@ import { getCommunitiesService } from './communities.service.js';
 
 
 export const createCommunityController = async (req, res, next) => {
-    const { userId, bookId, address, tag, capacity } = req.body;
+    const { userId, bookId, address, tag, capacity, createdAT, updatedAt  } = req.body;
 
     // 누락된 파라미터 확인
     const missingParams = [];
@@ -25,7 +25,7 @@ export const createCommunityController = async (req, res, next) => {
 
     try {
         // 커뮤니티 생성 및 DTO 반환
-        const communityData = await createCommunityService(userId, bookId, address, tag, capacity);
+        const communityData = await createCommunityService(userId, bookId, address, tag, capacity, createdAT, updatedAt );
 
         // 성공 응답 전송
         res.status(status.CREATED.status).send(response(

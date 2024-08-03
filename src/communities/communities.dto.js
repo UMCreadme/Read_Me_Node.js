@@ -6,7 +6,9 @@ export const createCommunityDto = (data) => ({
     bookId: data.bookId,
     address: data.address.split('|'),
     tag: data.tag ? data.tag.split('|') : [],
-    capacity: data.capacity
+    capacity: data.capacity,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt
 });
 
 export const getCommunitiesDto = (data, page, size) => {
