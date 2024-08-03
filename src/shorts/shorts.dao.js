@@ -21,7 +21,7 @@ export const getShortsToTitleKeyword = async (keyword) => {
         if (err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -40,7 +40,7 @@ export const getShortsToAuthorKeyword = async (keyword) => {
         if (err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -59,7 +59,7 @@ export const getShortsToTagKeyword = async (keyword) => {
         if (err instanceof BaseError) {
             throw err;
         } else {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
 };
