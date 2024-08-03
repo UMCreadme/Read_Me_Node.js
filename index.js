@@ -13,7 +13,7 @@ import { bookRouter } from './src/book/book.route.js';
 import { communitiesRouter } from './src/communities/communities.route.js';
 import { researchRouter } from './src/research/research.route.js';
 import { healthRouter } from './src/health/health.route.js';
-import { researchRouter } from './src/research/research.route.js';
+
 
 
 dotenv.config();
@@ -35,11 +35,8 @@ app.use('/home', homeRouter);
 app.use('/books', bookRouter);
 app.use('/communities', communitiesRouter);
 app.use('/recent-searches', researchRouter);
-<<<<<<< HEAD
 app.use('/health', healthRouter);
-=======
-app.use('/health', healthRouter)
->>>>>>> 8b673834d4b57af9df79a2a451e9d57eb1d89e3c
+
 
 
 

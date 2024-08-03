@@ -5,6 +5,7 @@ import { addSearchController, deleteRecentSearchController, getRecentSearches } 
 
 export const researchRouter = express.Router({mergeParams:true});
 
+
 // 최근 검색어 저장
 researchRouter.post('/add', addSearchController);
 
