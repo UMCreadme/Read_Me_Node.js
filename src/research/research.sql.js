@@ -1,4 +1,15 @@
 
+export const addSearchQuery = 
+`
+INSERT INTO RECENT_SEARCHES (user_id, query, book_id)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    query = VALUES(?),
+    book_id = VALUES(book_id),
+    updated_at = CURRENT_TIMESTAMP;
+`;
+
+
 export const deleteSearch = `
 DELETE FROM RECENT_SEARCHES
 WHERE recent_searches_id = ?;
@@ -14,3 +25,4 @@ WHERE rs.user_id = ?
 ORDER BY rs.timestamp DESC
 LIMIT 15;
 `;
+
