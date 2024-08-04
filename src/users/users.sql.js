@@ -1,3 +1,13 @@
+export const save = "INSERT INTO USERS(unique_id, email, account, nickname, provider, refresh_token) VALUES (?, ?, ?, ?, ?, ?)"
+
+export const insertUserFavorite = "INSERT INTO USER_FAVORITE(user_id, category_id) VALUES (?,?)"
+
+export const getRefreshToken = "SELECT refresh_token FROM USERS WHERE user_id = ?"
+
+export const updateRefreshToken = "UPDATE USERS SET refresh_token = ? WHERE user_id = ?"
+
+export const getUserByUniqueIdAndEmail = "SELECT * FROM USERS WHERE unique_id = ? AND email = ?";
+
 export const getUserById = "SELECT * FROM USERS WHERE user_id = ?";
 
 export const getUserFollowings = "SELECT * FROM FOLLOW WHERE follower = ?";
