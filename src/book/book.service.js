@@ -1,7 +1,7 @@
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
-import { createBook, deleteBookIsReadToUser, findIsReadById, getBookIdByISBN, getCategoryIdByAladinCid, updateBookIsReadToUser } from "./book.dao.js"
+import { findIsReadById, getBookIdByISBN, findUserRecentBookList,  createBook, deleteBookIsReadToUser, getCategoryIdByAladinCid, updateBookIsReadToUser } from "./book.dao.js"
 import { bookDetailDto } from "./book.dto.js";
 
 export const getBookDetailInfo = async (ISBN, page, size, userId) => {
@@ -22,7 +22,12 @@ export const getBookDetailInfo = async (ISBN, page, size, userId) => {
     if(hasNext) shorts.pop();
 
     return {"data": bookDetailDto(isRead, shorts), "pageInfo": pageInfo(page, shorts.length, hasNext)};
-};
+}
+
+export const findUserRecentBook = async (body, offset, limit) => {
+    const userId = body.id //TODO 로그인 미들웨어 추가하면 변경
+    return await findUserRecentBookList(userId, offset, limit)
+}
 
 export const updateBookIsRead = async (book, cid, userId) => {
     // 책 ID 조회

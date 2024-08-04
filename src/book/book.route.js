@@ -1,8 +1,10 @@
 import express from 'express';
 import asyncHandler from 'express-async-handler';
-import { getBookDetail, updateIsRead } from './book.controller.js';
+import { getBookDetail, getUserRecentBook,  updateIsRead} from './book.controller.js';
 
 export const bookRouter = express.Router({mergeParams:true});
+
+bookRouter.get('/recent', asyncHandler(getUserRecentBook));
 
 bookRouter.get('/:ISBN', asyncHandler(getBookDetail));
 
