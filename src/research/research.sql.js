@@ -2,7 +2,11 @@
 export const addSearchQuery = 
 `
 INSERT INTO RECENT_SEARCHES (user_id, query, book_id)
-VALUES (?, ?, ?);
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    query = VALUES(?),
+    book_id = VALUES(book_id),
+    updated_at = CURRENT_TIMESTAMP:
 `
 
 
