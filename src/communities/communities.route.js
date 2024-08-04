@@ -8,7 +8,7 @@ export const communitiesRouter = express.Router();
 
 // 사용자 ID를 직접 설정하는 미들웨어 (이렇게 설정하면 모든 요청에 동일한 사용자 ID가 적용됩니다)
 const setUserMiddleware = (req, res, next) => {
-    req.user = { id: 4 }; // 임시 사용자 ID: 5으로 설정
+    req.user = { id: 8 }; // 임시 사용자 ID: 5으로 설정
     next();
 };
 
