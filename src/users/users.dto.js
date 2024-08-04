@@ -13,6 +13,22 @@ export const userInfoResponseDTO = async (userData, isRecentPost, followerNum, f
     }
 }
 
+// 다른 유저의 프로필에서 유저 정보 조회시 반환값
+export const otherUserInfoResponseDTO = async (userData, isRecentPost, isFollowed, followerNum, followingNum) => {
+    
+    return {
+        "userId" : userData.user_id,
+        "nickname" : userData.nickname,
+        "account" : userData.account,
+        "comment" : userData.comment,
+        "followerNum" : followerNum,
+        "followingNum" : followingNum,
+        "profileImg" : userData.image_url,
+        "isFollowed" : isFollowed,
+        "isRecentPost": isRecentPost 
+    }
+}
+
 // 유저의 프로필 화면(마이페이지)에 쇼츠 리스트 조회시 반환값
 export const userShortsResponseDTO = (userShorts, shortsBookTitle, shortsBookAuthor) => {
 

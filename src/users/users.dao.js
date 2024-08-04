@@ -38,6 +38,7 @@ export const findById = async (userId) => {
     }
 }
 
+
 // 유저 정보 조회시 필요한 팔로잉수
 export const findFollowingNumByUserId = async (userId) => {
 
@@ -114,7 +115,6 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
             let [userLikeShort] = await pool.query(getShortsById,userLikeShortsId.shorts_id)
             userLikeShorts.push(userLikeShort[0])
         }
-
         conn.release();
         return userLikeShorts;
     }

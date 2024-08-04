@@ -5,7 +5,7 @@ export const isLikeShorts = "SELECT * FROM LIKE_SHORTS WHERE user_id = ? AND sho
 export const countShortsDetailByBookId = "SELECT COUNT(*) AS total FROM SHORTS WHERE book_id = ?;";
 
 // 쇼츠 ID로 조회
-export const getShortsById = "SELECT * FROM shorts WHERE shorts_id = ?";
+export const getShortsById = "SELECT * FROM SHORTS WHERE shorts_id = ?";
 
 // 책 제목에서 키워드로 쇼츠 검색
 export const getShortsByTitleKeyword = 
@@ -96,4 +96,3 @@ export const checkLike = "SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts
 export const addLike = "INSERT INTO LIKE_SHORTS (shorts_id, user_id) VALUES (?, ?)";
 
 export const removeLike = "DELETE FROM LIKE_SHORTS WHERE shorts_id = ? AND user_id = ?";
-
