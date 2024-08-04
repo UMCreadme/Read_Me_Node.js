@@ -6,7 +6,7 @@ import { bookInfoDto } from "./book.dto.js";
 export const getBookDetail = async (req, res, next) => {
     const ISBN = req.params.ISBN;
     const { page=1, size=10 } = req.query;
-    const userId = 1; // TODO: 유저 인가 구현 후 수정
+    const userId = req.user_id;
     
     const book = await getBookDetailInfo(ISBN, parseInt(page), parseInt(size), userId);
 
@@ -15,7 +15,7 @@ export const getBookDetail = async (req, res, next) => {
 
 export const updateIsRead = async (req, res, next) => {
     req.body.ISBN = req.params.ISBN;
-    const userId = 1; // TODO: 추후 인가 미들웨어 구현 이후 수정
+    const userId = req.user_id;
 
     const book = bookInfoDto(req.body);
 
@@ -27,8 +27,9 @@ export const getUserRecentBook = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
+    const userId = req.user_id;
 
-    const result = await findUserRecentBook(req.body, offset, size+1)
+    const result = await findUserRecentBook(userId, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
