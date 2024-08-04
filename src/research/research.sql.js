@@ -6,8 +6,8 @@ VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE
     query = VALUES(?),
     book_id = VALUES(book_id),
-    updated_at = CURRENT_TIMESTAMP:
-`
+    updated_at = CURRENT_TIMESTAMP;
+`;
 
 
 export const deleteSearch = `
