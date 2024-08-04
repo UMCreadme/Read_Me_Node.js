@@ -16,14 +16,10 @@ export const createCommunityController = async (req, res, next) => {
 
     // 누락된 정보가 있을 경우
     if (missingParams.length > 0) {
-        return next(new BaseError(
-            status.PARAMETER_IS_WRONG,
-            `필요한 정보가 누락되었습니다: ${missingParams.join(', ')}`
-        ));
+        return next(new BaseError(status.PARAMETER_IS_WRONG));
     }
 
-    // 커뮤니티 생성 서비스 호출
-    const communityData = await createCommunityService(userId, bookId, address, tag, capacity);
+await createCommunityService(userId, bookId, address, tag, capacity);
 
     // 성공 응답 전송
     res.status(status.CREATED.status).send(response(status.CREATED));

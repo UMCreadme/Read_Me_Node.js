@@ -16,5 +16,7 @@ export const COUNT_COMMUNITIES = "SELECT COUNT(*) as count FROM COMMUNITY;";
 export const COUNT_COMMUNITIES_BY_USER_AND_BOOK = `
     SELECT COUNT(*) AS count 
     FROM COMMUNITY 
-    WHERE user_id = ? AND book_id = ?;
+    WHERE user_id = ? 
+    AND book_id = ? 
+    AND deleted_at IS NULL;
 `;

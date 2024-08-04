@@ -18,7 +18,7 @@ export const status = {
     
     // New status code for community creation limit
     COMMUNITY_LIMIT_EXCEEDED: {status: StatusCodes.FORBIDDEN, "isSuccess": false, "code": "COMMUNITY001", "message": "한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없습니다."},
-
+    INVALID_CAPACITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY1002", "message": "커뮤니티의 수용 인원(capacity)은 최대 10명까지 허용됩니다." },
     // member err
     MEMBER_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다."},
     NICKNAME_NOT_EXIST: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4002", "message": "닉네임은 필수입니다."},
