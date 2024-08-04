@@ -4,13 +4,12 @@ import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 
 // 특정 사용자가 특정 책으로 생성한 모임 수를 조회
-export const countCommunitiesByUserAndBook = async (userId, bookId) => {
-    const conn = await pool.getConnection();
+export const countCommunitiesByUserAndBook = async (conn, userId, bookId) => {
     try {
         const [result] = await conn.query(COUNT_COMMUNITIES_BY_USER_AND_BOOK, [userId, bookId]);
         return result[0].count;
     } finally {
-        conn.release(); // 연결 해제
+        // conn.release()를 여기서 호출하지 않습니다. 연결은 호출자에서 해제합니다.
     }
 };
 
@@ -38,7 +37,7 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
     const conn = await pool.getConnection();
     try {
         // 사용자가 특정 책으로 생성한 모임 수 조회
-        const existingCount = await countCommunitiesByUserAndBook(userId, bookId);
+        const existingCount = await countCommunitiesByUserAndBook(conn, userId, bookId);
 
         // 한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없도록 제한
         if (existingCount >= 5) {
@@ -57,7 +56,11 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
         return communityId;
     } catch (err) {
         await conn.rollback(); // 트랜잭션 롤백
-        throw new BaseError(status.INTERNAL_SERVER_ERROR); // 에러를 상위로 전파
+        // BaseError인 경우 그대로 던지고, 그렇지 않은 경우에만 내부 서버 오류로 처리
+        if (err instanceof BaseError) {
+            throw err;
+        }
+        throw new BaseError(status.INTERNAL_SERVER_ERROR); // 다른 모든 예외는 내부 서버 오류로 처리
     } finally {
         conn.release(); // 연결 해제
     }

@@ -39,11 +39,12 @@ export const searchShorts = async (req, res, next) => {
 
 export const createShorts = async (req, res, next) => {
     const book = bookInfoDto(req.body);
+    const userId = req.user_id;
 
     if(!req.file) {
         throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
-    const shorts = shortsInfoDto(req.body, req.file.location);
+    const shorts = shortsInfoDto(req.body, req.file.location, userId);
 
     const shortsId = await service.createShorts(book, shorts, req.body.cid);
 

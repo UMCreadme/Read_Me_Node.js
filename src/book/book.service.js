@@ -24,8 +24,7 @@ export const getBookDetailInfo = async (ISBN, page, size, userId) => {
     return {"data": bookDetailDto(isRead, shorts), "pageInfo": pageInfo(page, shorts.length, hasNext)};
 }
 
-export const findUserRecentBook = async (body, offset, limit) => {
-    const userId = body.id //TODO 로그인 미들웨어 추가하면 변경
+export const findUserRecentBook = async (userId, offset, limit) => {
     return await findUserRecentBookList(userId, offset, limit)
 }
 

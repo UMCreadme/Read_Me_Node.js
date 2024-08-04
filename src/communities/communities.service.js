@@ -1,6 +1,5 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-import { createCommunityDto } from './communities.dto.js';
 import { createCommunityWithCheck } from './communities.dao.js';
 
 // 커뮤니티 생성 서비스
@@ -14,7 +13,7 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
     if (tag) {
         // 태그 문자열을 '|'로 분리하여 배열로 변환
         const tagsArray = tag.split('|');
-        
+
         // 태그 개수가 10개를 초과하면 오류 발생
         if (tagsArray.length > 10) {
             throw new BaseError(status.SHORTS_TAG_COUNT_TOO_LONG);
@@ -28,24 +27,6 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
         }
     }
 
-    try {
-        // 커뮤니티 생성과 관련된 전체 과정 처리
-        const communityId = await createCommunityWithCheck(userId, bookId, address, tag, capacity);
-
-        return createCommunityDto({
-            communityId,
-            userId,
-            bookId,
-            address,
-            tag,
-            capacity
-        });
-    } catch (err) {
-        console.error(err);
-        if (err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // 커뮤니티 생성과 관련된 전체 과정 처리
+    await createCommunityWithCheck(userId, bookId, address, tag, capacity);
 };
