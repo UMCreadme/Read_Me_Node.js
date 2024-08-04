@@ -1,4 +1,6 @@
-import express from 'express';    
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import { response } from './config/response.js';
 import { BaseError } from './config/error.js';
 import { status } from './config/response.status.js';
@@ -14,17 +16,22 @@ import { communitiesRouter } from './src/communities/communities.route.js';
 import { researchRouter } from './src/research/research.route.js';
 import { healthRouter } from './src/health/health.route.js';
 
-
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: '*', // 필요한 경우 CORS 설정을 조정합니다.
+    }
+});
 
 // server setting - view, static, body-parser etc..
 app.set('port', process.env.PORT || 3000);  // 서버 포트 지정
 app.use(cors());                            // cors 방식 허용
 app.use(express.static('public'));          // 정적 파일 접근
 app.use(express.json());                    // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
-app.use(express.urlencoded({extended: false})); // 단순 객체 문자열 형태로 본문 데이터 해석
+app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 
 // router setting
 app.use('/test', testRouter);
@@ -34,16 +41,32 @@ app.use('/home', homeRouter);
 app.use('/books', bookRouter);
 app.use('/communities', communitiesRouter);
 app.use('/recent-searches', researchRouter);
-app.use('/health', healthRouter)
+app.use('/health', healthRouter);
 
+// Socket.IO 설정
+io.on('connection', (socket) => {
+    console.log(`Socket connected: ${socket.id}`);
 
+    socket.on('joinRoom', (room) => {
+        socket.join(room);
+        console.log(`User ${socket.id} joined room ${room}`);
+    });
 
-// index.js
+    socket.on('message', (message) => {
+        io.to(message.room).emit('message', message);
+        console.log('Message sent:', message);
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`Socket disconnected: ${socket.id}`);
+    });
+});
+
+// 404 handler
 app.use((req, res, next) => {
     const err = new BaseError(status.NOT_FOUND);
     next(err);
 });
-
 
 // error handling
 app.use((err, req, res, next) => {
@@ -61,6 +84,6 @@ app.use((err, req, res, next) => {
     }
 });
 
-app.listen(app.get('port'), () => {
-    console.log(`Example app listening on port ${app.get('port')}`);
-})
+server.listen(app.get('port'), () => {
+    console.log(`Server listening on port ${app.get('port')}`);
+});
