@@ -2,7 +2,24 @@ import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { RecentSearchesDTO } from "./research.dto.js";
-import { getQueriesbyId } from "./research.sql.js";
+import { deleteSearch, SearchUser, getQueriesbyId } from "./research.sql.js";
+
+
+// 검색어 삭제
+export const deleteRecentSearch = async (research_id, currentUserId) => {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.query(SearchUser, [research_id]);
+    const user_id = rows[0].user_id;
+
+    if ( user_id !== currentUserId) {
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    // 유저 아이디가 일치할 경우, 검색어 삭제
+    await conn.query(deleteSearch, [research_id]);
+}
+
+
 
 export const getRecentResearch = async (user_id) => {
     try {
@@ -21,12 +38,5 @@ export const getRecentResearch = async (user_id) => {
             throw new BaseError(status.INTERNAL_SERVER_ERROR);
         }
     }
-};
-
-// 검색어 저장 공통 함수 (책, 유저, 쇼츠)
-export const addRecentSearch = async (keyword, user_id, search_type) => {
-    const conn = await pool.getConnection();
-    await conn.query(addSearch, [keyword, user_id, search_type]);
-    
-    conn.release();
 }
+
