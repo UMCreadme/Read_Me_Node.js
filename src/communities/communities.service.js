@@ -10,7 +10,7 @@ export const joinCommunityService = async (joinCommunityDTO) => {
     // 사용자가 이미 커뮤니티에 참여하고 있는지 확인
     const userInCommunity = await isUserAlreadyInCommunity(community_id, user_id);
     if (userInCommunity) {
-        throw new BaseError(status.ALREADY_IN_COMMUNITY, '이미 이 커뮤니티에 참여 중입니다.');
+        throw new BaseError(status.ALREADY_IN_COMMUNITY);
     }
 
     // 커뮤니티의 현재 참여자 수와 최대 인원수 조회
@@ -18,7 +18,7 @@ export const joinCommunityService = async (joinCommunityDTO) => {
     const capacity = await getCommunityCapacity(community_id);
 
     if (currentCount >= capacity) {
-        throw new BaseError(status.COMMUNITY_FULL, '커뮤니티 참여 인원이 가득 찼습니다.');
+        throw new BaseError(status.COMMUNITY_FULL);
     }
 
     // 커뮤니티 가입 처리
