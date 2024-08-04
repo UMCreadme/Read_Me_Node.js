@@ -21,13 +21,10 @@ import {
     userFollowResponseDTO,
     userInfoResponseDTO,
     otherUserInfoResponseDTO,
-    otherUserInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
     userSignUpResponseDTO
 } from "./users.dto.js";
-
-import { findFollowStatus } from "../users/users.sql.js";
 
 import { findFollowStatus } from "../users/users.sql.js";
 import {findBookById} from "../book/book.dao.js";
