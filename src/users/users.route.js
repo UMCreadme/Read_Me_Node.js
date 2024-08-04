@@ -57,3 +57,6 @@ userRouter.get("/refresh", asyncHandler(refresh))
 userRouter.get('/:userId/shorts', asyncHandler(getUserShortsForGuest));
 userRouter.get('/:userId/likes', asyncHandler(getUserLikeShortsForGuest));
 userRouter.get('/:userId/books', asyncHandler(getUserBooksForGuest));
+userRouter.get('/:userId/shorts', asyncHandler(getUserShortsForGuest));
+userRouter.get('/:userId/likes', asyncHandler(getUserLikeShortsForGuest));
+userRouter.get('/:userId/books', asyncHandler(getUserBooksForGuest));

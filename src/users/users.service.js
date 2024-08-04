@@ -21,10 +21,13 @@ import {
     userFollowResponseDTO,
     userInfoResponseDTO,
     otherUserInfoResponseDTO,
+    otherUserInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
     userSignUpResponseDTO
 } from "./users.dto.js";
+
+import { findFollowStatus } from "../users/users.sql.js";
 
 import { findFollowStatus } from "../users/users.sql.js";
 import {findBookById} from "../book/book.dao.js";
@@ -95,6 +98,8 @@ export const findOneOther = async(myId, userId) => {
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
     
+export const findUserShorts = async(userId, offset, limit) => {
+    
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -116,6 +121,7 @@ export const findUserShorts = async(userId, offset, limit) => {
 
 // 유저가 찜한 쇼츠 리스트 조회 로직
 export const findUserLikeShorts = async(userId, offset, limit) => {
+export const findUserLikeShorts = async(userId, offset, limit) => {
 
     // 없는 유저 확인
     const userData = await findById(userId)
@@ -136,6 +142,8 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 }
 
 // 유저가 읽은 책 리스트 조회 로직
+export const findUserBooks = async(userId, offset, limit) => {
+    
 export const findUserBooks = async(userId, offset, limit) => {
     
     // 없는 유저 확인
