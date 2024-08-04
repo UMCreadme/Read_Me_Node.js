@@ -108,6 +108,6 @@ LEFT JOIN COMMENT c ON s.shorts_id = c.shorts_id
 WHERE f.user_id = ? 
 AND s.created_at >= NOW() - INTERVAL 24 HOUR
 GROUP BY u.user_id, u.image_url, u.nickname, s.shorts_id, s.image_url, s.phrase, s.title, s.content, s.tag, s.created_at
-ORDER BY likeCnt DESC 
+ORDER BY s.created_at DESC
 LIMIT ? OFFSET ?;
 `;
