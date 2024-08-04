@@ -132,6 +132,22 @@ export const hasRecentPostForUser = async (userId) => {
     }
 };
 
+// 다른 유저 정보 조회시 필요한 팔로우 여부
+export const checkIsFollowed = async (myId, userId) => {
+    const conn = await pool.getConnection();
+
+    if (myId === null) {
+        return false;
+    }
+    
+    try {
+        const [followStatus] = await conn.query(findFollowStatus, [myId, userId]);
+
+        return followStatus.length > 0;
+    } finally {
+        conn.release();
+    }
+}
 
 // 유저가 만든 쇼츠 리스트 조회
 export const findUserShortsById = async (userId, offset ,limit) => {

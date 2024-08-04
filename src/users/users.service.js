@@ -4,6 +4,7 @@ import {
     findFollowerNumByUserId,
     findFollowingNumByUserId,
     hasRecentPostForUser,
+    checkIsFollowed,
     findMeFollowWithKeyword,
     findMeWithKeyword,
     findMyFollowWithKeyword,
@@ -29,7 +30,6 @@ import { findFollowStatus } from "../users/users.sql.js";
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
-import { pool } from "../../config/db.config.js";
 import {refresh, sign} from "../jwt/jwt-util.js";
 
 // 회원가입 후 토큰 반환
@@ -77,20 +77,19 @@ export const findOne = async(userId) => {
 }
 
 // 다른 유저 정보 조회 로직
-export const findOneOther = async(userId) => {
+export const findOneOther = async(myId, userId) => {
     const userData = await findById(userId)
     // 없는 유저 확인
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    const isRecentPost = await hasRecentPostForUser(userId);
-    const [followStatus] = await pool.query(findFollowStatus, [1, userId]) // 현재 접속한 사람의 id는 jwt 토큰으로 알 수 있다 : 추후 수정
-    const isFollowed = followStatus.length > 0;
-    const followingNum = await findFollowingNumByUserId(userId);
-    const followerNum = await findFollowerNumByUserId(userId);
+    const isRecentPost = await hasRecentPostForUser(userId); // 프로필 띠 기능
+    const followStatus = await checkIsFollowed(myId, userId); // 팔로우 여부 체크
+    const followingNum = await findFollowingNumByUserId(userId); // 팔로잉 수
+    const followerNum = await findFollowerNumByUserId(userId); // 팔로우 수
 
-    return otherUserInfoResponseDTO(userData, isRecentPost, isFollowed, followerNum, followingNum);
+    return otherUserInfoResponseDTO(userData, isRecentPost, followStatus, followerNum, followingNum);
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직

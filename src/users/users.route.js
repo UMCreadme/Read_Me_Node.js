@@ -7,11 +7,14 @@ import {
     getUserLikeShorts,
     getUserBooks,
     getOtherUserInfo,
+    getUserShortsForGuest,
+    getUserLikeShortsForGuest,
+    getUserBooksForGuest,
     followUser,
     searchUser,
     kakaoSignUp, kakaoLogin
 } from "./users.controller.js"
-import {authJWT} from "../jwt/authJWT.js";
+import {authJWT, authJWTNoUserRequired} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
 
 export const userRouter = express.Router({mergeParams:true});
@@ -33,7 +36,7 @@ userRouter.post("/:userId/follow", asyncHandler(authJWT), asyncHandler(followUse
 
 
 // 다른 유저 정보 조회 (로그인 필요 X)
-userRouter.get('/:userId', asyncHandler(getOtherUserInfo));
+userRouter.get('/:userId', asyncHandler(authJWTNoUserRequired), asyncHandler(getOtherUserInfo));
 
 // 로그인 후 유저 검색 기능
 userRouter.get("/my/search", asyncHandler(authJWT), asyncHandler(searchUser));
