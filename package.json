@@ -9,14 +9,13 @@
     "start:dist": "webpack --config webpack.config.js --mode production && node ./dist/main.cjs",
     "start": "node main.cjs",
     "build": "webpack --config webpack.config.js --mode production"
-
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.620.0",
-    "axios": "^1.7.2",
+    "axios": "^1.7.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

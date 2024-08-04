@@ -20,7 +20,7 @@ export const createCommunity = async (conn, userId, bookId, address, tag, capaci
         const [result] = await conn.query(CREATE_COMMUNITY, [userId, bookId, address, tag, capacity]);
         return result.insertId;
     } catch (err) {
-        throw err; // 에러를 상위로 전파
+        throw new BaseError(status.INTERNAL_SERVER_ERROR); // 에러를 상위로 전파
     }
 };
 
@@ -29,7 +29,7 @@ export const addAdminToCommunity = async (conn, communityId, userId) => {
     try {
         await conn.query(ADD_ADMIN_TO_COMMUNITY, [communityId, userId]);
     } catch (err) {
-        throw err; // 에러를 상위로 전파
+        throw new BaseError(status.INTERNAL_SERVER_ERROR); // 에러를 상위로 전파
     }
 };
 
@@ -42,7 +42,7 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
 
         // 한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없도록 제한
         if (existingCount >= 5) {
-            throw new BaseError(status.COMMUNITY_LIMIT_EXCEEDED, `한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없습니다. 이미 생성된 모임 수: ${existingCount}`);
+            throw new BaseError(status.COMMUNITY_LIMIT_EXCEEDED);
         }
 
         await conn.beginTransaction(); // 트랜잭션 시작
@@ -57,7 +57,7 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
         return communityId;
     } catch (err) {
         await conn.rollback(); // 트랜잭션 롤백
-        throw err; // 에러를 상위로 전파
+        throw new BaseError(status.INTERNAL_SERVER_ERROR); // 에러를 상위로 전파
     } finally {
         conn.release(); // 연결 해제
     }
