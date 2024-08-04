@@ -44,7 +44,7 @@ export const getSearchShortsListDto = (data) => {
     return shortsList;
 };
 
-export const shortsInfoDto = (data, imgUrl) => {
+export const shortsInfoDto = (data, imgUrl, userId) => {
     if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.shortsTitle || !data.content) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
@@ -55,6 +55,6 @@ export const shortsInfoDto = (data, imgUrl) => {
         "title": data.shortsTitle,
         "content": data.content,
         "tag": data.tags,
-        "user_id": 1 // TODO: 미들웨어 추가되면 수정
+        "user_id": userId
     };
 }
