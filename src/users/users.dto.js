@@ -52,3 +52,11 @@ export const userSearchResponseDTO =  (userData) => {
         "nickname" : userData.nickname
     }
 }
+
+// 유저 회원가입 성공시 반환 정보
+export const userSignUpResponseDTO = (accessToken, refreshToken) => {
+    return {
+        "accessToken" : accessToken,
+        "refreshToken" : refreshToken
+    }
+}

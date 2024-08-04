@@ -3,6 +3,7 @@ import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { insertObject } from "../common/common.dao.js";
 import { findBookIdByISBN, findCategoryIdByName, findCategoryNameByBookId, getBookById, isUserReadBookById, getUserRecentBookList } from "./book.sql.js";
+import { deleteUserBook, findBookIdByISBN, findCategoryIdByAladinCid, findCategoryIdByName, findCategoryNameByBookId, getBookById, isUserReadBookById, updateUserBook } from "./book.sql.js";
 
 // bookId로 책 정보 조회
 export const findBookById = async (bookId) => {
@@ -15,7 +16,7 @@ export const findBookById = async (bookId) => {
     return book[0];
 }
 
-// 책 ID로 카테고리 조회
+// 책 ID로 카테고리 조회 TODO: 사용 안하면 지우기
 export const getBookCategory = async (bookId) => {
     try {
         const conn = await pool.getConnection();
@@ -77,6 +78,28 @@ export const getCategoryIdByName = async (category) => {
     }
 }
 
+// 알라딘 카테고리 cid로 category_id 조회
+export const getCategoryIdByAladinCid = async (cid) => {
+    try {
+        const conn = await pool.getConnection();
+        const [result] = await conn.query(findCategoryIdByAladinCid, [cid]);
+        conn.release();
+
+        if(result.length === 0) {
+            return undefined;
+        }
+
+        return result[0].category_id;
+    } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+        }
+    }
+}
+
 // 책 생성
 export const createBook = async (book) => {
     try {
@@ -112,6 +135,42 @@ export const findIsReadById = async (userId, bookId) => {
         }
     }
 }
+
+// 책 읽음 여부 업데이트
+export const updateBookIsReadToUser = async (userId, bookId) => {
+    try {
+        const conn = await pool.getConnection();
+        await conn.query(updateUserBook, [userId, bookId]);
+
+        conn.release();
+        return;
+    } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+        }
+    }
+}
+
+// 책 읽음 여부 삭제
+export const deleteBookIsReadToUser = async (userId, bookId) => {
+    try {
+        const conn = await pool.getConnection();
+        await conn.query(deleteUserBook, [userId, bookId]);
+
+        conn.release();
+        return;
+    } catch (err) {
+        console.log(err);
+        if(err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+        }
+    }
+};
 
 export const findUserRecentBookList = async (userId, offset, limit) => {
     try {

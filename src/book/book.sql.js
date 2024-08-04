@@ -12,8 +12,15 @@ export const findBookIdByISBN = "SELECT book_id FROM BOOK WHERE ISBN = ?;";
 // 카테고리 이름으로 카테고리 ID 조회
 export const findCategoryIdByName = "SELECT category_id FROM CATEGORY WHERE name = ?;";
 
+// 알라딘 카테고리 cid로 category_id 조회
+export const findCategoryIdByAladinCid = "SELECT category_id FROM ALADIN_CATEGORY WHERE cid = ?;";
+
 // 유저가 읽은 책 ID 조회
 export const isUserReadBookById = "SELECT book_id FROM USER_BOOK WHERE user_id = ? AND book_id = ?;";
+
+// 유저가 읽은 책 정보 업데이트
+export const updateUserBook = "INSERT INTO USER_BOOK (user_id, book_id) VALUES (?, ?);";
+export const deleteUserBook = "DELETE FROM USER_BOOK WHERE user_id = ? AND book_id = ?;";
 
 // 유저가 쇼츠 생성시 선택했던 책 최근 리스트 조회
 export const getUserRecentBookList = `
