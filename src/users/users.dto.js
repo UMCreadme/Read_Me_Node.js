@@ -43,6 +43,14 @@ export const userFollowResponseDTO = (userId, followingId) =>{
     }
 }
 
+// 팔로잉 취소 시 반환 값
+export const userUnfollowResponseDTO = (userId, followCancelUserId) =>{
+    return {
+        "userId" : userId,
+        "followCancelUserId" : followCancelUserId
+    }
+}
+
 // 유저 검색시 반환 정보
 export const userSearchResponseDTO =  (userData) => {
     return {

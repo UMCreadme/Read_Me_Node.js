@@ -5,18 +5,21 @@ import {
     findFollowingNumByUserId,
     findMeFollowWithKeyword,
     findMeWithKeyword,
+    checkIsFollowed,
     findMyFollowWithKeyword,
     findUserBooksById,
     findUserLikeShortsById,
     findUserShortsById,
     findUsersWithKeyword,
     followUserAdd,
+    followUserCancel,
     userLogin,
     userSignUp
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
     userFollowResponseDTO,
+    userUnfollowResponseDTO,
     userInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
@@ -155,6 +158,26 @@ export const followNewUser = async(userId, followUserId) =>{
     }
 
     return userFollowResponseDTO(userId, followingId)
+}
+
+// 유저(본인)가 다른 유저 팔로우 취소하는 로직
+export const unfollowUser = async(myId, unfollowUserId) => {
+
+    // 유저 존재 확인
+    const userData = await findById(myId)
+    const unfollowUserData = await findById(unfollowUserId)
+    if((userData === -1) || (unfollowUserData === -1)){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+
+    // 팔로우 취소
+    const unfollowStatus = awit followUserCancel(userId, unfollowUserId);
+
+    if(!followStatus){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+
+    return userUnfollowResponseDTO(myId, unfollowUserId);
 }
 
 // 유저 검색 기능 로직

@@ -22,6 +22,8 @@ export const getUserReadBooksIdById = "SELECT book_id FROM USER_BOOK WHERE user_
 
 export const addFollowUser = "INSERT INTO FOLLOW(follower, user_id) VALUES(?, ?)";
 
+export const cancelFollowUser = "DELETE FROM FOLLOW WHERE user_id = ? AND follower = ?";
+
 export const findFollowStatus = "SELECT * FROM FOLLOW WHERE follower = ? AND user_id = ?";
 
 export const findIfContainsKeywordWithUserId = `SELECT * FROM USERS WHERE user_id = ? AND ( (CASE WHEN ? = 'account' THEN account ELSE nickname END) LIKE CONCAT('%', ?, '%') )`;

@@ -9,6 +9,7 @@ import {
     getUserLikeShortsIdById,
     getUserShortsById,
     addFollowUser,
+    cancelFollowUser,
     findFollowStatus,
     findIfContainsKeywordWithUserId,
     getEachFollowIdList,
@@ -116,6 +117,23 @@ export const findFollowerNumByUserId = async (userId) => {
     }
 }
 
+// 다른 유저 정보 조회시 필요한 팔로우 여부 -- feat/13번이랑 충돌날거라 머지 후 수정 예정
+export const checkIsFollowed = async (myId, userId) => {
+    const conn = await pool.getConnection();
+
+    if (myId === null) {
+        return false;
+    }
+    
+    try {
+        const [followStatus] = await conn.query(findFollowStatus, [myId, userId]);
+
+        return followStatus.length > 0;
+    } finally {
+        conn.release();
+    }
+}
+
 // 유저가 만든 쇼츠 리스트 조회
 export const findUserShortsById = async (userId, offset ,limit) => {
 
@@ -194,6 +212,30 @@ export const followUserAdd = async(userId, followingId) => {
         conn.release();
 
         return true
+    }
+    catch (err){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 유저(본인)가 다른 유저 팔로우 취소
+export const followUserCancel = async(userId, unfollowUserId) => {
+
+    try{
+        const conn = await pool.getConnection();
+
+        // 현재 팔로우 상태 확인
+        const isFollowing = await checkIsFollowed(myId, unfollowUserId);
+        console.log("팔로우 상태 확인",isFollowing);
+        if (!isFollowing) {
+            throw new BaseError(status.BAD_REQUEST, "현재 팔로우 상태가 아닙니다.");
+        }
+
+         // 팔로우 취소 쿼리 실행
+        await conn.query(cancelFollowUser, [userId, unfollowUserId]);
+        conn.release();
+
+         return true; // 팔로우 취소 성공
     }
     catch (err){
         throw new BaseError(status.BAD_REQUEST)
