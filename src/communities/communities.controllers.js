@@ -32,13 +32,10 @@ export const joinCommunityController = async (req, res, next) => {
     const userId = req.user_id; 
 
     if (!communityId) {
-        return next(new BaseError(status.PARAMETER_IS_WRONG)); 
+        throw new BaseError(status.PARAMETER_IS_WRONG); 
     }
 
-    try {
-        await joinCommunityService(communityId, userId);
-        return res.send(response(status.JOINED));
-    } catch (error) {
-        next(error); 
-    }
+    await joinCommunityService(parseInt(communityId), userId);
+    return res.send(response(status.JOINED));
+
 };
