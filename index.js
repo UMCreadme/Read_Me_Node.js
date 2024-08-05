@@ -9,7 +9,6 @@ import { testRouter } from './src/test/test.route.js';
 import { userRouter } from './src/users/users.route.js';
 import { shortsRouter } from './src/shorts/shorts.route.js';
 import { homeRouter } from './src/home/home.route.js';
-import { bookRouter } from './src/book/book.route.js';
 import { communitiesRouter } from './src/communities/communities.route.js';
 import { researchRouter } from './src/research/research.route.js';
 import { healthRouter } from './src/health/health.route.js';
@@ -32,13 +31,9 @@ app.use('/test', testRouter);
 app.use('/users', userRouter);
 app.use('/shorts', shortsRouter);
 app.use('/home', homeRouter);
-app.use('/books', bookRouter);
 app.use('/communities', communitiesRouter);
 app.use('/recent-searches', researchRouter);
 app.use('/health', healthRouter);
-
-
-
 
 // index.js
 app.use((req, res, next) => {
@@ -49,17 +44,22 @@ app.use((req, res, next) => {
 
 // error handling
 app.use((err, req, res, next) => {
-    console.log(err);
-
-    // 템플릿 엔진 변수 설정
-    res.locals.message = err.message;
-    // 개발환경이면 에러를 출력하고 아니면 출력하지 않기
-    res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
+    console.error('Error:', err); // 에러를 콘솔에 기록합니다.
 
     if (err instanceof BaseError) {
-        return res.status(err.data.status).send(response(err.data));
+        // BaseError의 경우, status 코드와 메시지를 사용하여 응답합니다.
+        res.status(err.data.status).json({
+            isSuccess: err.data.isSuccess,
+            code: err.data.code,
+            message: err.data.message
+        });
     } else {
-        return res.send(response(status.INTERNAL_SERVER_ERROR));
+        // 일반 에러의 경우, 500 상태 코드와 기본 메시지를 사용하여 응답합니다.
+        res.status(500).json({
+            isSuccess: false,
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Internal Server Error'
+        });
     }
 });
 
