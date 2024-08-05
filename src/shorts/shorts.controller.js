@@ -78,7 +78,7 @@ export const addComment = async (req, res, next) => {
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id } = req.user_id;
+    const { user_id } = req.userId;
 
     if (!shorts_id || !user_id) {
         return next(new BaseError(status.BAD_REQUEST));
@@ -92,7 +92,7 @@ export const likeShorts = async (req, res, next) => {
 
 export const deleteShorts = async (req, res, next) => {
     const { user_id } = req.user_id;
-    const { shorts_id } = req.params.user_id;
+    const { shorts_id } = req.params.shortsId;
 
     if ( !shorts_id || !user_id ) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
