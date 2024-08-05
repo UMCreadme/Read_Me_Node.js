@@ -82,6 +82,7 @@ export const getCategoryIdByAladinCid = async (cid) => {
     try {
         const conn = await pool.getConnection();
         const [result] = await conn.query(sql.findCategoryIdByAladinCid, [cid]);
+        console.log("cid: ", cid, " result: ", result);
         conn.release();
 
         if(result.length === 0) {
