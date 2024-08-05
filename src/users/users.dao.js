@@ -303,8 +303,10 @@ export const findUsersWithKeyword = async (userId, keyword, target) => {
 export const editUserInfo = async (userId, updateUserData) => {
     try{
         const conn = await pool.getConnection()
-        await pool.query(updateUserInfoByUserId, [userId, updateUserData.nickname, updateUserData.account, updateUserData.comment])
+        console.log(userId, updateUserData)
+        await pool.query(updateUserInfoByUserId, [updateUserData.nickname, updateUserData.account, updateUserData.comment, userId])
         conn.release()
+
     }
     catch(err){
         throw new BaseError(status.INTERNAL_SERVER_ERROR)

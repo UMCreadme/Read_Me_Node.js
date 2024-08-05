@@ -44,9 +44,9 @@ export const findAllIfContainsKeywordOrdered = `
 `;
 
 export const updateUserInfoByUserId = `
-    UPDATE users
-    SET nickname = COALESCE($2, nickname),
-        account = COALESCE($3, account),
-        comment = COALESCE($4, comment)
-    WHERE userId = $1
+    UPDATE USERS
+    SET nickname = COALESCE(?, nickname),
+        account = COALESCE(?, account),
+        comment = COALESCE(?, comment)
+    WHERE user_id = ?
 `;
