@@ -1,22 +1,30 @@
+import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
-import { getCommunitiesService, deleteCommunityService } from './communities.service.js';
-import { BaseError } from '../../config/error.js';
+import { getCommunitiesService, deleteCommunityService, createCommunityService } from './communities.service.js';
 
-export const getCommunitiesController = async (req, res, next) => {
-    const { page = 1, size = 10 } = req.query;  // req.body 대신 req.query 사용
 
-    try {
-        const communitiesData = await getCommunitiesService(parseInt(page), parseInt(size));
+// 커뮤니티 생성
+export const createCommunityController = async (req, res, next) => {
+    const userId = req.user_id;
+    const { bookId, address, tag, capacity } = req.body;
 
-        res.status(status.SUCCESS.status).send(response(
-            status.SUCCESS,
-            communitiesData,
-            "전체 모임 리스트 불러오기 성공"
-        ));
-    } catch (error) {
-        next(error);
+    // 누락된 파라미터 확인
+    const missingParams = [];
+    if (!userId) missingParams.push('userId');
+    if (!bookId) missingParams.push('bookId');
+    if (!address) missingParams.push('address');
+    if (!capacity) missingParams.push('capacity');
+
+    // 누락된 정보가 있을 경우
+    if (missingParams.length > 0) {
+        return next(new BaseError(status.PARAMETER_IS_WRONG));
     }
+
+    await createCommunityService(userId, bookId, address, tag, capacity);
+
+    // 성공 응답 전송
+    res.send(response(status.CREATED));
 };
 
 export const deleteCommunityController = async (req, res, next) => {
