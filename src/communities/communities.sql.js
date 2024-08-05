@@ -32,9 +32,12 @@ export const COUNT_COMMUNITIES_BY_USER_AND_BOOK = `
 // 그룹 생성 쿼리
 export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, address, tag, capacity) VALUES (?, ?, ?, ?, ?);";
 
-
-// 모임 리스트 조회 쿼리
-export const GET_COMMUNITIES = "SELECT * FROM COMMUNITY LIMIT ? OFFSET ?;";
-
 // 모임 총 개수 조회 쿼리
 export const COUNT_COMMUNITIES = "SELECT COUNT(*) as count FROM COMMUNITY;";
+
+//모임 리스트 조회 쿼리 (최신순 정렬)
+export const GET_COMMUNITIES = `
+    SELECT * FROM COMMUNITY 
+    ORDER BY created_at DESC 
+    LIMIT ? OFFSET ?;
+`;
