@@ -2,19 +2,21 @@
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
 import { joinCommunityService } from './communities.service.js';
-import { JoinCommunityDTO } from './communities.dto.js';
+import { BaseError } from '../../config/error.js';
 
 // 커뮤니티 가입 컨트롤러
 export const joinCommunityController = async (req, res, next) => {
-    const { community_id } = req.params; // community_id는 요청 경로에서 받음!
-    const user_id = req.user.id; // 미들웨어에서 설정된 사용자 ID 사용
+    const communityId = req.params.communityId; 
+    const userId = req.user_id; 
 
-    if (!community_id) {
-        return res.send(response(status.PARAMETER_IS_WRONG));
+    if (!communityId) {
+        return next(new BaseError(status.PARAMETER_IS_WRONG)); 
     }
 
-    const joinCommunityDTO = new JoinCommunityDTO(community_id, user_id);
-    await joinCommunityService(joinCommunityDTO);
-
-    return res.send(response(status.JOINED));
+    try {
+        await joinCommunityService(communityId, userId);
+        return res.send(response(status.JOINED));
+    } catch (error) {
+        next(error); 
+    }
 };
