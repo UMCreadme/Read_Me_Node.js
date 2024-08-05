@@ -3,6 +3,8 @@ import {
     findEachFollowWithKeyword,
     findFollowerNumByUserId,
     findFollowingNumByUserId,
+    hasRecentPostForUser,
+    checkIsFollowed,
     findMeFollowWithKeyword,
     findMeWithKeyword,
     findMyFollowWithKeyword,
@@ -18,10 +20,12 @@ import {
     userBookResponseDTO,
     userFollowResponseDTO,
     userInfoResponseDTO,
+    otherUserInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
     userSignUpResponseDTO
 } from "./users.dto.js";
+
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
@@ -59,23 +63,36 @@ export const login = async(body, provider) => {
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
     const userData = await findById(userId)
-
     // 없는 유저 확인
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    // const profileImg = await findImageById(userData.image_id)
-
+    const isRecentPost = await hasRecentPostForUser(userId);
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
 
-    return userInfoResponseDTO( userData, followerNum, followingNum);
+    return userInfoResponseDTO( userData, isRecentPost, followerNum, followingNum);
+}
+
+// 다른 유저 정보 조회 로직
+export const findOneOther = async(myId, userId) => {
+    const userData = await findById(userId)
+    // 없는 유저 확인
+    if(userData === -1){
+        throw new BaseError(status.MEMBER_NOT_FOUND)
+    }
+
+    const isRecentPost = await hasRecentPostForUser(userId); // 프로필 띠 기능
+    const followStatus = await checkIsFollowed(myId, userId); // 팔로우 여부 체크
+    const followingNum = await findFollowingNumByUserId(userId); // 팔로잉 수
+    const followerNum = await findFollowerNumByUserId(userId); // 팔로우 수
+
+    return otherUserInfoResponseDTO(userData, isRecentPost, followStatus, followerNum, followingNum);
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
-
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -118,7 +135,7 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 
 // 유저가 읽은 책 리스트 조회 로직
 export const findUserBooks = async(userId, offset, limit) => {
-
+        
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -137,8 +154,7 @@ export const findUserBooks = async(userId, offset, limit) => {
 }
 
 // 유저(본인)가 다른 유저 팔로우하는 로직
-export const followNewUser = async(userId, followUserId) =>{
-
+export const followNewUser = async(userId, followUserId) => {
     // 없는 유저 확인
     const userData = await findById(userId)
     const followUserData = await findById(followUserId)
@@ -159,7 +175,6 @@ export const followNewUser = async(userId, followUserId) =>{
 
 // 유저 검색 기능 로직
 export const searchUserByKeyword = async (userId, keyword, offset, size) => {
-
     // 키워드에 나 자신의 이름이 섞이는 경우
     const searchMySelf = await findMeWithKeyword(userId, keyword);
 
@@ -182,7 +197,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const uniqueUsers = allUsersListByAccount.filter(user => !searchUserSet.has(user.user_id));
     const searchUserByAccountList= [...searchFollowUserByAccountList, ...uniqueUsers];
 
-
     // 키워드 + 맞팔인 사람 리스트 (nickname 기준)
     const eachFollowUsersListByNickname = await findEachFollowWithKeyword(userId, keyword, 'nickname');
 
@@ -201,7 +215,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const searchUserSet2 = new Set(searchFollowUserByNicknameList.map(user => user.user_id));
     const uniqueUsers2 = allUsersListByNickname.filter(user => !searchUserSet2.has(user.user_id));
     const searchUserByNicknameList= [...searchFollowUserByNicknameList, ...uniqueUsers2];
-
 
     // 최종 리스트
     const mergedList = searchUserByAccountList.length >= searchUserByNicknameList.length
