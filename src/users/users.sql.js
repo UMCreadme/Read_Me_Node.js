@@ -22,7 +22,7 @@ export const getUserReadBooksIdById = "SELECT book_id FROM USER_BOOK WHERE user_
 
 export const addFollowUser = "INSERT INTO FOLLOW(follower, user_id) VALUES(?, ?)";
 
-export const cancelFollowUser = "DELETE FROM FOLLOW WHERE user_id = ? AND follower = ?";
+export const cancelFollowUser = "DELETE FROM FOLLOW WHERE follower = ? AND user_id = ?";
 
 export const findFollowStatus = "SELECT * FROM FOLLOW WHERE follower = ? AND user_id = ?";
 

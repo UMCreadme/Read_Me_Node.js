@@ -5,7 +5,6 @@ import {
     findFollowingNumByUserId,
     findMeFollowWithKeyword,
     findMeWithKeyword,
-    checkIsFollowed,
     findMyFollowWithKeyword,
     findUserBooksById,
     findUserLikeShortsById,
@@ -171,9 +170,8 @@ export const unfollowUser = async(myId, unfollowUserId) => {
     }
 
     // 팔로우 취소
-    const unfollowStatus = awit followUserCancel(userId, unfollowUserId);
-
-    if(!followStatus){
+    const unfollowStatus = await followUserCancel(myId, unfollowUserId);
+    if(!unfollowStatus){
         throw new BaseError(status.BAD_REQUEST)
     }
 
