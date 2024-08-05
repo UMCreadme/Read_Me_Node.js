@@ -1,8 +1,10 @@
 import express from 'express';    
+import { pool } from './config/db.config.js';
 import { response } from './config/response.js';
 import { BaseError } from './config/error.js';
 import { status } from './config/response.status.js';
 import dotenv from 'dotenv';
+import { cron } from 'node-cron';
 import cors from 'cors';
 
 import { testRouter } from './src/test/test.route.js';
@@ -45,7 +47,7 @@ app.use((req, res, next) => {
     const err = new BaseError(status.NOT_FOUND);
     next(err);
 });
-
+   
 
 // error handling
 app.use((err, req, res, next) => {
@@ -60,6 +62,27 @@ app.use((err, req, res, next) => {
         return res.status(err.data.status).send(response(err.data));
     } else {
         return res.send(response(status.INTERNAL_SERVER_ERROR));
+    }
+});
+
+
+
+cron.schedule('0 0 * * *', async () => {
+    try {
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        const formattedDate = twoWeeksAgo.toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:MM:SS 형식
+
+        const conn = await pool.getConnection();
+    
+        const query = 'UPDATE COMMUNITY SET is_deleted = 1 WHERE meeting_date <= ? AND is_deleted = 0';
+
+        const [results] = await conn.query(query, [formattedDate]);
+        console.log(`Updated ${results.affectedRows} records.`);
+
+        conn.release();
+    } catch(err) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 });
 

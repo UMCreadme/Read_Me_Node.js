@@ -18,7 +18,7 @@ export const checkCommunityExistenceDao = async (community_id) => {
 
     conn.release();
     return rows[0].count > 0;
-}
+;}
 
 export const checkCommunityOwnerDao = async (community_id) => {
     const conn = await pool.getConnection();
