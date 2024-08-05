@@ -2,7 +2,8 @@ import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { insertObject } from "../common/common.dao.js";
-import * as sql from "./book.sql.js";
+import { findBookIdByISBN, findCategoryIdByName, findCategoryNameByBookId, getBookById, isUserReadBookById, getUserRecentBookList } from "./book.sql.js";
+import { deleteUserBook,findCategoryIdByAladinCid, updateUserBook } from "./book.sql.js";
 
 // bookId로 책 정보 조회
 export const findBookById = async (bookId) => {
