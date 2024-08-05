@@ -107,7 +107,7 @@ export const searchUser = async (req, res, next) => {
 
 // 카테고리 수정
 export const changeCategory = async (req, res, next) => {
-    const { user_id } = req.user_id;
+    const user_id = req.user_id;
     const { category } = req.body;
 
     if (!Array.isArray(category) || category.length < 4 || category.length > 8) {

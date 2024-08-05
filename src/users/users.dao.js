@@ -19,7 +19,6 @@ import {
     updateRefreshToken,
     insertUserFavorite,
     getUserByUniqueIdAndEmail,
-    insertCategory
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -308,18 +307,23 @@ export const changeCategoryDao = async (user_id, category) => {
         // 기존 카테고리 삭제
         await conn.query('DELETE FROM USER_FAVORITE WHERE user_id = ?', [user_id]);
 
+
         // 새로운 카테고리 삽입
-        const insertParams = category.flatMap(category = [user_id, category]);
-        const insertCategory = await pool.query(insertCategory, [user_id, insertParams]);
+        const insertValues = category.map(catId => [user_id, catId]);
+        const insertCategoryQuery = 'INSERT INTO USER_FAVORITE (user_id, category_id) VALUES ?';
+        await conn.query(insertCategoryQuery, [insertValues]);
 
         // 트랜잭션 커밋
         await conn.commit();
-        
+
         // 업데이트된 카테고리 리스트 반환
-        const [rows] = await conn.query('SELECT category_id FROM user_favorite WHERE user_id = ?', [user_id]);
-        return rows.map(row => row.category_id);
+        const [rows] = await conn.query('SELECT category_id FROM USER_FAVORITE WHERE user_id = ? ORDER BY category_id;', [user_id]);
+        const result = rows.map(row => row.category_id);
+        const resultString = result.join(',');
+        return resultString;
     }
     catch(error) {
+        console.error('Error in changeCategoryDao:', error); // 에러 로그 추가
         await conn.rollback();
         throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }finally {
