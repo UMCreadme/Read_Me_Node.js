@@ -179,9 +179,9 @@ export const checkShortsOwnerDao = async (shorts_id) => {
     return result[0].user_id;
 };
 
-//쇼츠 삭제
+//쇼츠 삭제 - softdelete
 export const deleteShortsDao = async (shorts_id) => {
     const conn = await pool.getConnection();
     
-    await conn.query('DELETE FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+    await conn.query('UPDATE SHORTS SET is_deleted = 1 WHERE shorts_id = ? ', [shorts_id]);
 };
