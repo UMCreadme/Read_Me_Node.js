@@ -300,11 +300,10 @@ export const findUsersWithKeyword = async (userId, keyword, target) => {
 }
 
 // 유저 프로필 편집 기능
-export const editUserInfo = async (userId, updateUserData) => {
+export const editUserInfo = async (userId, updateUserData, profileImg) => {
     try{
         const conn = await pool.getConnection()
-        console.log(userId, updateUserData)
-        await pool.query(updateUserInfoByUserId, [updateUserData.nickname, updateUserData.account, updateUserData.comment, userId])
+        await pool.query(updateUserInfoByUserId, [updateUserData.nickname, updateUserData.account, updateUserData.comment, profileImg, userId])
         conn.release()
 
     }

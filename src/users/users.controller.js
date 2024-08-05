@@ -39,7 +39,7 @@ export const getUserInfo = async (req, res, next) => {
 
 // 유저 프로필 수정
 export const updateUserInfo = async(req, res, next) => {
-    res.send(response(status.SUCCESS, await updateUser(req.user_id, req.body)))
+    res.send(response(status.SUCCESS, await updateUser(req.user_id, req.body, req.file.location)))
 }
 
 // 유저가 만든 쇼츠 리스트 조회

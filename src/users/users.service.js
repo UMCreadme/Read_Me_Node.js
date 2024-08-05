@@ -75,8 +75,8 @@ export const findOne = async(userId) => {
 }
 
 //유저 프로필 수정
-export const updateUser = async(userId, body) =>{
-    await editUserInfo(userId, body)
+export const updateUser = async(userId, body, profileImg) =>{
+    await editUserInfo(userId, body, profileImg)
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
