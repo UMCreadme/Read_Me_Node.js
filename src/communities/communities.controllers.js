@@ -1,7 +1,7 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';  
-import { createCommunityService } from './communities.service.js';
+import { createCommunityService, joinCommunityService } from './communities.service.js';
 
 // 커뮤니티 생성
 export const createCommunityController = async (req, res, next) => {
@@ -24,4 +24,18 @@ export const createCommunityController = async (req, res, next) => {
 
     // 성공 응답 전송
     res.send(response(status.CREATED));
+};
+
+// 커뮤니티 가입 컨트롤러
+export const joinCommunityController = async (req, res, next) => {
+    const communityId = req.params.communityId; 
+    const userId = req.user_id; 
+
+    if (!communityId) {
+        throw new BaseError(status.PARAMETER_IS_WRONG); 
+    }
+
+    await joinCommunityService(parseInt(communityId), userId);
+    return res.send(response(status.JOINED));
+
 };
