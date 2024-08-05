@@ -1,8 +1,26 @@
 import { pool } from "../../config/db.config.js";
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
+import { addSearchQuery } from "./research.sql.js";
 import { RecentSearchesDTO } from "./research.dto.js";
 import { deleteSearch, SearchUser, getQueriesbyId } from "./research.sql.js";
+
+export const addSearchDao = async (user_id, query, book_id) => {
+    try {
+        const conn = await pool.getConnection();
+        const [result] = await conn.query(addSearchQuery, [user_id, query, 
+            book_id ? book_id : null ]);
+            
+        conn.release();
+        return result[0];
+    } catch (err) {
+        if (err instanceof BaseError) {
+            throw err;
+        } else {
+            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+        }
+    }
+};
 
 
 // 검색어 삭제
@@ -39,4 +57,5 @@ export const getRecentResearch = async (user_id) => {
         }
     }
 }
+
 

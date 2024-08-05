@@ -15,6 +15,7 @@ import { researchRouter } from './src/research/research.route.js';
 import { healthRouter } from './src/health/health.route.js';
 
 
+
 dotenv.config();
 
 const app = express();
@@ -34,7 +35,8 @@ app.use('/home', homeRouter);
 app.use('/books', bookRouter);
 app.use('/communities', communitiesRouter);
 app.use('/recent-searches', researchRouter);
-app.use('/health', healthRouter)
+app.use('/health', healthRouter);
+
 
 
 
