@@ -5,3 +5,4 @@ export const pageInfo = (page, size, hasNext) => {
         hasNext: hasNext
     }
 };
+

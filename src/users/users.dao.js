@@ -18,7 +18,9 @@ import {
     save,
     updateRefreshToken,
     insertUserFavorite,
-    getUserByUniqueIdAndEmail, updateUserInfoByUserId
+    getUserByUniqueIdAndEmail,
+    getLatestPostCount,
+    updateUserInfoByUserId
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -86,6 +88,7 @@ export const findById = async (userId) => {
     }
 }
 
+
 // 유저 정보 조회시 필요한 팔로잉수
 export const findFollowingNumByUserId = async (userId) => {
 
@@ -113,6 +116,37 @@ export const findFollowerNumByUserId = async (userId) => {
     }
     catch (err) {
         throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 유저 정보 조회시 필요한 24h 이내 게시물 게시 여부
+export const hasRecentPostForUser = async (userId) => {
+    const conn = await pool.getConnection();
+
+    try {
+        const [recent] = await conn.query(getLatestPostCount, [userId]);
+
+        // 24시간 이내 게시된 게시물 수가 0개 초과인지 반환
+        return recent[0].count > 0;
+    } finally {
+        conn.release();
+    }
+};
+
+// 다른 유저 정보 조회시 필요한 팔로우 여부
+export const checkIsFollowed = async (myId, userId) => {
+    const conn = await pool.getConnection();
+
+    if (myId === null) {
+        return false;
+    }
+
+    try {
+        const [followStatus] = await conn.query(findFollowStatus, [myId, userId]);
+
+        return followStatus.length > 0;
+    } finally {
+        conn.release();
     }
 }
 
