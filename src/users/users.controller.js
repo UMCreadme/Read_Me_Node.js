@@ -6,10 +6,9 @@ import {
     findUserLikeShorts,
     findUserBooks,
     followNewUser,
-    searchUserByKeyword, join, login
+    searchUserByKeyword, join, login, updateUser
 } from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
-import axios from "axios";
 import {BaseError} from "../../config/error.js";
 
 //카카오 로그인 후 처음 디비에 들어오는 사람일 경우
@@ -36,6 +35,11 @@ export const kakaoLogin = async (req,res, next) =>{
 // 유저 정보 조회
 export const getUserInfo = async (req, res, next) => {
     res.send(response(status.SUCCESS , await findOne(req.user_id)))
+}
+
+// 유저 프로필 수정
+export const updateUserInfo = async(req, res, next) => {
+    res.send(response(status.SUCCESS, await updateUser(req.user_id, req.body)))
 }
 
 // 유저가 만든 쇼츠 리스트 조회

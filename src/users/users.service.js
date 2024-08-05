@@ -1,4 +1,5 @@
 import {
+    editUserInfo,
     findById,
     findEachFollowWithKeyword,
     findFollowerNumByUserId,
@@ -71,6 +72,11 @@ export const findOne = async(userId) => {
     const followerNum = await findFollowerNumByUserId(userId);
 
     return userInfoResponseDTO( userData, followerNum, followingNum);
+}
+
+//유저 프로필 수정
+export const updateUser = async(userId, body) =>{
+    await editUserInfo(userId, body)
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직

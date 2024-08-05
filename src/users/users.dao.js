@@ -18,7 +18,7 @@ import {
     save,
     updateRefreshToken,
     insertUserFavorite,
-    getUserByUniqueIdAndEmail
+    getUserByUniqueIdAndEmail, updateUserInfoByUserId
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -297,4 +297,16 @@ export const findUsersWithKeyword = async (userId, keyword, target) => {
     conn.release()
 
     return allFindWithKeyword;
+}
+
+// 유저 프로필 편집 기능
+export const editUserInfo = async (userId, updateUserData) => {
+    try{
+        const conn = await pool.getConnection()
+        await pool.query(updateUserInfoByUserId, [userId, updateUserData.nickname, updateUserData.account, updateUserData.comment])
+        conn.release()
+    }
+    catch(err){
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
+    }
 }

@@ -42,3 +42,11 @@ export const findAllIfContainsKeywordOrdered = `
   GROUP BY u.user_id
   ORDER BY follower_count DESC;
 `;
+
+export const updateUserInfoByUserId = `
+    UPDATE users
+    SET nickname = COALESCE($2, nickname),
+        account = COALESCE($3, account),
+        comment = COALESCE($4, comment)
+    WHERE userId = $1
+`;

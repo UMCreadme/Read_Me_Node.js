@@ -8,7 +8,7 @@ import {
     getUserBooks,
     followUser,
     searchUser,
-    kakaoSignUp, kakaoLogin
+    kakaoSignUp, kakaoLogin, updateUserInfo
 } from "./users.controller.js"
 import {authJWT} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
@@ -17,6 +17,9 @@ export const userRouter = express.Router({mergeParams:true});
 
 // 나의 정보 조회
 userRouter.get('/my', asyncHandler(authJWT), asyncHandler(getUserInfo));
+
+// 나의 프로필 편집
+userRouter.put('/my', asyncHandler(authJWT), asyncHandler(updateUserInfo));
 
 // 내가 만든 쇼츠 리스트 조회
 userRouter.get("/my/shorts", asyncHandler(authJWT), asyncHandler(getUserShorts));
