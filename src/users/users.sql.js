@@ -47,6 +47,7 @@ export const updateUserInfoByUserId = `
     UPDATE USERS
     SET nickname = COALESCE(?, nickname),
         account = COALESCE(?, account),
-        comment = COALESCE(?, comment)
+        comment = COALESCE(?, comment),
+        image_url = COALESCE(?, image_url)
     WHERE user_id = ?
 `;

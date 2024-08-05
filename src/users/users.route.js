@@ -13,8 +13,7 @@ import {
 import {authJWT} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
 import imgUploader from "../../config/s3.manager.js";
-import {createShorts} from "../shorts/shorts.controller.js";
-import {shortsRouter} from "../shorts/shorts.route.js";
+
 
 export const userRouter = express.Router({mergeParams:true});
 

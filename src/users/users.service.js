@@ -76,6 +76,9 @@ export const findOne = async(userId) => {
 
 //유저 프로필 수정
 export const updateUser = async(userId, body, profileImg) =>{
+    if(!body.nickname || !body.account){
+        throw new BaseError(status.PARAMETER_IS_WRONG)
+    }
     await editUserInfo(userId, body, profileImg)
 }
 
