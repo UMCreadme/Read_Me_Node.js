@@ -39,7 +39,6 @@ export const getMainInfo = async(user_id, offset, limit) => {
     ? await getFollowersFeeds(user_id, offset, limit)
     : null;
 
-
-    return HomeInfoResponseDTO(user_id, categories, shorts, feeds);
+    return HomeInfoResponseDTO(categories, shorts, feeds);
 }
 

@@ -41,7 +41,7 @@ export const userSignUp = async (body, provider, refreshToken) => {
         return newUser[0];
     }
     catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -64,7 +64,7 @@ export const userLogin = async (body, provider, refreshToken) => {
     }
 
     catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -82,7 +82,7 @@ export const findById = async (userId) => {
         return user[0];
 
     } catch (err) {
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -98,7 +98,7 @@ export const findFollowingNumByUserId = async (userId) => {
         return followings.length;
     }
     catch (err) {
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -112,7 +112,7 @@ export const findFollowerNumByUserId = async (userId) => {
         return followers.length;
     }
     catch (err) {
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -121,7 +121,6 @@ export const findUserShortsById = async (userId, offset ,limit) => {
 
     try {
         const conn = await pool.getConnection();
-        const [user] = await pool.query(getUserById, userId);
         const [userShorts] = await pool.query(getUserShortsById, [userId, limit, offset]);
 
 
@@ -131,7 +130,7 @@ export const findUserShortsById = async (userId, offset ,limit) => {
 
     }
     catch(err){
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -152,7 +151,7 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
         return userLikeShorts;
     }
     catch (err) {
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 
 }
@@ -173,7 +172,7 @@ export const findUserBooksById = async(userId, offset, limit) => {
         return userBooks;
     }
     catch(err){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -196,7 +195,7 @@ export const followUserAdd = async(userId, followingId) => {
         return true
     }
     catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -213,7 +212,7 @@ export const findMeWithKeyword = async(userId, keyword) =>{
 
     }
     catch (err){
-
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -237,7 +236,7 @@ export const findEachFollowWithKeyword = async(userId, keyword, target) =>{
 
     }
     catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -261,7 +260,7 @@ export const findMyFollowWithKeyword = async(userId, keyword, target)=>{
 
     }
     catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -285,16 +284,21 @@ export const findMeFollowWithKeyword = async (userId, keyword, target) => {
 
     }
     catch (err){
-       throw new BaseError(status.BAD_REQUEST)
+       throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
 // 키워드에 해당하는 모든 유저 찾기 (팔로워 많은 순으로)
 export const findUsersWithKeyword = async (userId, keyword, target) => {
-    const conn = await pool.getConnection()
-    const [allFindWithKeyword] = await pool.query(findAllIfContainsKeywordOrdered,[target, keyword])
+    try {
+        const conn = await pool.getConnection()
+        const [allFindWithKeyword] = await pool.query(findAllIfContainsKeywordOrdered, [target, keyword])
 
-    conn.release()
+        conn.release()
 
-    return allFindWithKeyword;
+        return allFindWithKeyword;
+    }
+    catch (err){
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
+    }
 }

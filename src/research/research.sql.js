@@ -22,7 +22,7 @@ SELECT rs.query, rs.recent_searches_id, rs.book_id, b.image_url as bookImg, b.ti
 FROM RECENT_SEARCHES rs
 LEFT JOIN BOOK b ON rs.book_id = b.book_id
 WHERE rs.user_id = ?
-ORDER BY rs.timestamp DESC
+ORDER BY rs.created_at DESC
 LIMIT 15;
 `;
 

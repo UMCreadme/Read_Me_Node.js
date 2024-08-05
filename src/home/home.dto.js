@@ -18,10 +18,15 @@ export const categoryShortsResponseDTO = (shorts) => {
     }
 }
 
-export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
+export const HomeInfoResponseDTO = (categories, shorts, feeds) => {
+
+    const safeCategories = categories || [];
+    const safeShorts = shorts || [];
+    const safeFeeds = feeds || [];
+
     return {
-        "categories": categories.map(category => category.name),
-        "shorts": shorts.map(shorts => ({
+        "categories": safeCategories.map(category => category.name),
+        "shorts": safeShorts.map(shorts => ({
             "shorts_id": shorts.shorts_id,
             "shortsImg": shorts.shortsImg,
             "phrase": shorts.phrase,
@@ -31,7 +36,7 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
             "likeCnt":shorts.likeCnt,
             "category": shorts.category
         })),
-        "feeds": feeds.map(feeds => ({
+        "feeds": safeFeeds.map(feeds => ({
             "user_id": feeds.user_id,
             "profileImg": feeds.profileImg,
             "nickname": feeds.nickname,

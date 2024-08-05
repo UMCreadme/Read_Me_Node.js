@@ -7,15 +7,14 @@ import { getShortsByCategory, getAllCategories, getFollowerFeed, getShort, getUs
 export const getShortsbyCategory = async (category_id, offset, limit) => {
     try {
         const conn = await pool.getConnection();
-        const [categoryShorts] = await pool.query(getShortsByCategory, [category_id, category_id]);
+        const [categoryShorts] = await conn.query(getShortsByCategory, [category_id, category_id]);
 
         conn.release(); 
 
         return categoryShorts;
     }
     catch(err){
-        console.error('Error fetching recommended shorts:', err); 
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -30,7 +29,7 @@ export const getAllCategory = async () => {
         return allCategories;
     }
     catch(err){
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -46,7 +45,7 @@ export const getUserCategoriesById = async(user_id) => {
         return userCategories;
     }
     catch(err){
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -63,7 +62,7 @@ export const getRecommendedShorts = async (user_id) => {
         return userRecommendedShorts;
     }
     catch(err){
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -78,7 +77,7 @@ export const getShorts = async (offset, limit) => {
         return Shorts;
     }
     catch(err){
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -96,8 +95,7 @@ export const getFollowersFeeds = async (user_id, offset, limit) => {
         return followersFeeds;
     }
     catch (err) {
-        console.error("Error fetching followers feeds:", err);
-        throw new BaseError(status.BAD_REQUEST, "잘못된 요청입니다.");
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
     
 }

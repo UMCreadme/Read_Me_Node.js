@@ -58,14 +58,8 @@ export const login = async(body, provider) => {
 
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
+
     const userData = await findById(userId)
-
-    // 없는 유저 확인
-    if(userData === -1){
-        throw new BaseError(status.MEMBER_NOT_FOUND)
-    }
-
-    // const profileImg = await findImageById(userData.image_id)
 
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
@@ -76,15 +70,8 @@ export const findOne = async(userId) => {
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
 
-    // 없는 유저 확인
-    const userData = await findById(userId)
-    if(userData === -1){
-        throw new BaseError(status.MEMBER_NOT_FOUND)
-    }
-
     const userShorts = await findUserShortsById(userId, offset, limit);
     const userShortsResponseDTOList = [];
-
 
     for (const userShort of userShorts) {
         let userShortsBook = await findBookById(userShort.book_id);
@@ -97,12 +84,6 @@ export const findUserShorts = async(userId, offset, limit) => {
 
 // 유저가 찜한 쇼츠 리스트 조회 로직
 export const findUserLikeShorts = async(userId, offset, limit) => {
-
-    // 없는 유저 확인
-    const userData = await findById(userId)
-    if(userData === -1){
-        throw new BaseError(status.MEMBER_NOT_FOUND)
-    }
 
     const userLikeShorts = await findUserLikeShortsById(userId, offset, limit);
     const userShortsResponseDTOList = [];
@@ -119,12 +100,6 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 // 유저가 읽은 책 리스트 조회 로직
 export const findUserBooks = async(userId, offset, limit) => {
 
-    // 없는 유저 확인
-    const userData = await findById(userId)
-    if(userData === -1){
-        throw new BaseError(status.MEMBER_NOT_FOUND)
-    }
-
     const userBooks = await findUserBooksById(userId, offset, limit);
     const userBookResponseDTOList = [];
 
@@ -140,9 +115,9 @@ export const findUserBooks = async(userId, offset, limit) => {
 export const followNewUser = async(userId, followUserId) =>{
 
     // 없는 유저 확인
-    const userData = await findById(userId)
     const followUserData = await findById(followUserId)
-    if((userData === -1) || (followUserData === -1)){
+
+    if(followUserData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
