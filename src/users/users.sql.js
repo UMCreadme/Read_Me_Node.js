@@ -42,3 +42,10 @@ export const findAllIfContainsKeywordOrdered = `
   GROUP BY u.user_id
   ORDER BY follower_count DESC;
 `;
+
+
+export const insertCategory = (categories) =>
+`
+INSERT INTO USER_FAVORITE (user_id, category_id)
+VALUES ${categories.map(() => '(?, ?)').join(',')};
+`;

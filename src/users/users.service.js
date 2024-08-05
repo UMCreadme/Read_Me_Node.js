@@ -12,7 +12,8 @@ import {
     findUsersWithKeyword,
     followUserAdd,
     userLogin,
-    userSignUp
+    userSignUp,
+    changeCategoryDao
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
@@ -217,4 +218,15 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     }
 
     return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
+}
+
+
+// 카테고리 수정
+export const ChangeCategoryService = async(user_id, category) => {
+    if (!Array.isArray(category) || category.length < 4 || category.length > 8) {
+        return res.send(response(status.PARAMETER_IS_WRONG));
+    }
+
+    const changedCategory = await changeCategoryDao(user_id, category);
+    return changedCategory;
 }
