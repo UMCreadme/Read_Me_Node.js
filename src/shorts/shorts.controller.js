@@ -91,8 +91,12 @@ export const likeShorts = async (req, res, next) => {
 }
 
 export const deleteShorts = async (req, res, next) => {
-    const { user_id } = req.user_id;
-    const { shorts_id } = req.params.shortsId;
+    const user_id = req.user_id;
+    const shorts_id  = req.params.shortsId;
+
+    console.log(user_id)
+    console.log(shorts_id)
+
 
     if ( !shorts_id || !user_id ) {
         throw new BaseError(status.PARAMETER_IS_WRONG);

@@ -123,7 +123,7 @@ export const doesShortExistDao = async (shorts_id) => {
 // 존재하는 쇼츠인 지 확인
 export const checkShortsExistenceDao = async (shorts_id) => {
     const conn = await pool.getConnection();
-    const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ? AND is_deleted = 0', [shorts_id]);
 
     conn.release();
     return rows[0].count > 0;
@@ -172,7 +172,7 @@ export const getLikeCntDao = async (shorts_id) => {
 export const checkShortsOwnerDao = async (shorts_id) => {
     const conn = await pool.getConnection();
 
-    const result = await conn.query('SELECT user_id FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+    const [result] = await conn.query('SELECT user_id FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
     if (result.length === 0) {
         throw new BaseError(status.SHORTS_NOT_FOUND);
     }
