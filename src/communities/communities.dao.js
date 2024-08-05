@@ -6,11 +6,12 @@ import {
     JOIN_COMMUNITY,
     ADD_ADMIN_TO_COMMUNITY,
     COUNT_COMMUNITIES_BY_USER_AND_BOOK,
-    CREATE_COMMUNITY
+    CREATE_COMMUNITY,
+    GET_COMMUNITIES, 
+    COUNT_COMMUNITIES
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-
 // 커뮤니티 생성과 관련된 전체 과정 처리
 export const createCommunityWithCheck = async (userId, bookId, address, tag, capacity) => {
     const conn = await pool.getConnection();
@@ -73,4 +74,13 @@ export const isUserAlreadyInCommunity = async (communityId, userId) => {
 // 커뮤니티 가입 처리
 export const joinCommunity = async (communityId, userId) => {
     await pool.query(JOIN_COMMUNITY, [communityId, userId]);
+};
+
+// 모임 리스트 조회
+export const getCommunities = async (page, size) => {
+    const offset = (page - 1) * size;
+    const limit = parseInt(size) + 1;  // 요청한 size보다 하나 더 조회
+    const [rows] = await pool.query(GET_COMMUNITIES, [limit, parseInt(offset)]);
+    const [countResult] = await pool.query(COUNT_COMMUNITIES);
+    return { communities: rows, totalElements: countResult[0].count };
 };

@@ -1,6 +1,8 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-import { createCommunityWithCheck, getCommunityCurrentCount, getCommunityCapacity, isUserAlreadyInCommunity, joinCommunity } from './communities.dao.js';
+import { getCommunities, createCommunityWithCheck, getCommunityCurrentCount, getCommunityCapacity, isUserAlreadyInCommunity, joinCommunity } from './communities.dao.js';
+import { getCommunitiesDto } from './communities.dto.js';
+import { pageInfo } from '../../config/pageInfo.js';
 
 // 커뮤니티 생성 서비스
 export const createCommunityService = async (userId, bookId, address, tag, capacity) => {
@@ -50,3 +52,19 @@ export const joinCommunityService = async (communityId, userId) => {
 };
 
 
+
+
+// 전체 모임 리스트 조회
+export const getCommunitiesService = async (page, size) => {
+    const { communities, totalElements } = await getCommunities(page, size);
+
+    // 페이지 정보를 계산
+    const hasNext = communities.length > size;
+    const actualSize = hasNext ? size : communities.length;
+    const communityList = communities.slice(0, actualSize);
+
+    return {
+        communityList: getCommunitiesDto({ communities: communityList }),
+        pageInfo: pageInfo(page, actualSize, hasNext, totalElements)
+    };
+};
