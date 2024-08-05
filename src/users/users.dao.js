@@ -319,8 +319,7 @@ export const changeCategoryDao = async (user_id, category) => {
         // 업데이트된 카테고리 리스트 반환
         const [rows] = await conn.query('SELECT category_id FROM USER_FAVORITE WHERE user_id = ? ORDER BY category_id;', [user_id]);
         const result = rows.map(row => row.category_id);
-        const resultString = result.join(',');
-        return resultString;
+        return result.join(',');
     }
     catch(error) {
         console.error('Error in changeCategoryDao:', error); // 에러 로그 추가

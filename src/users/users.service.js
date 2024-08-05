@@ -233,6 +233,5 @@ export const ChangeCategoryService = async(user_id, category) => {
         throw new BaseError(status.BAD_REQUEST);
     }
 
-    const changedCategory = await changeCategoryDao(user_id, category);
-    return changedCategory;
+    return await changeCategoryDao(user_id, category);
 }
