@@ -78,7 +78,7 @@ export const addComment = async (req, res, next) => {
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id } = req.userId;
+    const { user_id } = req.user_id;
 
     if (!shorts_id || !user_id) {
         return next(new BaseError(status.BAD_REQUEST));
