@@ -16,9 +16,10 @@ export const status = {
     NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMON005", "message": "페이지를 찾을 수 없습니다."},
     PARAMETER_IS_WRONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMON006", "message": "잘못된 파라미터입니다."},
     
-    // New status code for community creation limit
+  
     COMMUNITY_LIMIT_EXCEEDED: {status: StatusCodes.FORBIDDEN, "isSuccess": false, "code": "COMMUNITY001", "message": "한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없습니다."},
     INVALID_CAPACITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY1002", "message": "커뮤니티의 수용 인원(capacity)은 최대 10명까지 허용됩니다." },
+   
     // member err
     MEMBER_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다."},
     NICKNAME_NOT_EXIST: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4002", "message": "닉네임은 필수입니다."},
@@ -27,7 +28,9 @@ export const status = {
     CATEGORY_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다."},
 
     // community err
-    COMMUNITY_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4001", "message": "존재하지 않는 커뮤니티입니다." },
+    COMMUNITY_LIMIT_EXCEEDED: {status: StatusCodes.FORBIDDEN, "isSuccess": false, "code": "COMMUNITY4001", "message": "한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없습니다."},
+    INVALID_CAPACITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY4002", "message": "커뮤니티의 수용 인원(capacity)은 최대 10명까지 허용됩니다." },
+    COMMUNITY_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4005", "message": "존재하지 않는 커뮤니티입니다." },
 
     // shorts err
     SHORTS_TAG_COUNT_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4001", "message": "태그는 10개 이내로 입력해주세요."},
