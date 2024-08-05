@@ -3,7 +3,6 @@ import { status } from "../../config/response.status.js";
 import {
     findOne,
     findOneOther,
-    findOneOther,
     findUserShorts,
     findUserLikeShorts,
     findUserBooks,
@@ -11,7 +10,6 @@ import {
     searchUserByKeyword, join, login
 } from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
-import axios from "axios";
 import {BaseError} from "../../config/error.js";
 
 //카카오 로그인 후 처음 디비에 들어오는 사람일 경우
