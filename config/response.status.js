@@ -24,7 +24,7 @@ export const status = {
     CATEGORY_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다."},
 
     // community err
-    COMMUNITY_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4001", "message": "존재하지 않는 쇼츠입니다." },
+    COMMUNITY_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4001", "message": "존재하지 않는 커뮤니티입니다." },
 
     // shorts err
     SHORTS_TAG_COUNT_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4001", "message": "태그는 10개 이내로 입력해주세요."},

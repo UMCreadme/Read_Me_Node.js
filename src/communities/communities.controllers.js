@@ -20,12 +20,13 @@ export const getCommunitiesController = async (req, res, next) => {
 };
 
 export const deleteCommunityController = async (req, res, next) => {
-    const { user_id } = req.user_id;
-    const { community_id } = req.params.communityId;
+    const user_id  = req.user_id;
+    const community_id = req.params.communityId;
 
-    if (!user_id || community_id) {
+    if (!user_id || !community_id) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
+  
     await deleteCommunityService(user_id, community_id);
     res.send(response(status.SUCCESS));
 }

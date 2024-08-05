@@ -14,7 +14,7 @@ export const getCommunities = async (page, size) => {
 
 export const checkCommunityExistenceDao = async (community_id) => {
     const conn = await pool.getConnection();
-    const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE community_id = ?', [community_id]);
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM COMMUNITY WHERE community_id = ? AND is_deleted = 0', [community_id]);
 
     conn.release();
     return rows[0].count > 0;
@@ -23,7 +23,7 @@ export const checkCommunityExistenceDao = async (community_id) => {
 export const checkCommunityOwnerDao = async (community_id) => {
     const conn = await pool.getConnection();
     
-    const result = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
+    const [result] = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
     if (result.length === 0) {
         throw new BaseError(status.COMMUNITY_NOT_FOUND);
     }

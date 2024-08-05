@@ -4,7 +4,7 @@ import { response } from './config/response.js';
 import { BaseError } from './config/error.js';
 import { status } from './config/response.status.js';
 import dotenv from 'dotenv';
-import { cron } from 'node-cron';
+import cron from 'node-cron';
 import cors from 'cors';
 
 import { testRouter } from './src/test/test.route.js';
@@ -47,6 +47,8 @@ app.use((req, res, next) => {
     const err = new BaseError(status.NOT_FOUND);
     next(err);
 });
+
+
    
 
 // error handling
@@ -74,7 +76,7 @@ cron.schedule('0 0 * * *', async () => {
         const formattedDate = twoWeeksAgo.toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:MM:SS 형식
 
         const conn = await pool.getConnection();
-    
+
         const query = 'UPDATE COMMUNITY SET is_deleted = 1 WHERE meeting_date <= ? AND is_deleted = 0';
 
         const [results] = await conn.query(query, [formattedDate]);
@@ -82,9 +84,11 @@ cron.schedule('0 0 * * *', async () => {
 
         conn.release();
     } catch(err) {
+        console.error('Error executing cron job:', err);  // 에러 로그 추가
         throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 });
+
 
 app.listen(app.get('port'), () => {
     console.log(`Example app listening on port ${app.get('port')}`);
