@@ -93,7 +93,6 @@ export const findOneOther = async(myId, userId) => {
 
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
-    
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -136,7 +135,7 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 
 // 유저가 읽은 책 리스트 조회 로직
 export const findUserBooks = async(userId, offset, limit) => {
-    
+        
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -155,8 +154,7 @@ export const findUserBooks = async(userId, offset, limit) => {
 }
 
 // 유저(본인)가 다른 유저 팔로우하는 로직
-export const followNewUser = async(userId, followUserId) =>{
-
+export const followNewUser = async(userId, followUserId) => {
     // 없는 유저 확인
     const userData = await findById(userId)
     const followUserData = await findById(followUserId)
@@ -177,7 +175,6 @@ export const followNewUser = async(userId, followUserId) =>{
 
 // 유저 검색 기능 로직
 export const searchUserByKeyword = async (userId, keyword, offset, size) => {
-
     // 키워드에 나 자신의 이름이 섞이는 경우
     const searchMySelf = await findMeWithKeyword(userId, keyword);
 
@@ -200,7 +197,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const uniqueUsers = allUsersListByAccount.filter(user => !searchUserSet.has(user.user_id));
     const searchUserByAccountList= [...searchFollowUserByAccountList, ...uniqueUsers];
 
-
     // 키워드 + 맞팔인 사람 리스트 (nickname 기준)
     const eachFollowUsersListByNickname = await findEachFollowWithKeyword(userId, keyword, 'nickname');
 
@@ -219,7 +215,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const searchUserSet2 = new Set(searchFollowUserByNicknameList.map(user => user.user_id));
     const uniqueUsers2 = allUsersListByNickname.filter(user => !searchUserSet2.has(user.user_id));
     const searchUserByNicknameList= [...searchFollowUserByNicknameList, ...uniqueUsers2];
-
 
     // 최종 리스트
     const mergedList = searchUserByAccountList.length >= searchUserByNicknameList.length
