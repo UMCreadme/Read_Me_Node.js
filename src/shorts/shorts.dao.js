@@ -167,3 +167,21 @@ export const getLikeCntDao = async (shorts_id) => {
     conn.release();
     return rows[0].count;
 }
+
+// 쇼츠 소유자 확인
+export const checkShortsOwnerDao = async (shorts_id) => {
+    const conn = await pool.getConnection();
+
+    const result = await conn.query('SELECT user_id FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+    if (result.length === 0) {
+        throw new BaseError(status.SHORTS_NOT_FOUND);
+    }
+    return result[0].user_id;
+};
+
+//쇼츠 삭제
+export const deleteShortsDao = async (shorts_id) => {
+    const conn = await pool.getConnection();
+    
+    await conn.query('DELETE FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+};

@@ -5,7 +5,8 @@ import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategory
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
-import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao} from "./shorts.dao.js";
+import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao,
+deleteShortsDao, checkShortsOwnerDao} from "./shorts.dao.js";
 
 
 // 쇼츠 검색
@@ -220,3 +221,16 @@ export const likeShortsService = async (shorts_id, user_id) => {
 
 };
 
+export const deleteShortsService = async (user_id, shorts_id) => {
+    const exists = await checkShortsExistenceDao(shorts_id);
+    if (!exists) {
+        throw new BaseError(status.SHORTS_NOT_FOUND);
+    }
+
+    const owner = await checkShortsOwnerDao(shorts_id);
+    if (owner !== user_id) {
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    await deleteShortsDao(shorts_id);
+}

@@ -29,6 +29,7 @@ export const status = {
     SHORTS_TITLE_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4003", "message": "제목은 30자 이내로 입력해주세요."},
     SHORTS_CONTENT_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4004", "message": "내용은 255자 이내로 입력해주세요."},
     SHORTS_PHRASE_TOO_LONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4005", "message": "책 구절은 150자 이내로 입력해주세요."},
+    SHORTS_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4006", "message": "존재하지 않는 쇼츠입니다."},
 
     // token err
     NOT_EXISTING_ACCESS_TOKEN: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4001", "message" : "존재하지 않는 엑세스 토큰 입니다."},
