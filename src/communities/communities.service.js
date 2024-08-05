@@ -22,7 +22,6 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
 
         // 각 태그의 길이가 10자를 초과하면 오류 발생
         for (const singleTag of tagsArray) {
-            console.log("태그 길이: ", singleTag.length);
             if (singleTag.length > 10) {
                 throw new BaseError(status.SHORTS_TAG_TOO_LONG);
             }
