@@ -5,6 +5,7 @@ export const status = {
     // success
     SUCCESS: { status: StatusCodes.OK, "isSuccess": true, "code": 2000, "message": "SUCCESS!" },
     CREATED: { status: StatusCodes.CREATED, "isSuccess": true, "code": 2010, "message": "CREATED!" },
+    JOINED: { status: StatusCodes.CREATED, "isSuccess": true, "code": 2010, "message": "JOINED!" },
     NO_CONTENT: { status: StatusCodes.NO_CONTENT, "isSuccess": true, "code": 2040, "message": "NO CONTENT!" },
 
     // error

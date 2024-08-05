@@ -29,3 +29,7 @@ export const COUNT_COMMUNITIES_BY_USER_AND_BOOK = `
     WHERE user_id = ? AND book_id = ? AND is_deleted = FALSE;
 `;
 
+
+// 그룹 생성 쿼리
+export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, address, tag, capacity) VALUES (?, ?, ?, ?, ?);";
+

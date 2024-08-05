@@ -1,5 +1,13 @@
 import { pool } from '../../config/db.config.js';
-import { CREATE_COMMUNITY, ADD_ADMIN_TO_COMMUNITY, COUNT_COMMUNITIES_BY_USER_AND_BOOK,  GET_COMMUNITY_CURRENT_COUNT, GET_COMMUNITY_CAPACITY, IS_USER_ALREADY_IN_COMMUNITY, JOIN_COMMUNITY } from './communities.sql.js';
+import {
+    GET_COMMUNITY_CURRENT_COUNT,
+    GET_COMMUNITY_CAPACITY,
+    IS_USER_ALREADY_IN_COMMUNITY,
+    JOIN_COMMUNITY,
+    ADD_ADMIN_TO_COMMUNITY,
+    COUNT_COMMUNITIES_BY_USER_AND_BOOK,
+    CREATE_COMMUNITY
+} from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 
@@ -57,12 +65,12 @@ export const getCommunityCapacity = async (communityId) => {
 };
 
 // 사용자가 이미 커뮤니티에 참여하고 있는지 확인하는 함수
-export const isUserAlreadyInCommunity = async (communityId, userId) => { 
+export const isUserAlreadyInCommunity = async (communityId, userId) => {
     const [result] = await pool.query(IS_USER_ALREADY_IN_COMMUNITY, [communityId, userId]);
     return result[0].count > 0;
 };
 
 // 커뮤니티 가입 처리
-export const joinCommunity = async (communityId, userId) => { 
+export const joinCommunity = async (communityId, userId) => {
     await pool.query(JOIN_COMMUNITY, [communityId, userId]);
 };
