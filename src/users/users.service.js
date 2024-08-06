@@ -13,6 +13,7 @@ import {
     followUserAdd,
     followUserCancel,
     checkIsFollowed,
+    hasRecentPostForUser,
     userLogin,
     userSignUp
 } from "./users.dao.js";
@@ -21,7 +22,8 @@ import {
     userInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
-    userSignUpResponseDTO
+    userSignUpResponseDTO,
+    otherUserInfoResponseDTO
 } from "./users.dto.js";
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
@@ -66,12 +68,11 @@ export const findOne = async(userId) => {
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    // const profileImg = await findImageById(userData.image_id)
-
+    const isRecentPost = await hasRecentPostForUser(userId); // 프로필 띠 기능
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
 
-    return userInfoResponseDTO( userData, followerNum, followingNum);
+    return userInfoResponseDTO( userData, isRecentPost, followerNum, followingNum);
 }
 
 // 다른 유저 정보 조회 로직
