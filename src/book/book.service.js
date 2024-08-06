@@ -1,8 +1,10 @@
+import { BaseError } from "../../config/error.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
-import { findIsReadById, getBookIdByISBN, findUserRecentBookList,  createBook, deleteBookIsReadToUser, getCategoryIdByAladinCid, updateBookIsReadToUser } from "./book.dao.js"
-import { bookDetailDto } from "./book.dto.js";
+import { findIsReadById, getBookIdByISBN, findUserRecentBookList,  createBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid } from "./book.dao.js"
+import { bookDetailDto, bookListInfoDto } from "./book.dto.js";
+import axios from "axios";
 
 export const getBookDetailInfo = async (ISBN, page, size, userId) => {
     // 책 ID 조회
@@ -52,5 +54,35 @@ export const updateBookIsRead = async (book, cid, userId) => {
         // 읽지 않은 책일 경우 읽음 처리
         await updateBookIsReadToUser(userId, bookId);
         return status.CREATED;
+    }
+};
+
+export const createDummyBookDataService = async () => {
+    // 알라딘 상품 리스트 조회 API 호출
+    let type = "Bestseller";
+    let start = 1;
+
+    // API 호출
+    while(start <= 20){
+        let url = `http://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=${process.env.TTB_KEY}&QueryType=${type}&MaxResults=50&start=${start}&SearchTarget=Book&output=js&Version=20131101`;
+        axios.get(url)
+            .then(response => {
+            // JSON 데이터 파싱 후 DTO로 변환
+            const bookDataList = response.data.item;
+            const bookList = bookListInfoDto(bookDataList);
+
+            // 카테고리 ID 수정
+            bookList.forEach(async book => {
+                let categoryId = await getCategoryIdByAladinCid(parseInt(book.category_id));
+                if(categoryId) {
+                    // DB에 저장
+                    book.category_id = categoryId;
+                    await createBook(book);
+                }
+            });
+        }).catch(error => {
+            console.error('Error fetching data from API:', error);
+        });
+        start++;
     }
 };
