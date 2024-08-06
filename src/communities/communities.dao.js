@@ -7,11 +7,14 @@ import {
     ADD_ADMIN_TO_COMMUNITY,
     COUNT_COMMUNITIES_BY_USER_AND_BOOK,
     CREATE_COMMUNITY,
-    GET_COMMUNITIES, 
-    COUNT_COMMUNITIES
+    COUNT_COMMUNITIES,
+    GET_COMMUNITIES,
+    GET_COMMUNITIES_BY_TAG_KEYWORD,
+    GET_COMMUNITIES_BY_TITLE_KEYWORD
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
+
 // 커뮤니티 생성과 관련된 전체 과정 처리
 export const createCommunityWithCheck = async (userId, bookId, address, tag, capacity) => {
     const conn = await pool.getConnection();
@@ -84,24 +87,29 @@ export const getCommunities = async (page, size) => {
     const [countResult] = await pool.query(COUNT_COMMUNITIES);
     return { communities: rows, totalElements: countResult[0].count };
 };
-import { pool } from '../../config/db.config.js';
-import { SEARCH_COMMUNITIES } from './communities.sql.js'; // 경로는 실제 위치에 맞게 조정
 
-// 커뮤니티 검색
-export const searchCommunities = async (query, size = 10, offset = 0) => {
-    const formattedQuery = query.replace(/\s+/g, ''); // 모든 공백 제거
-
-    const sql = SEARCH_COMMUNITIES;
-    const values = [
-        `%${formattedQuery}%`, `%${formattedQuery}%`, `%${formattedQuery}%`,
-        size, offset
-    ];
-
+// 제목으로 커뮤니티 검색
+export const searchCommunitiesByTitleKeyword = async (keyword) => {
     try {
-        const [results] = await pool.query(sql, values);
+        const conn = await pool.getConnection();
+        const [results] = await conn.query(GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
+        conn.release();
         return results;
-    } catch (error) {
-        console.error('Database query error:', error.message);
-        throw new Error('Failed to search communities.');
+    } catch (err) {
+        console.error('Database query error:', err);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
+    }
+};
+
+// 태그로 커뮤니티 검색
+export const searchCommunitiesByTagKeyword = async (keyword) => {
+    try {
+        const conn = await pool.getConnection();
+        const [shortsTag] = await conn.query(GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
+        conn.release();
+        return shortsTag;
+    } catch (err) {
+        console.log(err);
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 };

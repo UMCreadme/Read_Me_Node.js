@@ -1,10 +1,14 @@
 import express from 'express';
 import asyncHandler from 'express-async-handler';
-import { createCommunityController, getCommunitiesController, searchCommunityController } from './communities.controllers.js';
-import { communityUsersRouter } from '../communityUsers/communityUsers.route.js';
+import { createCommunityController, joinCommunityController, getCommunitiesController, searchCommunityController } from './communities.controllers.js';
+import { authJWT } from '../jwt/authJWT.js';
 
 export const communitiesRouter = express.Router();
+
 communitiesRouter.get('/', asyncHandler(getCommunitiesController));
-communitiesRouter.post('/', asyncHandler(createCommunityController));
-communitiesRouter.post('/join', communityUsersRouter); // 커뮤니티 사용자 관련 라우터 추가
+communitiesRouter.post('/', asyncHandler(authJWT), asyncHandler(createCommunityController));
+communitiesRouter.post('/:communityId', asyncHandler(authJWT), asyncHandler(joinCommunityController));
 communitiesRouter.get('/search', asyncHandler(searchCommunityController));
+
+
+
