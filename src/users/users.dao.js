@@ -19,7 +19,8 @@ import {
     save,
     updateRefreshToken,
     insertUserFavorite,
-    getUserByUniqueIdAndEmail
+    getUserByUniqueIdAndEmail,
+    getLatestPostCount
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -87,6 +88,7 @@ export const findById = async (userId) => {
     }
 }
 
+
 // 유저 정보 조회시 필요한 팔로잉수
 export const findFollowingNumByUserId = async (userId) => {
 
@@ -116,6 +118,20 @@ export const findFollowerNumByUserId = async (userId) => {
         throw new BaseError(status.BAD_REQUEST)
     }
 }
+
+// 유저 정보 조회시 필요한 24h 이내 게시물 게시 여부
+export const hasRecentPostForUser = async (userId) => {
+    const conn = await pool.getConnection();
+    
+    try {
+        const [recent] = await conn.query(getLatestPostCount, [userId]);
+
+        // 24시간 이내 게시된 게시물 수가 0개 초과인지 반환
+        return recent[0].count > 0;
+    } finally {
+        conn.release();
+    }
+};
 
 // 다른 유저 정보 조회시 필요한 팔로우 여부 -- feat/13번이랑 충돌날거라 머지 후 수정 예정
 export const checkIsFollowed = async (myId, userId) => {
@@ -163,7 +179,6 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
             let [userLikeShort] = await pool.query(getShortsById,userLikeShortsId.shorts_id)
             userLikeShorts.push(userLikeShort[0])
         }
-
         conn.release();
         return userLikeShorts;
     }
@@ -222,12 +237,6 @@ export const followUserCancel = async(userId, unfollowUserId) => {
     try{
         const conn = await pool.getConnection();
 
-        // 현재 팔로우 상태 확인
-        const isFollowing = await checkIsFollowed(userId, unfollowUserId);
-        if (!isFollowing) {
-            throw new BaseError(status.BAD_REQUEST, "현재 팔로우 상태가 아닙니다.");
-        }
-
          // 팔로우 취소 쿼리 실행
         await conn.query(cancelFollowUser, [userId, unfollowUserId]);
         conn.release();
@@ -235,7 +244,8 @@ export const followUserCancel = async(userId, unfollowUserId) => {
          return true; // 팔로우 취소 성공
     }
     catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        console.log(err)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -252,7 +262,7 @@ export const findMeWithKeyword = async(userId, keyword) =>{
 
     }
     catch (err){
-
+        throw new BaseError(status.BAD_REQUEST)
     }
 }
 

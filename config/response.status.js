@@ -30,6 +30,8 @@ export const status = {
     // member err
     MEMBER_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다." },
     NICKNAME_NOT_EXIST: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4002", "message": "닉네임은 필수입니다." },
+    FOLLOW_EXIST : { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4003", "message": "이미 처리된 팔로우 혹은 본인입니다." },
+    FOLLOW_NOT_FOUND : { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4004", "message": "현재 팔로우 상태가 아닙니다." },
 
     // category err
     CATEGORY_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다." },

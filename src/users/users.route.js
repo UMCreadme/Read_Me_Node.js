@@ -6,12 +6,16 @@ import {
     getUserShorts,
     getUserLikeShorts,
     getUserBooks,
+    getOtherUserInfo,
+    getUserShortsForGuest,
+    getUserLikeShortsForGuest,
+    getUserBooksForGuest,
     followUser,
     unfollow,
     searchUser,
     kakaoSignUp, kakaoLogin
 } from "./users.controller.js"
-import {authJWT} from "../jwt/authJWT.js";
+import {authJWT, authJWTNoUserRequired} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
 
 export const userRouter = express.Router({mergeParams:true});
@@ -31,6 +35,10 @@ userRouter.get("/my/books", asyncHandler(authJWT), asyncHandler(getUserBooks));
 // 다른 유저 팔로잉
 userRouter.post("/:userId/follow", asyncHandler(authJWT), asyncHandler(followUser));
 
+
+// 다른 유저 정보 조회 (로그인 필요 X)
+userRouter.get('/:userId', asyncHandler(authJWTNoUserRequired), asyncHandler(getOtherUserInfo));
+
 // 다른 유저 팔로우 취소
 userRouter.delete("/:userId/follow", asyncHandler(authJWT), asyncHandler(unfollow));
 
@@ -48,3 +56,8 @@ userRouter.post("/login", asyncHandler(kakaoLogin));
 
 //액세스 토큰 만료, 리프레시 토큰을 이용해 엑세스토큰 재발급
 userRouter.get("/refresh", asyncHandler(refresh))
+
+// 다른 유저의 피드 조회 (로그인 필요 X)
+userRouter.get('/:userId/shorts', asyncHandler(getUserShortsForGuest));
+userRouter.get('/:userId/likes', asyncHandler(getUserLikeShortsForGuest));
+userRouter.get('/:userId/books', asyncHandler(getUserBooksForGuest));
