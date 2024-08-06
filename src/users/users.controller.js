@@ -14,11 +14,6 @@ import {BaseError} from "../../config/error.js";
 
 //카카오 로그인 후 처음 디비에 들어오는 사람일 경우
 export const kakaoSignUp = async(req, res, next) => {
-
-    if(!req.body.uniqueId || !req.body.email || !req.body.nickname || !req.body.account || (req.body.categoryIdList.length<4) || (req.body.categoryIdList.length>8)){
-        throw new BaseError(status.PARAMETER_IS_WRONG)
-    }
-
     const result =  await join(req.body, 'kakao')
     res.send(response(status.SUCCESS, result))
 }
@@ -26,16 +21,13 @@ export const kakaoSignUp = async(req, res, next) => {
 // 카카오 로그인
 export const kakaoLogin = async (req,res, next) =>{
 
-    if(!req.body.uniqueId || !req.body.email){
-        throw new BaseError(status.PARAMETER_IS_WRONG)
-    }
-
     const result = await login(req.body, 'kakao')
+
     if (!result) {
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
-    res.send(response(status.SUCCESS, result))
 
+    res.send(response(status.SUCCESS, result))
 
 }
 // 다른 유저 정보 조회

@@ -14,7 +14,7 @@ import {
     findUsersWithKeyword,
     followUserAdd,
     userLogin,
-    userSignUp
+    userSignUp, checkDuplicateAccount
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
@@ -34,6 +34,27 @@ import {refresh, sign} from "../jwt/jwt-util.js";
 // 회원가입 후 토큰 반환
 export const join = async(body, provider) => {
 
+    const duplicateAccountCheck = await checkDuplicateAccount(body.account)
+
+    const accountCheck = (account) => {
+        const regex = /^[a-zA-Z0-9]{1,30}$/;
+        return regex.test(account);
+    }
+
+    const nicknameCheck = (nickname) => {
+        const regex = /^[a-zA-Z0-9가-힣]{1,12}$/;
+        return regex.test(nickname);
+    }
+
+    const categoryCheck = (category) => {
+        const duplicateCategory = (new Set(category).size !== category.length)
+        return (category.length < 4)  || (category.length >8) || duplicateCategory
+    }
+
+    if(!body.uniqueId || !body.email || !accountCheck(body.account) || duplicateAccountCheck || !nicknameCheck(body.nickname) || categoryCheck(body.categoryIdList))
+    {
+        throw new BaseError(status.PARAMETER_IS_WRONG)
+    }
 
     const refreshToken = refresh()
     const newUser = await userSignUp(body, provider, refreshToken);
@@ -46,6 +67,10 @@ export const join = async(body, provider) => {
 
 // 이미 존재하는 유저가 다시 로그인해서 토큰 값 줄때
 export const login = async(body, provider) => {
+
+    if(!body.uniqueId || !body.email){
+        throw new BaseError(status.PARAMETER_IS_WRONG)
+    }
 
     const refreshToken = refresh()
     const foundUser = await userLogin(body, provider, refreshToken)
