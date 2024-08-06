@@ -1,19 +1,19 @@
 import { pool } from "../../config/db.config.js";
-import { BaseError } from "../../config/error.js";
-import { status } from "../../config/response.status.js";
 import { insertObject } from "../common/common.dao.js";
-import { findBookIdByISBN, findCategoryIdByName, findCategoryNameByBookId, getBookById, isUserReadBookById, getUserRecentBookList } from "./book.sql.js";
-import { deleteUserBook,findCategoryIdByAladinCid, updateUserBook } from "./book.sql.js";
+import * as sql from "./book.sql.js";
 
 // bookId로 책 정보 조회
 export const findBookById = async (bookId) => {
+    try {
+        const conn = await pool.getConnection();
+        const [book] = await conn.query(sql.getBookById, bookId)
 
-    const conn = await pool.getConnection();
-    const [book] = await pool.query(sql.getBookById, bookId)
+        conn.release();
 
-    conn.release();
-
-    return book[0];
+        return book[0];
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 // 책 ID로 카테고리 조회
@@ -26,11 +26,6 @@ export const getBookCategory = async (bookId) => {
         return result[0].name;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -48,11 +43,6 @@ export const getBookIdByISBN = async (ISBN) => {
         return result[0].book_id;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -70,11 +60,6 @@ export const getCategoryIdByName = async (category) => {
         return result[0].category_id;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -93,11 +78,6 @@ export const getCategoryIdByAladinCid = async (cid) => {
         return result[0].category_id;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -111,11 +91,6 @@ export const createBook = async (book) => {
         return result;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -129,11 +104,6 @@ export const findIsReadById = async (userId, bookId) => {
         return result.length !== 0;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -147,11 +117,6 @@ export const updateBookIsReadToUser = async (userId, bookId) => {
         return;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -165,18 +130,13 @@ export const deleteBookIsReadToUser = async (userId, bookId) => {
         return;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 };
 
 export const findUserRecentBookList = async (userId, offset, limit) => {
     try {
         const conn = await pool.getConnection()
-        const [userRecentBookList] = await pool.query(sql.getUserRecentBookList, [userId, limit, offset])
+        const [userRecentBookList] = await conn.query(sql.getUserRecentBookList, [userId, limit, offset])
 
         const uniqueBookList = [];
         const bookIdSet = new Set();
@@ -192,6 +152,6 @@ export const findUserRecentBookList = async (userId, offset, limit) => {
         return uniqueBookList;
     }
     catch (err){
-        throw new BaseError(status.INTERNAL_SERVER_ERROR)
+        console.log(err);
     }
 }
