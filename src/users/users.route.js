@@ -11,6 +11,7 @@ import {
     getUserLikeShortsForGuest,
     getUserBooksForGuest,
     followUser,
+    unfollow,
     searchUser,
     kakaoSignUp, kakaoLogin
 } from "./users.controller.js"
@@ -37,6 +38,9 @@ userRouter.post("/:userId/follow", asyncHandler(authJWT), asyncHandler(followUse
 
 // 다른 유저 정보 조회 (로그인 필요 X)
 userRouter.get('/:userId', asyncHandler(authJWTNoUserRequired), asyncHandler(getOtherUserInfo));
+
+// 다른 유저 팔로우 취소
+userRouter.delete("/:userId/follow", asyncHandler(authJWT), asyncHandler(unfollow));
 
 // 로그인 후 유저 검색 기능
 userRouter.get("/my/search", asyncHandler(authJWT), asyncHandler(searchUser));
