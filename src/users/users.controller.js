@@ -29,6 +29,10 @@ export const getOtherUserInfo = async (req, res, next) => {
     const myId = req.user_id;
     const userId = parseInt(req.params.userId)
 
+    if (myId === userId) {
+        return res.send(response(status.SUCCESS, await service.findOne(myId)));
+    }
+
     const userInfo = await service.findOne(userId);
     const isFollowing = await service.isFollowing(myId, userId);
     const result = await otherUserInfoResponseDTO(userInfo, isFollowing);
