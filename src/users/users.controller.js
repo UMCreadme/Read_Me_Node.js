@@ -7,6 +7,7 @@ import {
     findUserLikeShorts,
     findUserBooks,
     followNewUser,
+    unfollowUser,
     searchUserByKeyword, join, login
 } from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
@@ -139,8 +140,14 @@ export const getUserBooksForGuest = async(req, res, next)=> {
 
 // 유저(본인)가 다른 유저 팔로우
 export const followUser = async(req, res, next)=>{
-    const result= await  followNewUser (req.user_id, req.params.userId)
-    return res.send(response(status.SUCCESS, result))
+    await  followNewUser (req.user_id, parseInt(req.params.userId))
+    return res.send(response(status.SUCCESS))
+}
+
+// 유저(본인)가 다른 유저 팔로우 취소
+export const unfollow = async(req, res, next)=>{
+    await  unfollowUser (req.user_id, parseInt(req.params.userId))
+    return res.send(response(status.SUCCESS))
 }
 
 // 유저 검색

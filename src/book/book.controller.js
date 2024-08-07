@@ -1,6 +1,6 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { getBookDetailInfo, updateBookIsRead, findUserRecentBook} from "./book.service.js";
+import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, createDummyBookDataService} from "./book.service.js";
 import { bookInfoDto } from "./book.dto.js";
 
 export const getBookDetail = async (req, res, next) => {
@@ -35,4 +35,9 @@ export const getUserRecentBook = async (req, res, next) => {
     if (hasNext) result.pop();
 
     res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
+}
+
+export const createDummyBookDataController = async (req, res, next) => {
+    await createDummyBookDataService();
+    res.send(response(status.SUCCESS));
 }

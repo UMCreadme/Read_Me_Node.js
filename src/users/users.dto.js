@@ -53,14 +53,6 @@ export const userBookResponseDTO = (userBook) => {
     }
 }
 
-// 팔로잉 성공시 반환해주는 값
-export const userFollowResponseDTO = (userId, followingId) =>{
-    return {
-        "userId" : userId,
-        "followingUserId" : followingId
-    }
-}
-
 // 유저 검색시 반환 정보
 export const userSearchResponseDTO =  (userData) => {
     return {

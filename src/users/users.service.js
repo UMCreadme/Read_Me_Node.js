@@ -3,8 +3,6 @@ import {
     findEachFollowWithKeyword,
     findFollowerNumByUserId,
     findFollowingNumByUserId,
-    hasRecentPostForUser,
-    checkIsFollowed,
     findMeFollowWithKeyword,
     findMeWithKeyword,
     findMyFollowWithKeyword,
@@ -13,19 +11,20 @@ import {
     findUserShortsById,
     findUsersWithKeyword,
     followUserAdd,
+    followUserCancel,
+    checkIsFollowed,
+    hasRecentPostForUser,
     userLogin,
     userSignUp
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
-    userFollowResponseDTO,
     userInfoResponseDTO,
-    otherUserInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
-    userSignUpResponseDTO
+    userSignUpResponseDTO,
+    otherUserInfoResponseDTO
 } from "./users.dto.js";
-
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
@@ -63,12 +62,13 @@ export const login = async(body, provider) => {
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
     const userData = await findById(userId)
+
     // 없는 유저 확인
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    const isRecentPost = await hasRecentPostForUser(userId);
+    const isRecentPost = await hasRecentPostForUser(userId); // 프로필 띠 기능
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
 
@@ -93,6 +93,7 @@ export const findOneOther = async(myId, userId) => {
 
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
+
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -135,7 +136,7 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 
 // 유저가 읽은 책 리스트 조회 로직
 export const findUserBooks = async(userId, offset, limit) => {
-        
+
     // 없는 유저 확인
     const userData = await findById(userId)
     if(userData === -1){
@@ -154,7 +155,8 @@ export const findUserBooks = async(userId, offset, limit) => {
 }
 
 // 유저(본인)가 다른 유저 팔로우하는 로직
-export const followNewUser = async(userId, followUserId) => {
+export const followNewUser = async(userId, followUserId) =>{
+
     // 없는 유저 확인
     const userData = await findById(userId)
     const followUserData = await findById(followUserId)
@@ -167,14 +169,39 @@ export const followNewUser = async(userId, followUserId) => {
 
     // 중복팔로우 예외 처리 + 본인이 본인을 팔로우하려는 경우
     if(!followStatus){
+        throw new BaseError(status.FOLLOW_EXIST)
+    }
+
+    return 
+}
+
+// 유저(본인)가 다른 유저 팔로우 취소하는 로직
+export const unfollowUser = async(myId, unfollowUserId) => {
+
+    // 유저 존재 확인
+    const unfollowUserData = await findById(unfollowUserId)
+    if(unfollowUserData === -1){
         throw new BaseError(status.BAD_REQUEST)
     }
 
-    return userFollowResponseDTO(userId, followingId)
+    // 현재 팔로우 상태 확인
+    const isFollowing = await checkIsFollowed(myId, unfollowUserId);
+    if (!isFollowing) {
+        throw new BaseError(status.FOLLOW_NOT_FOUND);
+    }
+
+    // 팔로우 취소
+    const unfollowStatus = await followUserCancel(myId, unfollowUserId);
+    if(!unfollowStatus){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+
+    return
 }
 
 // 유저 검색 기능 로직
 export const searchUserByKeyword = async (userId, keyword, offset, size) => {
+
     // 키워드에 나 자신의 이름이 섞이는 경우
     const searchMySelf = await findMeWithKeyword(userId, keyword);
 
@@ -197,6 +224,7 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const uniqueUsers = allUsersListByAccount.filter(user => !searchUserSet.has(user.user_id));
     const searchUserByAccountList= [...searchFollowUserByAccountList, ...uniqueUsers];
 
+
     // 키워드 + 맞팔인 사람 리스트 (nickname 기준)
     const eachFollowUsersListByNickname = await findEachFollowWithKeyword(userId, keyword, 'nickname');
 
@@ -215,6 +243,7 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const searchUserSet2 = new Set(searchFollowUserByNicknameList.map(user => user.user_id));
     const uniqueUsers2 = allUsersListByNickname.filter(user => !searchUserSet2.has(user.user_id));
     const searchUserByNicknameList= [...searchFollowUserByNicknameList, ...uniqueUsers2];
+
 
     // 최종 리스트
     const mergedList = searchUserByAccountList.length >= searchUserByNicknameList.length
