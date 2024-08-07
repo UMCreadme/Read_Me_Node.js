@@ -5,6 +5,7 @@ import { addSearchQuery } from "./research.sql.js";
 import { RecentSearchesDTO } from "./research.dto.js";
 import { deleteSearch, SearchUser, getQueriesbyId } from "./research.sql.js";
 
+// 검색어 추가
 export const addSearchDao = async (user_id, query, book_id) => {
     try {
         const conn = await pool.getConnection();
@@ -14,14 +15,9 @@ export const addSearchDao = async (user_id, query, book_id) => {
         conn.release();
         return result[0];
     } catch (err) {
-        if (err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
+        console.log(err);
     }
 };
-
 
 // 검색어 삭제
 export const deleteRecentSearch = async (research_id, currentUserId) => {
@@ -35,9 +31,7 @@ export const deleteRecentSearch = async (research_id, currentUserId) => {
 
     // 유저 아이디가 일치할 경우, 검색어 삭제
     await conn.query(deleteSearch, [research_id]);
-}
-
-
+};
 
 export const getRecentResearch = async (user_id) => {
     try {
@@ -46,16 +40,7 @@ export const getRecentResearch = async (user_id) => {
 
         conn.release();
         return queries.map(row => new RecentSearchesDTO(row));
-
-    
     } catch (err) {
         console.log(err);
-        if (err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
-}
-
-
+};

@@ -4,7 +4,7 @@ export const addSearchQuery =
 INSERT INTO RECENT_SEARCHES (user_id, query, book_id)
 VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE
-    query = VALUES(?),
+    query = VALUES(query),
     book_id = VALUES(book_id),
     updated_at = CURRENT_TIMESTAMP;
 `;
@@ -25,4 +25,3 @@ WHERE rs.user_id = ?
 ORDER BY rs.timestamp DESC
 LIMIT 15;
 `;
-
