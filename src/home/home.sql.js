@@ -57,22 +57,22 @@ export const getAllCategories = "SELECT name FROM CATEGORY;";
 // 유저가 선택한 카테고리의 숏츠 1개씩 반환 + 인기쇼츠 중 랜덤
 export const getUserRecommendedShorts = 
 `WITH FilteredShorts AS (
-    SELECT s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, b.author, b.translator, c.name AS category, c.category_id, COUNT(ls.like_shorts_id) AS likeCnt
+    SELECT s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, b.author, c.name AS category, c.category_id, COUNT(ls.like_shorts_id) AS likeCnt
     FROM SHORTS s
     JOIN BOOK b ON s.book_id = b.book_id
     JOIN CATEGORY c ON b.category_id = c.category_id
     JOIN USER_FAVORITE uf ON c.category_id = uf.category_id
     LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id
     WHERE uf.user_id = ?
-    GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name
+    GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, c.name
     HAVING COUNT(ls.like_shorts_id) >= 1
 ),
 RankedShorts AS (
-    SELECT shorts_id, shortsImg, phrase, title, author, translator, category, category_id,likeCnt,
+    SELECT shorts_id, shortsImg, phrase, title, author, category, category_id,likeCnt,
         ROW_NUMBER() OVER (PARTITION BY category ORDER BY RAND()) AS RN
     FROM FilteredShorts
 )
-SELECT shorts_id, shortsImg, phrase, title, author, translator, category, likeCnt
+SELECT shorts_id, shortsImg, phrase, title, author, category, likeCnt
 FROM RankedShorts
 WHERE rn = 1
 ORDER BY category_id;
@@ -80,12 +80,12 @@ ORDER BY category_id;
 
 // 전체 숏츠 조회 + 좋아요순으로 정렬
 export const getShort = 
-`SELECT s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name AS category, COUNT(ls.like_shorts_id) AS likeCnt
+`SELECT s.shorts_id, s.image_url, s.phrase, s.title, b.author, c.name AS category, COUNT(ls.like_shorts_id) AS likeCnt
 FROM SHORTS s
 JOIN BOOK b ON s.book_id = b.book_id 
 JOIN CATEGORY c ON b.category_id = c.category_id
 LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id
-GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, b.translator, c.name
+GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, c.name
 ORDER BY likeCnt DESC, s.created_at DESC
 LIMIT ? OFFSET ?;
 `;

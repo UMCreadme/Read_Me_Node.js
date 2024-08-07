@@ -29,7 +29,6 @@ SELECT
     b.image_url,
     b.title,
     b.author,
-    b.translator
 FROM 
     SHORTS s
 JOIN 

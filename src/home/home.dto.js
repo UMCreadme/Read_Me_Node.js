@@ -27,7 +27,6 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
             "phrase": shorts.phrase,
             "bookTitle": shorts.title,
             "author": shorts.author,
-            "translator": shorts.translator,
             "likeCnt":shorts.likeCnt,
             "category": shorts.category
         })),

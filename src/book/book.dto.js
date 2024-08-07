@@ -33,7 +33,6 @@ export const bookInfoDto = (data) => {
         "title": data.bookTitle,
         "image_url": data.bookCover,
         "author": data.author,
-        "translator": data.translator,
         "link": data.link
     };
 };

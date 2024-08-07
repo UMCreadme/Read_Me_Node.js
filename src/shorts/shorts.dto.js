@@ -36,7 +36,6 @@ export const getSearchShortsListDto = (data) => {
             "category": short.category,
             "bookTitle": short.book_title,
             "author": short.author,
-            "translator": short.translator,
             "tags": short.tag ? short.tag.split("|") : []
         });
     }
