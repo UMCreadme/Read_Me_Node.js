@@ -1,6 +1,15 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-import { getCommunities, createCommunityWithCheck, getCommunityCurrentCount, getCommunityCapacity, isUserAlreadyInCommunity, joinCommunity } from './communities.dao.js';
+import {
+    getCommunities,
+    createCommunityWithCheck,
+    getCommunityCurrentCount,
+    getCommunityCapacity,
+    isUserAlreadyInCommunity,
+    searchCommunitiesByTagKeyword,
+    searchCommunitiesByTitleKeyword,
+    joinCommunity
+} from './communities.dao.js';
 import { getCommunitiesDto } from './communities.dto.js';
 import { pageInfo } from '../../config/pageInfo.js';
 
@@ -51,9 +60,6 @@ export const joinCommunityService = async (communityId, userId) => {
     await joinCommunity(communityId, userId);
 };
 
-
-
-
 // 전체 모임 리스트 조회
 export const getCommunitiesService = async (page, size) => {
     const { communities, totalElements } = await getCommunities(page, size);
@@ -66,5 +72,38 @@ export const getCommunitiesService = async (page, size) => {
     return {
         communityList: getCommunitiesDto({ communities: communityList }),
         pageInfo: pageInfo(page, actualSize, hasNext, totalElements)
+    };
+};
+
+// 커뮤니티 검색 서비스
+export const searchCommunityService = async (keyword, page = 1, size = 10) => {
+    // 파라미터 검증
+    if (!keyword || page <= 0 || size <= 0) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    let communities;
+    const decodedKeyword = decodeURIComponent(keyword.trim()); // URL 디코딩
+    const isTagSearch = decodedKeyword.startsWith('#');
+
+    if (isTagSearch) {
+        // 태그 검색
+        const formattedKeyword = decodedKeyword.startsWith('#') ? decodedKeyword.substring(1) : decodedKeyword; // #을 제거
+        communities = await searchCommunitiesByTagKeyword(formattedKeyword);
+    } else {
+        // 제목 검색
+        communities = await searchCommunitiesByTitleKeyword(decodedKeyword);
+    }
+
+    // 페이지네이션 계산
+    const offset = (page - 1) * size;
+    const limit = size + 1; // 요청한 size보다 하나 더 조회
+    const paginatedCommunities = communities.slice(offset, offset + limit);
+    const hasNext = paginatedCommunities.length > size;
+    const actualSize = hasNext ? size : paginatedCommunities.length;
+
+    return {
+        communityList: getCommunitiesDto({ communities: paginatedCommunities.slice(0, actualSize) }),
+        pageInfo: pageInfo(page, actualSize, hasNext, communities.length)
     };
 };
