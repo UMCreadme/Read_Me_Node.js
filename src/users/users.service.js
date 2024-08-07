@@ -11,17 +11,20 @@ import {
     findUserShortsById,
     findUsersWithKeyword,
     followUserAdd,
+    followUserCancel,
+    checkIsFollowed,
+    hasRecentPostForUser,
     userLogin,
     userSignUp,
     changeCategoryDao
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
-    userFollowResponseDTO,
     userInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
-    userSignUpResponseDTO
+    userSignUpResponseDTO,
+    otherUserInfoResponseDTO
 } from "./users.dto.js";
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
@@ -66,12 +69,27 @@ export const findOne = async(userId) => {
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    // const profileImg = await findImageById(userData.image_id)
-
+    const isRecentPost = await hasRecentPostForUser(userId); // 프로필 띠 기능
     const followingNum = await findFollowingNumByUserId(userId);
     const followerNum = await findFollowerNumByUserId(userId);
 
-    return userInfoResponseDTO( userData, followerNum, followingNum);
+    return userInfoResponseDTO( userData, isRecentPost, followerNum, followingNum);
+}
+
+// 다른 유저 정보 조회 로직
+export const findOneOther = async(myId, userId) => {
+    const userData = await findById(userId)
+    // 없는 유저 확인
+    if(userData === -1){
+        throw new BaseError(status.MEMBER_NOT_FOUND)
+    }
+
+    const isRecentPost = await hasRecentPostForUser(userId); // 프로필 띠 기능
+    const followStatus = await checkIsFollowed(myId, userId); // 팔로우 여부 체크
+    const followingNum = await findFollowingNumByUserId(userId); // 팔로잉 수
+    const followerNum = await findFollowerNumByUserId(userId); // 팔로우 수
+
+    return otherUserInfoResponseDTO(userData, isRecentPost, followStatus, followerNum, followingNum);
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
@@ -152,10 +170,34 @@ export const followNewUser = async(userId, followUserId) =>{
 
     // 중복팔로우 예외 처리 + 본인이 본인을 팔로우하려는 경우
     if(!followStatus){
+        throw new BaseError(status.FOLLOW_EXIST)
+    }
+
+    return 
+}
+
+// 유저(본인)가 다른 유저 팔로우 취소하는 로직
+export const unfollowUser = async(myId, unfollowUserId) => {
+
+    // 유저 존재 확인
+    const unfollowUserData = await findById(unfollowUserId)
+    if(unfollowUserData === -1){
         throw new BaseError(status.BAD_REQUEST)
     }
 
-    return userFollowResponseDTO(userId, followingId)
+    // 현재 팔로우 상태 확인
+    const isFollowing = await checkIsFollowed(myId, unfollowUserId);
+    if (!isFollowing) {
+        throw new BaseError(status.FOLLOW_NOT_FOUND);
+    }
+
+    // 팔로우 취소
+    const unfollowStatus = await followUserCancel(myId, unfollowUserId);
+    if(!unfollowStatus){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+
+    return
 }
 
 // 유저 검색 기능 로직

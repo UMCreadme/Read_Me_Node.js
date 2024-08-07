@@ -96,4 +96,3 @@ export const checkLike = "SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts
 export const addLike = "INSERT INTO LIKE_SHORTS (shorts_id, user_id) VALUES (?, ?)";
 
 export const removeLike = "DELETE FROM LIKE_SHORTS WHERE shorts_id = ? AND user_id = ?";
-

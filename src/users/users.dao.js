@@ -9,6 +9,7 @@ import {
     getUserLikeShortsIdById,
     getUserShortsById,
     addFollowUser,
+    cancelFollowUser,
     findFollowStatus,
     findIfContainsKeywordWithUserId,
     getEachFollowIdList,
@@ -19,6 +20,7 @@ import {
     updateRefreshToken,
     insertUserFavorite,
     getUserByUniqueIdAndEmail,
+    getLatestPostCount
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
@@ -86,6 +88,7 @@ export const findById = async (userId) => {
     }
 }
 
+
 // 유저 정보 조회시 필요한 팔로잉수
 export const findFollowingNumByUserId = async (userId) => {
 
@@ -113,6 +116,35 @@ export const findFollowerNumByUserId = async (userId) => {
     }
     catch (err) {
         throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 유저 정보 조회시 필요한 24h 이내 게시물 게시 여부
+export const hasRecentPostForUser = async (userId) => {
+    const conn = await pool.getConnection();
+    
+    try {
+        const [recent] = await conn.query(getLatestPostCount, [userId]);
+
+        // 24시간 이내 게시된 게시물 수가 0개 초과인지 반환
+        return recent[0].count > 0;
+    } finally {
+        conn.release();
+    }
+};
+
+// 다른 유저 정보 조회시 필요한 팔로우 여부 -- feat/13번이랑 충돌날거라 머지 후 수정 예정
+export const checkIsFollowed = async (myId, userId) => {
+    const conn = await pool.getConnection();
+    if (myId === null) {
+        return false;
+    }
+    
+    try {
+        const [followStatus] = await conn.query(findFollowStatus, [myId, userId]);
+        return followStatus.length > 0;
+    } finally {
+        conn.release();
     }
 }
 
@@ -147,7 +179,6 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
             let [userLikeShort] = await pool.query(getShortsById,userLikeShortsId.shorts_id)
             userLikeShorts.push(userLikeShort[0])
         }
-
         conn.release();
         return userLikeShorts;
     }
@@ -200,6 +231,24 @@ export const followUserAdd = async(userId, followingId) => {
     }
 }
 
+// 유저(본인)가 다른 유저 팔로우 취소
+export const followUserCancel = async(userId, unfollowUserId) => {
+
+    try{
+        const conn = await pool.getConnection();
+
+         // 팔로우 취소 쿼리 실행
+        await conn.query(cancelFollowUser, [userId, unfollowUserId]);
+        conn.release();
+
+         return true; // 팔로우 취소 성공
+    }
+    catch (err){
+        console.log(err)
+        throw new BaseError(status.INTERNAL_SERVER_ERROR)
+    }
+}
+
 // 키워드 검색으로 조회되는 나를 찾기
 export const findMeWithKeyword = async(userId, keyword) =>{
     try{
@@ -213,7 +262,7 @@ export const findMeWithKeyword = async(userId, keyword) =>{
 
     }
     catch (err){
-
+        throw new BaseError(status.BAD_REQUEST)
     }
 }
 

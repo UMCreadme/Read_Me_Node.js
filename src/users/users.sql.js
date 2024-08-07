@@ -22,6 +22,8 @@ export const getUserReadBooksIdById = "SELECT book_id FROM USER_BOOK WHERE user_
 
 export const addFollowUser = "INSERT INTO FOLLOW(follower, user_id) VALUES(?, ?)";
 
+export const cancelFollowUser = "DELETE FROM FOLLOW WHERE follower = ? AND user_id = ?";
+
 export const findFollowStatus = "SELECT * FROM FOLLOW WHERE follower = ? AND user_id = ?";
 
 export const findIfContainsKeywordWithUserId = `SELECT * FROM USERS WHERE user_id = ? AND ( (CASE WHEN ? = 'account' THEN account ELSE nickname END) LIKE CONCAT('%', ?, '%') )`;
@@ -41,5 +43,13 @@ export const findAllIfContainsKeywordOrdered = `
   WHERE (CASE WHEN ? = 'account' THEN u.account ELSE u.nickname END) LIKE CONCAT('%', ?, '%')
   GROUP BY u.user_id
   ORDER BY follower_count DESC;
+`;
+
+
+// 최근 24시간 이내의 게시물 수를 가져오는 쿼리
+export const getLatestPostCount = `
+  SELECT COUNT(*) AS count
+  FROM SHORTS
+  WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
 `;
 
