@@ -230,7 +230,7 @@ export const ChangeCategoryService = async(user_id, category) => {
 
     // category 배열에 중복된 값이 있는지 검사
     if (hasDuplicates(category)) {
-        throw new BaseError(status.BAD_REQUEST);
+        throw new BaseError(status.CATEGORY_DUPLICATED);
     }
 
     return await changeCategoryDao(user_id, category);
