@@ -84,3 +84,18 @@ export const searchBookService = async (userId, keyword, page, size) => {
     addSearchDao(userId, keyword);
     return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
 };
+
+export const createBookSearchService = async (book, cid, keyword, userId) => {
+    let bookId = await getBookIdByISBN(book.ISBN);
+    if(!bookId) {
+        const categoryId = await getCategoryIdByAladinCid(cid);
+        if(!categoryId) {
+            throw new BaseError(status.CATEGORY_NOT_FOUND);
+        }
+    
+        book.category_id = categoryId;
+        bookId = await createBook(book);
+    }
+
+    await addSearchDao(userId, keyword, bookId);
+};

@@ -1,6 +1,6 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService } from "./book.service.js";
+import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService } from "./book.service.js";
 import { bookInfoDto } from "./book.dto.js";
 
 // 책 상세 정보 조회
@@ -46,4 +46,20 @@ export const searchBook = async (req, res, next) => {
     const book = await searchBookService(userId, keyword, parseInt(page), parseInt(size));
 
     res.send(response(status.SUCCESS, book.data, book.pageInfo));
+};
+
+// 책 검색어 추가
+export const createBookSearch = async (req, res, next) => {
+    const userId = req.user_id;
+    if(!userId) {
+        res.send(response(status.NO_CONTENT));
+    }
+
+    const keyword = req.body.keyword;
+    req.body.ISBN = req.params.ISBN;
+    const book = bookInfoDto(req.body);
+
+    await createBookSearchService(book, req.body.cid, keyword, userId);
+
+    res.send(response(status.CREATED));
 };
