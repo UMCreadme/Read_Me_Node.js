@@ -13,9 +13,10 @@ export const bookListInfoDto = (data) => {
         return {
             "ISBN": book.isbn13 ? book.isbn13 : book.isbn,
             "bookCover": book.cover,
-            "title": book.title,
-            "mallType": book.mallType,
+            "bookTitle": book.title,
             "author": author,
+            "cid": book.categoryId,
+            "mallType": book.mallType,
             "link": book.link
         }
     })
