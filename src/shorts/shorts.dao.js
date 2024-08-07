@@ -18,11 +18,6 @@ export const getShortsToTitleKeyword = async (keyword) => {
         return shortsTitle;
     } catch (err) {
         console.log(err);
-        if (err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 };
 
@@ -30,7 +25,7 @@ export const getShortsToTitleKeyword = async (keyword) => {
 export const getShortsToAuthorKeyword = async (keyword) => {
     try {
         const conn = await pool.getConnection();
-        const [shortsAuthor] = await conn.query(getShortsByAuthorKeyword, [keyword, keyword]);
+        const [shortsAuthor] = await conn.query(getShortsByAuthorKeyword, [keyword]);
 
         conn.release();
 

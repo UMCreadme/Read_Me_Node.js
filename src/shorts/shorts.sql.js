@@ -30,7 +30,7 @@ LEFT JOIN (
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE b.title REGEXP ? AND is_deleted = false
-ORDER BY s.like_count DESC;`;
+ORDER BY like_count DESC;`;
 
 // 저자에서 키워드로 쇼츠 검색
 export const getShortsByAuthorKeyword =
@@ -55,7 +55,7 @@ LEFT JOIN (
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE b.author REGEXP ? AND is_deleted = false
-ORDER BY s.like_count DESC;`;
+ORDER BY like_count DESC;`;
 
 // 태그에서 키워드로 쇼츠 검색
 export const getShortsByTagKeyword =
@@ -80,7 +80,7 @@ LEFT JOIN (
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE s.tag REGEXP ? AND is_deleted = false
-ORDER BY s.like_count DESC;`;
+ORDER BY like_count DESC;`;
 
 
 // 쇼츠에 댓글 달기

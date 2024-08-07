@@ -80,7 +80,7 @@ export const searchBookService = async (userId, keyword, page, size) => {
     if(!userId) {
         return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
     }
-    await addSearchDao(userId, keyword);
-
+    
+    addSearchDao(userId, keyword);
     return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
 };
