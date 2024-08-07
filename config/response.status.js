@@ -34,7 +34,10 @@ export const status = {
     FOLLOW_NOT_FOUND : { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4004", "message": "현재 팔로우 상태가 아닙니다." },
 
     // category err
-    CATEGORY_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다." },
+    CATEGORY_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다."},
+    CATEGORY_COUNT_IS_WRONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4002", "message": "카테고리 개수는 4~8개로 입력해주세요."},
+    CATEGORY_DUPLICATED: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4003", "message": "카테고리는 중복되지 않게 선택해주세요."},
+
 
     // shorts err
     SHORTS_TAG_COUNT_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4001", "message": "태그는 10개 이내로 입력해주세요." },

@@ -8,7 +8,7 @@ import {
     findUserBooks,
     followNewUser,
     unfollowUser,
-    searchUserByKeyword, join, login
+    searchUserByKeyword, join, login, ChangeCategoryService
 } from "./users.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import {BaseError} from "../../config/error.js";
@@ -163,3 +163,17 @@ export const searchUser = async (req, res, next) => {
 
     res.send(response(status.SUCCESS, userSearchResponseDTOList, pageInfo(page, currentSize, hasNext)))
 }
+
+// 카테고리 수정
+export const changeCategory = async (req, res, next) => {
+    const user_id = req.user_id;
+    const { category } = req.body;
+
+    if (!Array.isArray(category) || category.length < 4 || category.length > 8) {
+        return res.send(response(status.CATEGORY_COUNT_IS_WRONG));
+    }
+
+    const result = await ChangeCategoryService(user_id, category);
+    return res.send(response(status.SUCCESS, result));
+}
+

@@ -15,7 +15,8 @@ import {
     checkIsFollowed,
     hasRecentPostForUser,
     userLogin,
-    userSignUp
+    userSignUp,
+    changeCategoryDao
 } from "./users.dao.js";
 import {
     userBookResponseDTO,
@@ -259,4 +260,20 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     }
 
     return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
+}
+
+
+// 카테고리 수정
+export const ChangeCategoryService = async(user_id, category) => {
+
+    const hasDuplicates = (arr) => {
+        return new Set(arr).size !== arr.length;
+    };
+
+    // category 배열에 중복된 값이 있는지 검사
+    if (hasDuplicates(category)) {
+        throw new BaseError(status.CATEGORY_DUPLICATED);
+    }
+
+    return await changeCategoryDao(user_id, category);
 }
