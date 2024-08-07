@@ -23,7 +23,7 @@ WHERE s.shorts_id = ?;`;
 // 카테고리별 쇼츠 상세 정보를 가져오는 쿼리
 export const getShortsDetailByCategory = 
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
-shorts_with_likes AS (
+WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
@@ -65,7 +65,7 @@ LIMIT ? OFFSET ?;`;
 // 카테고리별 쇼츠 상세 정보를 가져오는 쿼리 (검색어로 노출된 쇼츠 제외)
 export const getShortsDetailByCategoryExcludeKeyword =
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
-shorts_with_likes AS (
+WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
@@ -107,7 +107,7 @@ LIMIT ? OFFSET ?;`;
 // 카테고리별 쇼츠 상세 정보를 가져오는 쿼리 (책 제외)
 export const getShortsDetailByCategoryExcludeBook =
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
-shorts_with_likes AS (
+WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
@@ -148,7 +148,7 @@ LIMIT ? OFFSET ?;`;
 // 책에 해당하는 쇼츠 상세 정보를 가져오는 쿼리
 export const getShortsDetailByBook =
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
-shorts_with_likes AS (
+WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
         s.phrase, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
