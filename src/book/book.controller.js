@@ -2,6 +2,7 @@ import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
 import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService } from "./book.service.js";
 import { bookInfoDto } from "./book.dto.js";
+import { pageInfo } from "../../config/pageInfo.js";
 
 // 책 상세 정보 조회
 export const getBookDetail = async (req, res, next) => {

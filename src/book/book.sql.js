@@ -28,7 +28,7 @@ SELECT
     s.book_id,
     b.image_url,
     b.title,
-    b.author,
+    b.author
 FROM 
     SHORTS s
 JOIN 

@@ -3,7 +3,7 @@ import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
 import { addSearchDao } from "../research/research.dao.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
-import { findIsReadById, getBookIdByISBN, findUserRecentBookList,  createBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid } from "./book.dao.js"
+import { checkIsReadById, getBookIdByISBN, findUserRecentBookList,  createBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid } from "./book.dao.js"
 import { bookDetailDto, bookListInfoDto } from "./book.dto.js";
 import axios from "axios";
 
@@ -17,7 +17,7 @@ export const getBookDetailInfo = async (ISBN, page, size, userId) => {
     }
 
     // 책 읽음 여부 업데이트 (회원인 경우 DB 조회 / 비회원인 경우 false)
-    const isRead = userId ? await findIsReadById(userId, bookId) : false;
+    const isRead = userId ? await checkIsReadById(userId, bookId) : false;
     // 책에 해당하는 쇼츠 조회
     const shorts = await getShortsDetailToBook(-1, bookId, size+1, (page-1)*size);
 
@@ -46,7 +46,7 @@ export const updateBookIsRead = async (book, cid, userId) => {
         bookId = await createBook(book);
     }
 
-    const isRead = await findIsReadById(userId, bookId);
+    const isRead = await checkIsReadById(userId, bookId);
     // 읽은 책일 경우 삭제
     if(isRead) {
         await deleteBookIsReadToUser(userId, bookId);
