@@ -1,6 +1,4 @@
 import { pool } from "../../config/db.config.js";
-import { BaseError } from "../../config/error.js";
-import { status } from "../../config/response.status.js";
 import { isUserReadBookById } from "../book/book.sql.js";
 import { insertObject } from "../common/common.dao.js";
 import { addComment, getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
@@ -9,60 +7,55 @@ import { checkLike, removeLike, addLike } from "./shorts.sql.js";
 
 // 책 제목으로 쇼츠 검색
 export const getShortsToTitleKeyword = async (keyword) => {
-    try {
-        const conn = await pool.getConnection();
-        const [shortsTitle] = await conn.query(getShortsByTitleKeyword, [keyword]);
-
+    const conn = await pool.getConnection();
+    const [shortsTitle] = await conn.query(getShortsByTitleKeyword, [keyword], (err, rows) => {
         conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        } else {
+            return rows;
+        }
+    });
 
-        return shortsTitle;
-    } catch (err) {
-        console.log(err);
-    }
+    return shortsTitle;
 };
 
 // 저자로 쇼츠 검색
 export const getShortsToAuthorKeyword = async (keyword) => {
-    try {
-        const conn = await pool.getConnection();
-        const [shortsAuthor] = await conn.query(getShortsByAuthorKeyword, [keyword]);
-
+    const conn = await pool.getConnection();
+    const [shortsAuthor] = await conn.query(getShortsByAuthorKeyword, [keyword], (err, rows) => {
         conn.release();
-
-        return shortsAuthor;
-    } catch (err) {
-        console.log(err);
-        if (err instanceof BaseError) {
+        if (err) {
+            console.log(err);
             throw err;
         } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+            return rows;
         }
-    }
+    });
+
+    return shortsAuthor;
 };
 
 // 태그로 쇼츠 검색
 export const getShortsToTagKeyword = async (keyword) => {
-    try {
-        const conn = await pool.getConnection();
-        const [shortsTag] = await conn.query(getShortsByTagKeyword, [keyword]);
-
+    const conn = await pool.getConnection();
+    const [shortsTag] = await conn.query(getShortsByTagKeyword, [keyword], (err, rows) => {
         conn.release();
-
-        return shortsTag;
-    } catch (err) {
-        console.log(err);
-        if (err instanceof BaseError) {
+        if (err) {
+            console.log(err);
             throw err;
         } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
+            return rows;
         }
-    }
+    });
+
+    return shortsTag;
 };
 
 // 쇼츠 생성
 export const createShorts = async (shorts) => {
     const conn = await pool.getConnection();
-
     try {
         await conn.query('BEGIN');
         
@@ -89,11 +82,7 @@ export const createShorts = async (shorts) => {
         conn.release();
 
         console.log(err);
-        if (err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
+        throw err;
     }
 };
 
@@ -101,26 +90,44 @@ export const createShorts = async (shorts) => {
 // 쇼츠에 댓글 달기
 export const addCommentDao = async (shorts_id, user_id, content) => {
     const conn = await pool.getConnection();
-    await conn.query(addComment, [shorts_id, user_id, content]);
-        
-    conn.release();
+    await conn.query(addComment, [shorts_id, user_id, content], (err) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        }
+    });
 }
 
 // shorts ID 존재 여부 확인
 export const doesShortExistDao = async (shorts_id) => {
     const conn = await pool.getConnection();
 
-    const [result] = await conn.query('SELECT 1 FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
-    conn.release();
+    const [result] = await conn.query('SELECT 1 FROM SHORTS WHERE shorts_id = ?', [shorts_id], (err, rows) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        } else {
+            return rows;
+        }
+    });
     return result.length > 0;
 }
 
 // 존재하는 쇼츠인 지 확인
 export const checkShortsExistenceDao = async (shorts_id) => {
     const conn = await pool.getConnection();
-    const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ?', [shorts_id], (err, rows) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        } else {
+            return rows;
+        }
+    });
 
-    conn.release();
     return rows[0].count > 0;
 }
 
@@ -128,37 +135,58 @@ export const checkShortsExistenceDao = async (shorts_id) => {
 export const checkLikeDao = async (shorts_id, user_id) => {
     const conn = await pool.getConnection();
 
-    const [rows] = await conn.query(checkLike, [shorts_id, user_id]);
+    const [rows] = await conn.query(checkLike, [shorts_id, user_id], (err, rows) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        } else {
+            return rows;
+        }
+    });
 
-    conn.release();
     return rows[0].count > 0;
-
 }
 
 // 좋아요 추가
 export const addLikeDao = async (shorts_id, user_id) => {
     const conn = await pool.getConnection();
 
-    await conn.query(addLike, [shorts_id, user_id]);
-    
-    conn.release();
+    await conn.query(addLike, [shorts_id, user_id], (err) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        }
+    });
 }
 
 // 좋아요 삭제
 export const removeLikeDao = async (shorts_id, user_id) => {
     const conn = await pool.getConnection();
 
-    await conn.query(removeLike, [shorts_id, user_id]);
-
-    conn.release();
+    await conn.query(removeLike, [shorts_id, user_id], (err) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        }
+    });
 }
 
 // 좋아요 수 조회
 export const getLikeCntDao = async (shorts_id) => {
     const conn = await pool.getConnection();
 
-    const [rows] = await conn.query('SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts_id = ?', [shorts_id]);
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts_id = ?', [shorts_id], (err, rows) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        } else {
+            return rows;
+        }
+    });
 
-    conn.release();
     return rows[0].count;
 }
