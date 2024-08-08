@@ -41,3 +41,9 @@ export const GET_COMMUNITIES = `
     ORDER BY created_at DESC 
     LIMIT ? OFFSET ?;
 `;
+
+// 커뮤니티 ID로 책 id 조회
+export const getCommunityBookID = "SELECT book_id FROM COMMUNITY WHERE community_id = ?;";
+
+// 책 ID로 제목, 표지url 조회
+export const getBookInfo = "SELECT title, image_url FROM BOOK WHERE book_id = ?;";

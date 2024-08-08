@@ -8,7 +8,8 @@ import {
     COUNT_COMMUNITIES_BY_USER_AND_BOOK,
     CREATE_COMMUNITY,
     GET_COMMUNITIES, 
-    COUNT_COMMUNITIES
+    getCommunityBookID,
+    getBookInfo
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
@@ -77,10 +78,30 @@ export const joinCommunity = async (communityId, userId) => {
 };
 
 // 모임 리스트 조회
-export const getCommunities = async (page, size) => {
-    const offset = (page - 1) * size;
-    const limit = parseInt(size) + 1;  // 요청한 size보다 하나 더 조회
-    const [rows] = await pool.query(GET_COMMUNITIES, [limit, parseInt(offset)]);
-    const [countResult] = await pool.query(COUNT_COMMUNITIES);
-    return { communities: rows, totalElements: countResult[0].count };
+export const getCommunities = async (offset, limit) => {
+    
+    try{
+        const conn = await pool.getConnection();
+        const [communities] = await pool.query(GET_COMMUNITIES, [limit, offset]);
+        
+        conn.release();
+
+        return communities;
+    }
+    catch (err) {
+        console.log(err);
+    }
+};
+
+// 커뮤니티 책 제목, 표지 불러오기
+export const getCommunityBookInfo = async (communityId) => {
+
+    // 모임에서 선택된 책 id 불러오기
+    const [bookIdResult] = await pool.query(getCommunityBookID, [communityId]);
+    const bookId = bookIdResult[0].book_id;
+
+    // 해당 책의 표지와 제목 불러오기
+    const [result] = await pool.query(getBookInfo, [bookId]);
+
+    return result[0]
 };

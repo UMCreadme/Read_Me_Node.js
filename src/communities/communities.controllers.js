@@ -1,6 +1,7 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
+import { pageInfo } from "../../config/pageInfo.js";
 import { createCommunityService, joinCommunityService, getCommunitiesService } from './communities.service.js';
 
 // 커뮤니티 생성
@@ -40,18 +41,16 @@ export const joinCommunityController = async (req, res, next) => {
 
 };
 
-
+// 전체 모임 리스트 조회
 export const getCommunitiesController = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const size = parseInt(req.query.size) || 10;
+    const offset = (page -1) * size
 
-    const { communityList, pageInfo } = await getCommunitiesService(page, size);
+    const result = await getCommunitiesService(offset, size+1)
 
-    res.status(status.SUCCESS.status).send({
-        isSuccess: true,
-        code: status.SUCCESS.code,
-        message: "전체 모임 리스트 불러오기 성공",
-        pageInfo: pageInfo,
-        result: communityList
-    });
-};
+    const hasNext = result.length > size;
+    if (hasNext) result.pop();
+    
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
+}
