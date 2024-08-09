@@ -81,11 +81,11 @@ export const searchBookService = async (userId, keyword, page, size) => {
         return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
     }
 
-    const recentSerachId = await getResearchId(userId, keyword);
-    if(!recentSerachId) {
+    const recentSearchId = await getResearchId(userId, keyword);
+    if(!recentSearchId) {
         await addSearchDao(userId, keyword);
     } else {
-        await updateSearchDao(recentSerachId);
+        await updateSearchDao(recentSearchId);
     }
 
     return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
