@@ -13,7 +13,7 @@ export const kakaoSignUp = async(req, res, next) => {
 
 // 카카오 로그인
 export const kakaoLogin = async (req,res, next) =>{
-   const result = await login(req.body, 'kakao')
+   const result = await service.login(req.body, 'kakao')
 
     if (!result) {
         throw new BaseError(status.MEMBER_NOT_FOUND)
@@ -151,7 +151,7 @@ export const searchUser = async (req, res, next) => {
     const size = parseInt(req.query.size) || 20;
     const offset = (page - 1) * size;
 
-    const { userSearchResponseDTOList, totalCount, currentSize } = await service.searchUserByKeyword(req.user_id || null, req.query.keyword, offset, size);
+    const { userSearchResponseDTOList, totalCount, currentSize } = await service.searchUserByKeyword(req.user_id, req.query.keyword, offset, size);
 
     const hasNext = totalCount > offset + size;
 

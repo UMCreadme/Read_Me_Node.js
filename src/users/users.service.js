@@ -15,6 +15,10 @@ import {refresh, sign} from "../jwt/jwt-util.js";
 export const join = async(body, provider) => {
     const duplicateAccountCheck = await dao.checkDuplicateAccount(body.account)
 
+    if(duplicateAccountCheck){
+        throw new BaseError(status.DUPLICATE_ACCOUNT)
+    }
+
     const accountCheck = (account) => {
         const regex = /^[a-zA-Z0-9]{1,30}$/;
         return regex.test(account);
@@ -30,7 +34,7 @@ export const join = async(body, provider) => {
         return (category.length < 4)  || (category.length >8) || duplicateCategory
     }
 
-    if(!body.uniqueId || !body.email || !accountCheck(body.account) || duplicateAccountCheck || !nicknameCheck(body.nickname) || categoryCheck(body.categoryIdList))
+    if(!body.uniqueId || !body.email || !accountCheck(body.account) || !nicknameCheck(body.nickname) || categoryCheck(body.categoryIdList))
     {
         throw new BaseError(status.PARAMETER_IS_WRONG)
     }
