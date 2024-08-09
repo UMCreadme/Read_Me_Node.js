@@ -1,5 +1,5 @@
 import { pool } from "../../config/db.config.js";
-import { addSearchQuery } from "./research.sql.js";
+import { addSearchQuery, getRecentResearchId, updateRecentSearch } from "./research.sql.js";
 import { RecentSearchesDTO } from "./research.dto.js";
 import { deleteSearch, SearchUser, getQueriesbyId } from "./research.sql.js";
 
@@ -18,6 +18,38 @@ export const addSearchDao = async (user_id, query, book_id) => {
         });
         
     return result[0];
+};
+
+// 검색어, 유저 ID에 해당하는 ID값 조회
+export const getResearchId = async (user_id, query) => {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.query(getRecentResearchId, [user_id, query], (err, rows) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        } else {
+            return rows;
+        }
+    });
+
+    if(rows.length === 0) {
+        return undefined;
+    }
+
+    return rows[0].research_id;
+};
+
+// 검색어 업데이트
+export const updateSearchDao = async (research_id) => {
+    const conn = await pool.getConnection();
+    await conn.query(updateRecentSearch, [research_id], (err) => {
+        conn.release();
+        if (err) {
+            console.log(err);
+            throw err;
+        }
+    });
 };
 
 // 검색어에 해당하는 유저 ID 조회

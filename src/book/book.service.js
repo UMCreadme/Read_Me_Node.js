@@ -1,7 +1,7 @@
 import { BaseError } from "../../config/error.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
-import { addSearchDao } from "../research/research.dao.js";
+import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
 import { checkIsReadById, getBookIdByISBN, findUserRecentBookList,  createBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid } from "./book.dao.js"
 import { bookDetailDto, bookListInfoDto } from "./book.dto.js";
@@ -80,8 +80,14 @@ export const searchBookService = async (userId, keyword, page, size) => {
     if(!userId) {
         return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
     }
-    
-    addSearchDao(userId, keyword);
+
+    const recentSerachId = await getResearchId(userId, keyword);
+    if(!recentSerachId) {
+        await addSearchDao(userId, keyword);
+    } else {
+        await updateSearchDao(recentSerachId);
+    }
+
     return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
 };
 

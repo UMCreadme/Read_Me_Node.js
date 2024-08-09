@@ -6,7 +6,7 @@ import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
 import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao} from "./shorts.dao.js";
-import { addSearchDao } from "../research/research.dao.js";
+import { addSearchDao, getResearchId } from "../research/research.dao.js";
 
 
 // 쇼츠 검색
@@ -21,7 +21,13 @@ export const getSearchShorts = async (userId, keyword, page, size) => {
     if(!userId) {
         return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
     }
-    addSearchDao(userId, keyword);
+
+    const recentSerachId = await getResearchId(userId, keyword);
+    if(!recentSerachId) {
+        await addSearchDao(userId, keyword);
+    } else {
+        await updateSearchDao(recentSerachId);
+    }
 
     return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
 };
