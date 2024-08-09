@@ -33,21 +33,17 @@ userRouter.get("/my/likes", asyncHandler(authJWT), asyncHandler(getUserLikeShort
 //내가 읽은 책 리스트 조회
 userRouter.get("/my/books", asyncHandler(authJWT), asyncHandler(getUserBooks));
 
+// 로그인 안하고 유저 검색 기능
+userRouter.get("", asyncHandler(authJWTNoUserRequired), asyncHandler(searchUser))
+
 // 다른 유저 팔로잉
 userRouter.post("/:userId/follow", asyncHandler(authJWT), asyncHandler(followUser));
-
 
 // 다른 유저 정보 조회 (로그인 필요 X)
 userRouter.get('/:userId', asyncHandler(authJWTNoUserRequired), asyncHandler(getOtherUserInfo));
 
 // 다른 유저 팔로우 취소
 userRouter.delete("/:userId/follow", asyncHandler(authJWT), asyncHandler(unfollow));
-
-// 로그인 후 유저 검색 기능
-userRouter.get("/my/search", asyncHandler(authJWT), asyncHandler(searchUser));
-
-// 로그인 안하고 유저 검색 기능
-userRouter.get("/search", asyncHandler(searchUser))
 
 // 카카오 회원가입
 userRouter.post("/sign", asyncHandler(kakaoSignUp));
