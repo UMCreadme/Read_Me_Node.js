@@ -37,7 +37,7 @@ export const getResearchId = async (user_id, query) => {
         return undefined;
     }
 
-    return rows[0].research_id;
+    return rows[0].recent_searches_id;
 };
 
 // 검색어 업데이트

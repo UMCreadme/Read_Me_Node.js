@@ -6,7 +6,7 @@ import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
 import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao} from "./shorts.dao.js";
-import { addSearchDao, getResearchId } from "../research/research.dao.js";
+import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 
 
 // 쇼츠 검색
