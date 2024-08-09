@@ -151,6 +151,12 @@ export const searchUser = async (req, res, next) => {
     const size = parseInt(req.query.size) || 20;
     const offset = (page - 1) * size;
 
+    if(!req.query.keyword) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    req.query.keyword = req.query.keyword.trim();
+
     const { userSearchResponseDTOList, totalCount, currentSize } = await service.searchUserByKeyword(req.user_id, req.query.keyword, offset, size);
 
     const hasNext = totalCount > offset + size;

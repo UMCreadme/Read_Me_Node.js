@@ -1,7 +1,6 @@
 import * as service from "./shorts.service.js";
 import { status } from "../../config/response.status.js";
 import { response } from "../../config/response.js";
-import imgUploader from "../../config/s3.manager.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
 import { bookInfoDto } from "../book/book.dto.js";
@@ -32,7 +31,14 @@ export const getShortsDetail = async (req, res, next) => {
 
 export const searchShorts = async (req, res, next) => {
     const { keyword, page=1, size=10 } = req.query;
-    const shorts = await service.getSearchShorts(keyword, parseInt(page), parseInt(size));
+    const userId = req.user_id;
+
+    if(!keyword) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    keyword = keyword.trim();
+    const shorts = await service.getSearchShorts(userId, keyword, parseInt(page), parseInt(size));
 
     res.send(response(status.SUCCESS, shorts.data, shorts.pageInfo));
 };
