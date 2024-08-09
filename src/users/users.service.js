@@ -97,12 +97,14 @@ export const isFollowing = async(myId, userId) => {
     return followStatus;
 }
 
-//유저 프로필 수정
-export const updateUser = async(userId, body, profileImg) =>{
-    if(!body.nickname || !body.account){
-        throw new BaseError(status.PARAMETER_IS_WRONG)
-    }
-    await editUserInfo(userId, body, profileImg)
+//유저 프로필 이미지 수정
+export const updateUserImageService = async(userId, profileImg) =>{
+    await dao.editUserImageDao(userId, profileImg)
+}
+
+//유저 프로필 이미지 삭제
+export const deleteUserImageService = async (userId) => {
+    await dao.deleteUserImageDao(userId)
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직

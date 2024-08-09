@@ -15,7 +15,7 @@ import {
     searchUser,
     kakaoSignUp, kakaoLogin,
     changeCategory,
-    updateUserInfo
+    updateUserImage, deleteUserImage
 } from "./users.controller.js"
 import {authJWT, authJWTNoUserRequired} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
@@ -27,10 +27,12 @@ export const userRouter = express.Router({mergeParams:true});
 // 나의 정보 조회
 userRouter.get('/my', asyncHandler(authJWT), asyncHandler(getUserInfo));
 
-// 나의 프로필 편집
+// 나의 프로필 이미지 편집
 userRouter.put('/my', asyncHandler(authJWT),  imgUploader.single('image'), (req, res, next) => {
     next(); // 다음 미들웨어로 넘어가기
-}, asyncHandler(updateUserInfo));
+}, asyncHandler(updateUserImage));
+
+userRouter.delete('/my', asyncHandler(authJWT), asyncHandler(deleteUserImage))
 
 // 내가 만든 쇼츠 리스트 조회
 userRouter.get("/my/shorts", asyncHandler(authJWT), asyncHandler(getUserShorts));

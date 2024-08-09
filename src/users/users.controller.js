@@ -43,12 +43,14 @@ export const getUserInfo = async (req, res, next) => {
     res.send(response(status.SUCCESS , await service.findOne(req.user_id)))
 }
 
-// 유저 프로필 수정
-export const updateUserInfo = async(req, res, next) => {
-    if(!req.file){
-        res.send(response(status.SUCCESS, await updateUser(req.user_id, req.body, "https://readme-image.s3.ap-northeast-2.amazonaws.com/profile/default-profile.png")))
-    }
-    else res.send(response(status.SUCCESS, await updateUser(req.user_id, req.body, req.file.location)))
+// 유저 프로필 이미지 수정
+export const updateUserImage = async(req, res, next) => {
+    res.send(response(status.SUCCESS, await service.updateUserImageService(req.user_id, req.file.location)))
+}
+
+// 유저 프로필 이미지 삭제
+export const deleteUserImage = async(req, res, next) => {
+    res.send(response(status.SUCCESS, await service.deleteUserImageService(req.user_id)))
 }
 
 // 유저가 만든 쇼츠 리스트 조회

@@ -54,11 +54,8 @@ export const getLatestPostCount = `
   WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
 `;
 
-export const updateUserInfoByUserId = `
+export const updateUserImageSql = `
     UPDATE USERS
-    SET nickname = COALESCE(?, nickname),
-        account = COALESCE(?, account),
-        comment = COALESCE(?, comment),
-        image_url = COALESCE(?, image_url)
+    SET image_url = COALESCE(?, image_url)
     WHERE user_id = ?
 `;

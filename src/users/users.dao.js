@@ -355,14 +355,24 @@ export const changeCategoryDao = async (user_id, category) => {
 }
 
 // 유저 프로필 편집 기능
-export const editUserInfo = async (userId, updateUserData, profileImg) => {
+export const editUserImageDao = async (userId, profileImg) => {
     try{
         const conn = await pool.getConnection()
-        await pool.query(updateUserInfoByUserId, [updateUserData.nickname, updateUserData.account, updateUserData.comment, profileImg, userId])
+        await pool.query(sql.updateUserImageSql, [profileImg, userId])
         conn.release()
-
     }
     catch(err){
-        throw new BaseError(status.INTERNAL_SERVER_ERROR)
+        console.log(err)
+    }
+}
+
+// 유저 프로필 이미지 삭제 기능
+export const deleteUserImageDao = async (userId) => {
+    try{
+        const conn = await pool.getConnection()
+        await pool.query(sql.deleteUser)
+    }
+    catch (err) {
+        console.log(err)
     }
 }
