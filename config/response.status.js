@@ -36,6 +36,11 @@ export const status = {
     CATEGORY_DUPLICATED: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4003", "message": "카테고리는 중복되지 않게 선택해주세요."},
 
 
+    // community err
+    COMMUNITY_LIMIT_EXCEEDED: {status: StatusCodes.FORBIDDEN, "isSuccess": false, "code": "COMMUNITY4001", "message": "한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없습니다."},
+    INVALID_CAPACITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY4002", "message": "커뮤니티의 수용 인원(capacity)은 최대 10명까지 허용됩니다." },
+    COMMUNITY_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4005", "message": "존재하지 않는 커뮤니티입니다." },
+
     // shorts err
     SHORTS_TAG_COUNT_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4001", "message": "태그는 10개 이내로 입력해주세요." },
     SHORTS_TAG_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4002", "message": "태그는 10자 이내로 입력해주세요." },

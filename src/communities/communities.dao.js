@@ -13,6 +13,7 @@ import {
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 
+  
 // 커뮤니티 생성과 관련된 전체 과정 처리
 export const createCommunityWithCheck = async (userId, bookId, address, tag, capacity) => {
     const conn = await pool.getConnection();
@@ -117,4 +118,47 @@ export const getCommunities = async (page, size) => {
     } finally {
         conn.release(); // 연결 해제
     }
+
+};
+
+export const checkCommunityExistenceDao = async (community_id) => {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM COMMUNITY WHERE community_id = ? AND is_deleted = 0', [community_id]);
+
+    conn.release();
+    return rows[0].count > 0;
+};
+
+export const checkCommunityOwnerDao = async (community_id) => {
+    const conn = await pool.getConnection();
+    
+    const [result] = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
+    if (result.length === 0) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    }
+    return result[0].user_id;
+};
+
+
+export const deleteCommunityDao = async (community_id) => {
+    const conn = await pool.getConnection();
+
+    try {
+        await conn.query('BEGIN');
+
+        // 커뮤니티 소프트 딜리트
+        await conn.query('UPDATE COMMUNITY SET is_deleted = 1 WHERE community_id = ?',[community_id]);
+        
+        // 커뮤니티 참가자 소프트 딜리트
+        await conn.query('UPDATE COMMUNITY_USERS SET is_deleted = 1 WHERE community_id = ?', [community_id]);
+
+        // 트랜잭션 커밋
+        await conn.query('COMMIT');
+    } catch (err) {
+        await conn.query('ROLLBACK');
+        throw err;
+    } finally {
+        conn.release();
+    }
+    
 };
