@@ -42,6 +42,26 @@ export const GET_COMMUNITIES = `
     LIMIT ? OFFSET ?;
 `;
 
+// 나의 참여 모임 리스트 조회 쿼리 (최신 메시지 온 순으로 정렬)
+export const getMyCommunities = `
+    SELECT c.*
+    FROM COMMUNITY c
+    LEFT JOIN MESSAGE m ON c.community_id = m.community_id
+    WHERE c.user_id = ?
+    GROUP BY c.community_id
+    ORDER BY MAX(m.created_at) DESC
+    LIMIT ? OFFSET ?;
+`
+// 안읽은 개수 조회
+export const getUnreadCount = `
+    SELECT COUNT(*) AS unread
+    FROM MESSAGE m
+    WHERE m.created_at > (
+        SELECT MAX(r.created_at)
+        FROM MESSAGE_READ_STATUS r
+        JOIN MESSAGE m ON r.message_id = m.message_id
+        WHERE r.user_id = ? ) ;`;
+
 // 커뮤니티 ID로 책 id 조회
 export const getCommunityBookID = "SELECT book_id FROM COMMUNITY WHERE community_id = ?;";
 

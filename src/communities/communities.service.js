@@ -2,13 +2,15 @@ import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { 
     getCommunities, 
+    getMyCommunities,
     createCommunityWithCheck, 
     getCommunityCurrentCount,
+    getUnreadCnt,
     getCommunityBookInfo, 
     getCommunityCapacity, 
     isUserAlreadyInCommunity, 
     joinCommunity } from './communities.dao.js';
-import { communitiesInfoDTO } from './communities.dto.js';
+import { communitiesInfoDTO, mycommunitiesInfoDTO } from './communities.dto.js';
 
 // 커뮤니티 생성 서비스
 export const createCommunityService = async (userId, bookId, address, tag, capacity) => {
@@ -77,4 +79,28 @@ export const getCommunitiesService = async (offset, limit) => {
     }
 
     return allCommunitiesDTOList
+};
+
+// 나의 참여 모임 리스트 조회
+export const getMyCommunitiesService = async (myId, offset, limit) => {
+    
+    const myCommunities = await getMyCommunities(myId, offset, limit);
+    const myCommunitiesDTOList = [];
+    
+    for (const c of myCommunities) {
+        //현재 참여자수
+        let currentCount = await getCommunityCurrentCount(c.community_id);
+        
+        // 모임 책 정보
+        let communityBook = await getCommunityBookInfo(c.community_id);
+
+        // 안읽음 개수
+        let unreadCnt = await getUnreadCnt(myId);
+        unreadCnt = Number(unreadCnt.unread);
+        
+        let result = mycommunitiesInfoDTO(c, communityBook, currentCount, unreadCnt);
+        myCommunitiesDTOList.push(result);
+    }
+
+    return myCommunitiesDTOList
 };

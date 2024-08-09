@@ -1,6 +1,6 @@
 import express from 'express';
 import asyncHandler from 'express-async-handler';
-import { createCommunityController,joinCommunityController,getCommunitiesController } from './communities.controllers.js';
+import { createCommunityController,joinCommunityController,getCommunitiesController, getMyCommunitiesController } from './communities.controllers.js';
 import { authJWT } from '../jwt/authJWT.js';
 
 export const communitiesRouter = express.Router();
@@ -9,7 +9,7 @@ export const communitiesRouter = express.Router();
 communitiesRouter.get('/', asyncHandler(getCommunitiesController));
 
 // 나의 참여 모임 조회
-communitiesRouter.get('/my', asyncHandler(authJWT), asyncHandler(getCommunitiesController));
+communitiesRouter.get('/my', asyncHandler(authJWT), asyncHandler(getMyCommunitiesController));
 
 // 모임 생성
 communitiesRouter.post('/', asyncHandler(authJWT), asyncHandler(createCommunityController));

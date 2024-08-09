@@ -2,7 +2,7 @@ import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
 import { pageInfo } from "../../config/pageInfo.js";
-import { createCommunityService, joinCommunityService, getCommunitiesService } from './communities.service.js';
+import { createCommunityService, joinCommunityService, getCommunitiesService, getMyCommunitiesService } from './communities.service.js';
 
 // 커뮤니티 생성
 export const createCommunityController = async (req, res, next) => {
@@ -48,6 +48,22 @@ export const getCommunitiesController = async (req, res, next) => {
     const offset = (page -1) * size
 
     const result = await getCommunitiesService(offset, size+1)
+
+    const hasNext = result.length > size;
+    if (hasNext) result.pop();
+
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
+}
+
+// 나의 모임 리스트 조회
+export const getMyCommunitiesController = async (req, res, next) => {
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 10;
+    const offset = (page -1) * size
+
+    const myId = req.user_id;
+
+    const result = await getMyCommunitiesService(myId, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
