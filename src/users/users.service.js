@@ -10,6 +10,7 @@ import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
 import {refresh, sign} from "../jwt/jwt-util.js";
+import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 
 // 회원가입 후 토큰 반환
 export const join = async(body, provider) => {
@@ -220,6 +221,13 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const userSearchResponseDTOList = []
     for (const paginatedListElement of paginatedList) {
         userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement))
+    }
+
+    const recentSerachId = await getResearchId(userId, keyword);
+    if(!recentSerachId) {
+        await addSearchDao(userId, keyword);
+    } else {
+        await updateSearchDao(recentSerachId);
     }
 
     return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}

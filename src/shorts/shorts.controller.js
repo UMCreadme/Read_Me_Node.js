@@ -32,6 +32,12 @@ export const getShortsDetail = async (req, res, next) => {
 export const searchShorts = async (req, res, next) => {
     const { keyword, page=1, size=10 } = req.query;
     const userId = req.user_id;
+
+    if(!keyword) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    keyword = keyword.trim();
     const shorts = await service.getSearchShorts(userId, keyword, parseInt(page), parseInt(size));
 
     res.send(response(status.SUCCESS, shorts.data, shorts.pageInfo));
