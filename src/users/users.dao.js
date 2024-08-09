@@ -314,6 +314,16 @@ export const findUsersWithKeyword = async (userId, keyword, target) => {
     return allFindWithKeyword;
 }
 
+
+export const checkDuplicateAccount = async(account) => {
+    const conn = await pool.getConnection()
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM USERS WHERE account = ?', [account])
+
+    conn.release()
+
+    return rows[0].count > 0
+}
+
 export const changeCategoryDao = async (user_id, category) => {
     const conn = await pool.getConnection();
     try {

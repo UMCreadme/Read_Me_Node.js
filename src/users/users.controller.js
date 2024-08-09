@@ -13,16 +13,14 @@ export const kakaoSignUp = async(req, res, next) => {
 
 // 카카오 로그인
 export const kakaoLogin = async (req,res, next) =>{
-    try {
-        const result = await service.login(req.body, 'kakao')
-        if (!result) {
-            return res.send(response(status.MEMBER_NOT_FOUND))
-        }
-        return res.send(response(status.SUCCESS, result))
+   const result = await service.login(req.body, 'kakao')
+
+    if (!result) {
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
-    catch (err){
-        return next(new BaseError(status.BAD_REQUEST))
-    }
+
+    res.send(response(status.SUCCESS, result))
+
 }
 // 다른 유저 정보 조회
 export const getOtherUserInfo = async (req, res, next) => {
@@ -159,7 +157,7 @@ export const searchUser = async (req, res, next) => {
 
     req.query.keyword = req.query.keyword.trim();
 
-    const { userSearchResponseDTOList, totalCount, currentSize } = await service.searchUserByKeyword(req.user_id || null, req.query.keyword, offset, size);
+    const { userSearchResponseDTOList, totalCount, currentSize } = await service.searchUserByKeyword(req.user_id, req.query.keyword, offset, size);
 
     const hasNext = totalCount > offset + size;
 
