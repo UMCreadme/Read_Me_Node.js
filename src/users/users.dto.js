@@ -1,5 +1,5 @@
 // 유저의 마이프로필 페이지에서 유저 정보 조회시 반환값
-export const userInfoResponseDTO = async (userData, isRecentPost, followerNum, followingNum) => {
+export const userInfoResponseDTO = async (userData, isRecentPost, followerNum, followingNum, readBookNum) => {
     
     return {
         "userId" : userData.user_id,
@@ -9,23 +9,17 @@ export const userInfoResponseDTO = async (userData, isRecentPost, followerNum, f
         "followerNum" : followerNum,
         "followingNum" : followingNum,
         "profileImg" : userData.image_url,
-        "isRecentPost": isRecentPost 
+        "isRecentPost": isRecentPost,
+        "readCount": readBookNum
     }
 }
 
 // 다른 유저의 프로필에서 유저 정보 조회시 반환값
-export const otherUserInfoResponseDTO = async (userData, isRecentPost, isFollowed, followerNum, followingNum) => {
+export const otherUserInfoResponseDTO = async (userInfo, isFollowed) => {
     
     return {
-        "userId" : userData.user_id,
-        "nickname" : userData.nickname,
-        "account" : userData.account,
-        "comment" : userData.comment,
-        "followerNum" : followerNum,
-        "followingNum" : followingNum,
-        "profileImg" : userData.image_url,
-        "isFollowed" : isFollowed,
-        "isRecentPost": isRecentPost 
+        ...userInfo,
+        "isFollowed" : isFollowed
     }
 }
 
