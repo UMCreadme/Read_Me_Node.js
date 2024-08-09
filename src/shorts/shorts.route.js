@@ -2,12 +2,12 @@ import express from 'express';
 import asyncHandler from 'express-async-handler';
 import { createShorts, getShortsDetail, searchShorts, addComment, likeShorts, deleteShorts } from './shorts.controller.js';
 import imgUploader from '../../config/s3.manager.js';
-import { authJWT } from '../jwt/authJWT.js';
+import { authJWT, authJWTNoUserRequired } from '../jwt/authJWT.js';
 
 
 export const shortsRouter = express.Router({mergeParams:true});
 
-shortsRouter.get('', asyncHandler(searchShorts));
+shortsRouter.get('', asyncHandler(authJWTNoUserRequired), asyncHandler(searchShorts));
 shortsRouter.get('/:shortsId', asyncHandler(getShortsDetail));
 
 shortsRouter.post('/:shortsId/comments', asyncHandler(addComment));
