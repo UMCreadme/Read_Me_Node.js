@@ -2,7 +2,6 @@ import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { getCommunities, deleteCommunityDao, 
     checkCommunityExistenceDao, checkCommunityOwnerDao } from './communities.dao.js';
-import { getCommunitiesDto } from './communities.dto.js';
 import { createCommunityWithCheck } from './communities.dao.js';
 
 

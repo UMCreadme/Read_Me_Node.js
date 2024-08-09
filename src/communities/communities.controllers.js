@@ -1,7 +1,7 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
-import { getCommunitiesService, deleteCommunityService, createCommunityService } from './communities.service.js';
+import {deleteCommunityService, createCommunityService } from './communities.service.js';
 
 
 // 커뮤니티 생성

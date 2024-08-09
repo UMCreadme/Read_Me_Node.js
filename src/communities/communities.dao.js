@@ -1,7 +1,6 @@
 import { pool } from '../../config/db.config.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-import { GET_COMMUNITIES, COUNT_COMMUNITIES } from './communities.sql.js';
 import { CREATE_COMMUNITY, ADD_ADMIN_TO_COMMUNITY, COUNT_COMMUNITIES_BY_USER_AND_BOOK } from './communities.sql.js';
 
 // 모임 리스트 조회
@@ -76,5 +75,22 @@ export const checkCommunityOwnerDao = async (community_id) => {
 export const deleteCommunityDao = async (community_id) => {
     const conn = await pool.getConnection();
 
-    await conn.query('UPDATE COMMUNITY SET is_deleted = 1 WHERE community_id = ?',[community_id]);
+    try {
+        await conn.query('BEGIN');
+
+        // 커뮤니티 소프트 딜리트
+        await conn.query('UPDATE COMMUNITY SET is_deleted = 1 WHERE community_id = ?',[community_id]);
+        
+        // 커뮤니티 참가자 소프트 딜리트
+        await conn.query('UPDATE COMMUNITY_USERS SET is_deleted = 1 WHERE community_id = ?', [community_id]);
+
+        // 트랜잭션 커밋
+        await conn.query('COMMIT');
+    } catch (err) {
+        await conn.query('ROLLBACK');
+        throw err;
+    } finally {
+        conn.release();
+    }
+    
 };
