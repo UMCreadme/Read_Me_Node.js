@@ -53,6 +53,7 @@ jobs:
           echo "S3_SECRET=${{secrets.S3_SECRET}}" >> .env
           echo "S3_BUCKET=${{secrets.S3_BUCKET}}" >> .env
           echo "SECRET_KEY=${{secrets.SECRET_KEY}}" >> .env
+          echo "TTB_KEY=${{secrets.TTB_KEY}}" >> .env
           cat .env
 
       - name: Run Build
@@ -92,8 +93,8 @@ jobs:
         with:
           aws_access_key: ${{secrets.AWS_ACTION_ACCESS_KEY_ID}}
           aws_secret_key: ${{secrets.AWS_ACTION_SECRET_ACCESS_KEY}}
-          application_name: readme-prod
-          environment_name: readme-prod-env
+          application_name: readme-dev
+          environment_name: readme-dev-env
           version_label: github-action-${{ steps.current-time.outputs.formattedTime }}  # version_label은 이전에 배포한 label과 중복되면 안됨!
           use_existing_version_if_available: true
           region: ap-northeast-2
