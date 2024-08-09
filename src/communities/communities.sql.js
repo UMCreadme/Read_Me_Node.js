@@ -42,7 +42,7 @@ export const GET_COMMUNITIES = `
     LIMIT ? OFFSET ?;
 `;
 
-// 제목으로 커뮤니티 검색
+// 제목으로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TITLE_KEYWORD = `
 SELECT 
     c.community_id AS community_id,
@@ -55,11 +55,12 @@ SELECT
     c.updated_at AS updated_at
 FROM COMMUNITY c
 JOIN BOOK b ON c.book_id = b.book_id
-WHERE REPLACE(b.title, ' ', '') LIKE REPLACE(?, ' ', '')
+WHERE REPLACE(b.title, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
 ORDER BY c.created_at DESC;
 `;
 
-// 태그로 커뮤니티 검색
+
+// 태그로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TAG_KEYWORD = `
 SELECT 
     c.community_id AS community_id,
@@ -71,6 +72,6 @@ SELECT
     c.created_at AS created_at,
     c.updated_at AS updated_at
 FROM COMMUNITY c
-WHERE REPLACE(c.tag, ' ', '') LIKE CONCAT('%', REPLACE(? , ' ', ''), '%')
+WHERE REPLACE(c.tag, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
 ORDER BY c.created_at DESC;
 `;
