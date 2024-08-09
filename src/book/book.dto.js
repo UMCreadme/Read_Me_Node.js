@@ -21,8 +21,7 @@ export const bookListInfoDto = (data) => {
         }
     })
 
-    // null 제거
-    return result.filter(Boolean);
+    return result;
 };
 
 export const bookInfoDto = (data) => {
