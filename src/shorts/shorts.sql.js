@@ -11,7 +11,7 @@ export const getShortsById = "SELECT * FROM SHORTS WHERE shorts_id = ?";
 export const getShortsByTitleKeyword = 
 `SELECT 
     u.user_id, u.account, u.image_url AS profile_img,
-    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
     b.book_id, b.title AS book_title, b.author, c.name AS category,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count
@@ -36,7 +36,7 @@ ORDER BY like_count DESC;`;
 export const getShortsByAuthorKeyword =
 `SELECT 
     u.user_id, u.account, u.image_url AS profile_img,
-    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
     b.book_id, b.title AS book_title, b.author, c.name AS category,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count
@@ -61,7 +61,7 @@ ORDER BY like_count DESC;`;
 export const getShortsByTagKeyword =
 `SELECT 
     u.user_id, u.account, u.image_url AS profile_img,
-    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.title, s.content, s.tag,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
     b.book_id, b.title AS book_title, b.author, c.name AS category,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count

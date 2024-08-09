@@ -46,6 +46,11 @@ export const getBookIdByISBN = async (ISBN) => {
             return rows;
         }
     });
+
+    if(result.length === 0) {
+        return undefined;
+    }
+    
     return result[0].book_id;
 }
 

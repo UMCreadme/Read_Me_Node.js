@@ -2,7 +2,7 @@ export const getShortsByCategory =
 `WITH FilteredShorts AS (
     SELECT u.user_id, u.image_url AS profileImg, u.nickname,
            s.shorts_id, s.book_id, s.image_url AS shortsImg,
-           s.phrase, s.title, s.content, s.tag AS tags,
+           s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
            (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
            (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
            s.created_at
@@ -17,12 +17,12 @@ export const getShortsByCategory =
 ),
 RankedShorts AS (
     SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
-           phrase, title, content, tags, likeCnt, commentCnt, created_at,
+           phrase, phrase_x, phrase_y, title, content, tags, likeCnt, commentCnt, created_at,
            ROW_NUMBER() OVER (ORDER BY RAND()) AS RN
     FROM FilteredShorts
 )
 SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
-       phrase, title, content, tags, likeCnt, commentCnt, created_at
+       phrase, phrase_x, phrase_y, title, content, tags, likeCnt, commentCnt, created_at
 FROM RankedShorts
 WHERE RN <= 20
 
@@ -30,7 +30,7 @@ UNION ALL
 
 SELECT u.user_id, u.image_url AS profileImg, u.nickname,
        s.shorts_id, s.book_id, s.image_url AS shortsImg,
-       s.phrase, s.title, s.content, s.tag AS tags,
+       s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
        (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
        (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
        s.created_at
@@ -80,7 +80,7 @@ ORDER BY category_id;
 
 // 전체 숏츠 조회 + 좋아요순으로 정렬
 export const getShort = 
-`SELECT s.shorts_id, s.image_url, s.phrase, s.title, b.author, c.name AS category, COUNT(ls.like_shorts_id) AS likeCnt
+`SELECT s.shorts_id, s.image_url, s.phrase, s.phrase_x, s.phrase_y, s.title, b.author, c.name AS category, COUNT(ls.like_shorts_id) AS likeCnt
 FROM SHORTS s
 JOIN BOOK b ON s.book_id = b.book_id 
 JOIN CATEGORY c ON b.category_id = c.category_id
@@ -95,7 +95,7 @@ export const getFollowerFeed =
 `SELECT 
 u.user_id, u.image_url AS profileImg, 
 u.nickname, s.shorts_id, s.image_url AS shortsImg, 
-s.phrase, s.title, s.content, s.tag, 
+s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag, 
 COUNT(ls.like_shorts_id) AS likeCnt, 
 COUNT(c.comment_id) AS commentCnt, 
 s.created_at, 
