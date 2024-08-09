@@ -30,7 +30,7 @@ export const getShortsDetail = async (req, res, next) => {
 };
 
 export const searchShorts = async (req, res, next) => {
-    const { keyword, page=1, size=10 } = req.query;
+    let { keyword, page=1, size=10 } = req.query;
     const userId = req.user_id;
 
     if(!keyword) {

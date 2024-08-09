@@ -12,6 +12,7 @@ import {
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
+
 // 커뮤니티 생성과 관련된 전체 과정 처리
 export const createCommunityWithCheck = async (userId, bookId, address, tag, capacity) => {
     const conn = await pool.getConnection();
@@ -40,47 +41,80 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
     } catch (err) {
         await conn.query('ROLLBACK'); // 트랜잭션 롤백
         console.error(err); // 에러 로그 출력
-
-        if (err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
+        throw err;
     } finally {
-        console.log('finally');
         conn.release(); // 연결 해제
     }
 };
 
-
 // 커뮤니티의 현재 참여자 수를 조회하는 함수
 export const getCommunityCurrentCount = async (communityId) => {
-    const [result] = await pool.query(GET_COMMUNITY_CURRENT_COUNT, [communityId]);
-    return result[0].count;
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(GET_COMMUNITY_CURRENT_COUNT, [communityId]);
+        return result[0].count;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release(); // 연결 해제
+    }
 };
 
 // 커뮤니티의 최대 인원수를 조회하는 함수
 export const getCommunityCapacity = async (communityId) => {
-    const [result] = await pool.query(GET_COMMUNITY_CAPACITY, [communityId]);
-    return result[0].capacity;
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(GET_COMMUNITY_CAPACITY, [communityId]);
+        return result[0].capacity;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release(); // 연결 해제
+    }
 };
 
 // 사용자가 이미 커뮤니티에 참여하고 있는지 확인하는 함수
 export const isUserAlreadyInCommunity = async (communityId, userId) => {
-    const [result] = await pool.query(IS_USER_ALREADY_IN_COMMUNITY, [communityId, userId]);
-    return result[0].count > 0;
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(IS_USER_ALREADY_IN_COMMUNITY, [communityId, userId]);
+        return result[0].count > 0;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release(); // 연결 해제
+    }
 };
 
 // 커뮤니티 가입 처리
 export const joinCommunity = async (communityId, userId) => {
-    await pool.query(JOIN_COMMUNITY, [communityId, userId]);
+    const conn = await pool.getConnection();
+    try {
+        await conn.query(JOIN_COMMUNITY, [communityId, userId]);
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release(); // 연결 해제
+    }
 };
 
 // 모임 리스트 조회
 export const getCommunities = async (page, size) => {
-    const offset = (page - 1) * size;
-    const limit = parseInt(size) + 1;  // 요청한 size보다 하나 더 조회
-    const [rows] = await pool.query(GET_COMMUNITIES, [limit, parseInt(offset)]);
-    const [countResult] = await pool.query(COUNT_COMMUNITIES);
-    return { communities: rows, totalElements: countResult[0].count };
+    const conn = await pool.getConnection();
+    try {
+        const offset = (page - 1) * size;
+        const limit = parseInt(size) + 1;  // 요청한 size보다 하나 더 조회
+        const [rows] = await conn.query(GET_COMMUNITIES, [limit, parseInt(offset)]);
+        const [countResult] = await conn.query(COUNT_COMMUNITIES);
+        return { communities: rows, totalElements: countResult[0].count };
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release(); // 연결 해제
+    }
 };
