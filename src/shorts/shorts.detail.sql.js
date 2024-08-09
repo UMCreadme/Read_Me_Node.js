@@ -2,7 +2,7 @@
 export const getShortsDetailById =
 `SELECT
     s.user_id, u.account, u.image_url AS profile_img,
-    s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+    s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count,
     s.book_id
@@ -25,7 +25,7 @@ export const getShortsDetailByCategory =
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
-        s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+        s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count
     FROM SHORTS s
@@ -53,7 +53,7 @@ WITH shorts_with_likes AS (
 -- 2. 최종 결과를 가져오는 쿼리
 SELECT
     s.user_id, u.account, u.image_url AS profile_img,
-    s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+    s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_likes s
 JOIN USERS u ON s.user_id = u.user_id
@@ -67,7 +67,7 @@ export const getShortsDetailByCategoryExcludeKeyword =
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
-        s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+        s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count
     FROM SHORTS s
@@ -95,7 +95,7 @@ WITH shorts_with_likes AS (
 -- 2. 최종 결과를 가져오는 쿼리
 SELECT
     s.user_id, u.account, u.image_url AS profile_img,
-    s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+    s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_likes s
 JOIN USERS u ON s.user_id = u.user_id
@@ -109,7 +109,7 @@ export const getShortsDetailByCategoryExcludeBook =
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
-        s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+        s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count
     FROM SHORTS s
@@ -137,7 +137,7 @@ WITH shorts_with_likes AS (
 -- 2. 최종 결과를 가져오는 쿼리
 SELECT
     s.user_id, u.account, u.image_url AS profile_img,
-    s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+    s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_likes s
 JOIN USERS u ON s.user_id = u.user_id
@@ -150,7 +150,7 @@ export const getShortsDetailByBook =
 `-- 1. shorts와 해당 shorts의 좋아요 수, 댓글 수, 팔로워 수를 조인하는 CTE
 WITH shorts_with_likes AS (
     SELECT s.shorts_id, s.user_id, s.book_id, s.image_url,
-        s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+        s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
         COALESCE(likes.like_count, 0) AS like_count, 
         COALESCE(comments.comment_count, 0) AS comment_count
     FROM SHORTS s
@@ -177,7 +177,7 @@ WITH shorts_with_likes AS (
 -- 2. 최종 결과를 가져오는 쿼리
 SELECT
     s.user_id, u.account, u.image_url AS profile_img,
-    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     s.like_count, s.comment_count, s.book_id
 FROM shorts_with_likes s
 JOIN USERS u ON s.user_id = u.user_id
@@ -190,7 +190,7 @@ LIMIT ? OFFSET ?;`;
 export const getShortsDetailByUser =
 `SELECT 
     s.user_id, u.account, u.image_url AS profile_img,
-    s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+    s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count,
     s.book_id
@@ -215,7 +215,7 @@ LIMIT ? OFFSET ?;`;
 export const getShortsDetailByUserLike =
 `SELECT 
     s.user_id, u.account, u.image_url AS profile_img,
-    s.image_url AS shorts_img, s.phrase, s.pharse_x, s.pharse_y, s.title, s.content, s.tag,
+    s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count,
     s.book_id
