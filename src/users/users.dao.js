@@ -64,8 +64,10 @@ export const findById = async (userId) => {
     }
 }
 
+
 // 유저 정보 조회시 필요한 팔로잉수
 export const findFollowingNumByUserId = async (userId) => {
+
     try {
         const conn = await pool.getConnection();
         const [followings] = await pool.query(sql.getUserFollowings, userId)
@@ -349,5 +351,28 @@ export const changeCategoryDao = async (user_id, category) => {
         await conn.rollback();
     } finally {
         conn.release();
+    }
+}
+
+// 유저 프로필 편집 기능
+export const editUserImageDao = async (userId, profileImg) => {
+    try{
+        const conn = await pool.getConnection()
+        await pool.query(sql.updateUserImageSql, [profileImg, userId])
+        conn.release()
+    }
+    catch(err){
+        console.log(err)
+    }
+}
+
+// 유저 프로필 이미지 삭제 기능
+export const deleteUserImageDao = async (userId) => {
+    try{
+        const conn = await pool.getConnection()
+        await pool.query(sql.deleteUser)
+    }
+    catch (err) {
+        console.log(err)
     }
 }

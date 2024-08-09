@@ -42,6 +42,7 @@ export const userBookResponseDTO = (userBook) => {
         "bookImage" : userBook.image_url,
         "bookTitle" : userBook.title,
         "bookAuthor" : userBook.author,
+        "bookTranslator" : userBook.translator? userBook.translator : undefined,
         "bookId" : userBook.id
     }
 }

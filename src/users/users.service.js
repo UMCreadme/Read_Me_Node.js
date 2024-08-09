@@ -70,8 +70,8 @@ export const login = async(body, provider) => {
 
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
+    const userData = await findById(userId)
     // 없는 유저 확인
-    const userData = await dao.findById(userId)
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
@@ -95,6 +95,16 @@ export const isFollowing = async(myId, userId) => {
     const followStatus = await dao.checkIsFollowed(myId, userId); // 팔로우 여부 체크
 
     return followStatus;
+}
+
+//유저 프로필 이미지 수정
+export const updateUserImageService = async(userId, profileImg) =>{
+    await dao.editUserImageDao(userId, profileImg)
+}
+
+//유저 프로필 이미지 삭제
+export const deleteUserImageService = async (userId) => {
+    await dao.deleteUserImageDao(userId)
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
@@ -141,6 +151,7 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 
 // 유저가 읽은 책 리스트 조회 로직
 export const findUserBooks = async(userId, offset, limit) => {
+        
     // 없는 유저 확인
     const userData = await dao.findById(userId)
     if(userData === -1){
@@ -165,7 +176,7 @@ export const followNewUser = async(userId, followUserId) =>{
     if(followUserData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
-    
+
     const followStatus = await dao.followUserAdd(userId, followUserId)
 
     // 중복팔로우 예외 처리 + 본인이 본인을 팔로우하려는 경우
@@ -193,6 +204,8 @@ export const unfollowUser = async(myId, unfollowUserId) => {
     if(!unfollowStatus){
         throw new BaseError(status.BAD_REQUEST)
     }
+
+    return userFollowResponseDTO(userId, followingId)
 }
 
 // 유저 검색 기능 로직
@@ -219,7 +232,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const uniqueUsers = allUsersListByAccount.filter(user => !searchUserSet.has(user.user_id));
     const searchUserByAccountList= [...searchFollowUserByAccountList, ...uniqueUsers];
 
-
     // 키워드 + 맞팔인 사람 리스트 (nickname 기준)
     const eachFollowUsersListByNickname = await dao.findEachFollowWithKeyword(userId, keyword, 'nickname');
 
@@ -238,7 +250,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const searchUserSet2 = new Set(searchFollowUserByNicknameList.map(user => user.user_id));
     const uniqueUsers2 = allUsersListByNickname.filter(user => !searchUserSet2.has(user.user_id));
     const searchUserByNicknameList= [...searchFollowUserByNicknameList, ...uniqueUsers2];
-
 
     // 최종 리스트
     const mergedList = searchUserByAccountList.length >= searchUserByNicknameList.length

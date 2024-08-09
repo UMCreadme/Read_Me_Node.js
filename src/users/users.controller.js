@@ -43,6 +43,16 @@ export const getUserInfo = async (req, res, next) => {
     res.send(response(status.SUCCESS , await service.findOne(req.user_id)))
 }
 
+// 유저 프로필 이미지 수정
+export const updateUserImage = async(req, res, next) => {
+    res.send(response(status.SUCCESS, await service.updateUserImageService(req.user_id, req.file.location)))
+}
+
+// 유저 프로필 이미지 삭제
+export const deleteUserImage = async(req, res, next) => {
+    res.send(response(status.SUCCESS, await service.deleteUserImageService(req.user_id)))
+}
+
 // 유저가 만든 쇼츠 리스트 조회
 export const getUserShorts = async(req, res, next)=> {
 
@@ -56,6 +66,7 @@ export const getUserShorts = async(req, res, next)=> {
     if (hasNext) result.pop();
 
     res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
+
 }
 
 // 유저가 만든 쇼츠 리스트 조회 (비회원)
@@ -71,6 +82,7 @@ export const getUserShortsForGuest = async(req, res, next)=> {
     if (hasNext) result.pop();
 
     res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
+
 }
 
 //유저가 찜한 쇼츠 리스트 조회
@@ -147,6 +159,7 @@ export const unfollow = async(req, res, next)=>{
 
 // 유저 검색
 export const searchUser = async (req, res, next) => {
+
     const page = parseInt(req.query.page) || 1;
     const size = parseInt(req.query.size) || 20;
     const offset = (page - 1) * size;
