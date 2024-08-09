@@ -1,6 +1,4 @@
 import { pool } from "../../config/db.config.js";
-import { BaseError } from "../../config/error.js";
-import { status } from "../../config/response.status.js";
 import { findFollowStatus } from "../users/users.sql.js";
 import * as sql from "./shorts.detail.sql.js";
 import { countShortsDetailByBookId, isLikeShorts } from "./shorts.sql.js";
