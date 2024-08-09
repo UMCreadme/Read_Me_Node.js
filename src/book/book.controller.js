@@ -43,14 +43,14 @@ export const getUserRecentBook = async (req, res, next) => {
 
 // 책 검색
 export const searchBook = async (req, res, next) => {
-    let { page=1, size=50, keyword } = req.query;
+    let { page=1, size=50, keyword, preview } = req.query;
     const userId = req.user_id;
     if(!keyword) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
     keyword = keyword.trim();
-    const book = await searchBookService(userId, keyword, parseInt(page), parseInt(size));
+    const book = await searchBookService(userId, keyword, preview === 'true', parseInt(page), parseInt(size));
 
     res.send(response(status.SUCCESS, book.data, book.pageInfo));
 };
