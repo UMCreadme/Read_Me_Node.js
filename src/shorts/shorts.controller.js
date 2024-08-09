@@ -1,7 +1,6 @@
 import * as service from "./shorts.service.js";
 import { status } from "../../config/response.status.js";
 import { response } from "../../config/response.js";
-import imgUploader from "../../config/s3.manager.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
 import { bookInfoDto } from "../book/book.dto.js";
