@@ -8,10 +8,6 @@ export const status = {
     JOINED: { status: StatusCodes.CREATED, "isSuccess": true, "code": 2010, "message": "JOINED!" },
     NO_CONTENT: { status: StatusCodes.NO_CONTENT, "isSuccess": true, "code": 2040, "message": "NO CONTENT!" },
 
-    SUCCESS: {status: StatusCodes.OK, "isSuccess": true, "code": "2000", "message": "SUCCESS!"},
-    CREATED: {status: StatusCodes.CREATED, "isSuccess": true, "code": "2010", "message": "CREATED!"},
-    NO_CONTENT: {status: StatusCodes.NO_CONTENT, "isSuccess": true, "code": "2040", "message": "NO CONTENT!"},
-
     // error
     INTERNAL_SERVER_ERROR: { status: StatusCodes.INTERNAL_SERVER_ERROR, "isSuccess": false, "code": "COMMON000", "message": "서버 에러, 관리자에게 문의 바랍니다." },
     BAD_REQUEST: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMON001", "message": "잘못된 요청입니다." },
@@ -30,9 +26,15 @@ export const status = {
     // member err
     MEMBER_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다." },
     NICKNAME_NOT_EXIST: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4002", "message": "닉네임은 필수입니다." },
+    FOLLOW_EXIST : { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4003", "message": "이미 처리된 팔로우 혹은 본인입니다." },
+    FOLLOW_NOT_FOUND : { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4004", "message": "현재 팔로우 상태가 아닙니다." },
+    DUPLICATE_ACCOUNT : {status: StatusCodes.BAD_REQUEST, "isSuccess" : false, "code" : "MEMBER4005", "message" : "아이디 중복"},
 
     // category err
-    CATEGORY_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다." },
+    CATEGORY_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다."},
+    CATEGORY_COUNT_IS_WRONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4002", "message": "카테고리 개수는 4~8개로 입력해주세요."},
+    CATEGORY_DUPLICATED: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4003", "message": "카테고리는 중복되지 않게 선택해주세요."},
+
 
     // shorts err
     SHORTS_TAG_COUNT_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4001", "message": "태그는 10개 이내로 입력해주세요." },
