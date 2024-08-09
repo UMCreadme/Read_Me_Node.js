@@ -182,6 +182,26 @@ export const checkShortsOwnerDao = async (shorts_id) => {
 //쇼츠 삭제 - softdelete
 export const deleteShortsDao = async (shorts_id) => {
     const conn = await pool.getConnection();
+
+    try {
+        await conn.query('BEGIN');
+
+        // 쇼츠 좋아요 - Hard delete
+        await conn.query('DELETE FROM LIKE_SHORTS WHERE shorts_id = ?', [shorts_id]);
+
+        // 쇼츠 댓글 - soft delete
+        await conn.query('UPDATE COMMENT SET is_deleted = 1 WHERE shorts_id = ?', [shorts_id]);
+
+        // 쇼츠 - soft delete
+        await conn.query('UPDATE SHORTS SET is_deleted = 1 WHERE shorts_id = ?', [shorts_id]);
+
+        await conn.query('COMMIT');
+    } catch (err) {
+        await conn.query('ROLLBACK');
+        throw err;
+    } finally {
+        conn.release();
+    }
     
-    await conn.query('UPDATE SHORTS SET is_deleted = 1 WHERE shorts_id = ? ', [shorts_id]);
+    
 };
