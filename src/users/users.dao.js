@@ -14,10 +14,60 @@ import {
     getEachFollowIdList,
     getMeFollowIdList,
     getMyFollowIdList,
-    findAllIfContainsKeywordOrdered
+    findAllIfContainsKeywordOrdered,
+    save,
+    updateRefreshToken,
+    insertUserFavorite,
+    getUserByUniqueIdAndEmail,
+    getLatestPostCount
 } from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
+
+// 유저 회원가입
+export const userSignUp = async (body, provider, refreshToken) => {
+    try{
+        const conn = await pool.getConnection();
+
+        const [result] = await pool.query(save, [body.uniqueId, body.email, body.account, body.nickname, provider, refreshToken])
+        const [newUser] = await pool.query(getUserById, result.insertId)
+
+        const userFavoriteIdList = body.categoryIdList
+
+        for (const userFavoriteIdListElement of userFavoriteIdList) {
+            await pool.query(insertUserFavorite, [newUser[0].user_id, userFavoriteIdListElement])
+        }
+
+        conn.release()
+        return newUser[0];
+    }
+    catch (err){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 이미 존재하는 유저가 다시 로그인
+export const userLogin = async (body, provider, refreshToken) => {
+
+    try{
+        const conn = await pool.getConnection();
+        const [user] = await pool.query(getUserByUniqueIdAndEmail, [body.uniqueId, body.email])
+
+        if(user[0] === undefined){
+            return null
+        }
+
+        const realUserId = user[0].user_id
+        await pool.query(updateRefreshToken, [refreshToken, realUserId])
+
+        conn.release()
+        return user[0]
+    }
+
+    catch (err){
+        throw new BaseError(status.BAD_REQUEST)
+    }
+}
 
 // 유저 정보 조회
 export const findById = async (userId) => {
@@ -36,6 +86,7 @@ export const findById = async (userId) => {
         throw new BaseError(status.BAD_REQUEST);
     }
 }
+
 
 // 유저 정보 조회시 필요한 팔로잉수
 export const findFollowingNumByUserId = async (userId) => {
@@ -64,6 +115,37 @@ export const findFollowerNumByUserId = async (userId) => {
     }
     catch (err) {
         throw new BaseError(status.BAD_REQUEST)
+    }
+}
+
+// 유저 정보 조회시 필요한 24h 이내 게시물 게시 여부
+export const hasRecentPostForUser = async (userId) => {
+    const conn = await pool.getConnection();
+    
+    try {
+        const [recent] = await conn.query(getLatestPostCount, [userId]);
+
+        // 24시간 이내 게시된 게시물 수가 0개 초과인지 반환
+        return recent[0].count > 0;
+    } finally {
+        conn.release();
+    }
+};
+
+// 다른 유저 정보 조회시 필요한 팔로우 여부
+export const checkIsFollowed = async (myId, userId) => {
+    const conn = await pool.getConnection();
+
+    if (myId === null) {
+        return false;
+    }
+    
+    try {
+        const [followStatus] = await conn.query(findFollowStatus, [myId, userId]);
+
+        return followStatus.length > 0;
+    } finally {
+        conn.release();
     }
 }
 
@@ -98,7 +180,6 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
             let [userLikeShort] = await pool.query(getShortsById,userLikeShortsId.shorts_id)
             userLikeShorts.push(userLikeShort[0])
         }
-
         conn.release();
         return userLikeShorts;
     }

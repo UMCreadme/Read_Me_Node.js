@@ -1,0 +1,101 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.chat-container {
+    width: 90%;
+    max-width: 600px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 80vh; /* 채팅 컨테이너의 높이 설정 */
+}
+
+.chat-header, .chat-footer {
+    padding: 10px;
+    background-color: #ffebf0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-header input, .chat-footer input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    outline: none;
+}
+
+.chat-header button, .chat-footer button {
+    padding: 10px 20px;
+    background-color: #ff69b4;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+.chat-header button:hover, .chat-footer button:hover {
+    background-color: #ff85c0;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 10px;
+    background-color: #f0f0f0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; /* 패딩과 테두리를 포함하여 계산 */
+}
+
+.message {
+    margin-bottom: 10px;
+    display: flex;
+    max-width: 100%;
+}
+
+.message.user-message {
+    justify-content: flex-end;
+}
+
+.message.other-message {
+    justify-content: flex-start;
+}
+
+.message .bubble {
+    max-width: 70%;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.message.user-message .bubble {
+    background-color: #ff69b4;
+    color: white;
+    border-bottom-right-radius: 0;
+}
+
+.message.other-message .bubble {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-bottom-left-radius: 0;
+}
+
+#status {
+    padding: 10px;
+    font-size: 14px;
+    color: #ff69b4;
+    text-align: center;
+}

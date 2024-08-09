@@ -1,15 +1,19 @@
+// src/routes/chat.routes.js
 import express from 'express';
 import asyncHandler from 'express-async-handler';
 import { getMessagesController, postMessageController, markMessageReadController } from './chat.controller.js';
+import { authJWT } from '../jwt/authJWT.js';
 
-// 새로운 라우터 객체 생성
 export const chatRouter = express.Router();
 
+// JWT 미들웨어 적용
+chatRouter.use(authJWT);
+
 // 채팅 메시지 목록 조회
-chatRouter.get('/communities/:communityId/messages', asyncHandler(getMessagesController));
+chatRouter.get('/:communityId/messages', asyncHandler(getMessagesController));
 
 // 채팅 메시지 저장
-chatRouter.post('/communities/:communityId/messages', asyncHandler(postMessageController));
+chatRouter.post('/:communityId/messages', asyncHandler(postMessageController));
 
 // 메시지 읽기 상태 저장
-chatRouter.post('/communities/:communityId/messages/read', asyncHandler(markMessageReadController));
+chatRouter.post('/:communityId/messages/read', asyncHandler(markMessageReadController));

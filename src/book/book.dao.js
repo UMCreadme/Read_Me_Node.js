@@ -1,35 +1,31 @@
 import { pool } from "../../config/db.config.js";
-import { BaseError } from "../../config/error.js";
-import { status } from "../../config/response.status.js";
 import { insertObject } from "../common/common.dao.js";
-import { deleteUserBook, findBookIdByISBN, findCategoryIdByAladinCid, findCategoryIdByName, findCategoryNameByBookId, getBookById, isUserReadBookById, updateUserBook } from "./book.sql.js";
+import * as sql from "./book.sql.js";
 
 // bookId로 책 정보 조회
 export const findBookById = async (bookId) => {
+    try {
+        const conn = await pool.getConnection();
+        const [book] = await conn.query(sql.getBookById, bookId)
 
-    const conn = await pool.getConnection();
-    const [book] = await pool.query(getBookById, bookId)
+        conn.release();
 
-    conn.release();
-
-    return book[0];
+        return book[0];
+    } catch (err) {
+        console.log(err);
+    }
 }
 
-// 책 ID로 카테고리 조회 TODO: 사용 안하면 지우기
+// 책 ID로 카테고리 조회
 export const getBookCategory = async (bookId) => {
     try {
         const conn = await pool.getConnection();
-        const [result] = await conn.query(findCategoryNameByBookId, [bookId]);
+        const [result] = await conn.query(sql.findCategoryNameByBookId, [bookId]);
         conn.release();
 
         return result[0].name;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -37,7 +33,7 @@ export const getBookCategory = async (bookId) => {
 export const getBookIdByISBN = async (ISBN) => {
     try {
         const conn = await pool.getConnection();
-        const [result] = await conn.query(findBookIdByISBN, [ISBN]);
+        const [result] = await conn.query(sql.findBookIdByISBN, [ISBN]);
         conn.release();
 
         if(result.length === 0) {
@@ -47,11 +43,6 @@ export const getBookIdByISBN = async (ISBN) => {
         return result[0].book_id;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -59,7 +50,7 @@ export const getBookIdByISBN = async (ISBN) => {
 export const getCategoryIdByName = async (category) => {
     try {
         const conn = await pool.getConnection();
-        const [result] = await conn.query(findCategoryIdByName, [category]);
+        const [result] = await conn.query(sql.findCategoryIdByName, [category]);
         conn.release();
 
         if(result.length === 0) {
@@ -69,11 +60,6 @@ export const getCategoryIdByName = async (category) => {
         return result[0].category_id;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -81,7 +67,8 @@ export const getCategoryIdByName = async (category) => {
 export const getCategoryIdByAladinCid = async (cid) => {
     try {
         const conn = await pool.getConnection();
-        const [result] = await conn.query(findCategoryIdByAladinCid, [cid]);
+        const [result] = await conn.query(sql.findCategoryIdByAladinCid, [cid]);
+        console.log("cid: ", cid, " result: ", result);
         conn.release();
 
         if(result.length === 0) {
@@ -91,11 +78,6 @@ export const getCategoryIdByAladinCid = async (cid) => {
         return result[0].category_id;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -109,11 +91,6 @@ export const createBook = async (book) => {
         return result;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -121,17 +98,12 @@ export const createBook = async (book) => {
 export const findIsReadById = async (userId, bookId) => {
     try {
         const conn = await pool.getConnection();
-        const [result] = await conn.query(isUserReadBookById, [userId, bookId]);
+        const [result] = await conn.query(sql.isUserReadBookById, [userId, bookId]);
         conn.release();
 
         return result.length !== 0;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -139,17 +111,12 @@ export const findIsReadById = async (userId, bookId) => {
 export const updateBookIsReadToUser = async (userId, bookId) => {
     try {
         const conn = await pool.getConnection();
-        await conn.query(updateUserBook, [userId, bookId]);
+        await conn.query(sql.updateUserBook, [userId, bookId]);
 
         conn.release();
         return;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 
@@ -157,16 +124,34 @@ export const updateBookIsReadToUser = async (userId, bookId) => {
 export const deleteBookIsReadToUser = async (userId, bookId) => {
     try {
         const conn = await pool.getConnection();
-        await conn.query(deleteUserBook, [userId, bookId]);
+        await conn.query(sql.deleteUserBook, [userId, bookId]);
 
         conn.release();
         return;
     } catch (err) {
         console.log(err);
-        if(err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
     }
 };
+
+export const findUserRecentBookList = async (userId, offset, limit) => {
+    try {
+        const conn = await pool.getConnection()
+        const [userRecentBookList] = await conn.query(sql.getUserRecentBookList, [userId, limit, offset])
+
+        const uniqueBookList = [];
+        const bookIdSet = new Set();
+
+        for (const book of userRecentBookList) {
+            if (!bookIdSet.has(book.book_id)) {
+                bookIdSet.add(book.book_id);
+                uniqueBookList.push(book);
+            }
+        }
+
+        conn.release()
+        return uniqueBookList;
+    }
+    catch (err){
+        console.log(err);
+    }
+}
