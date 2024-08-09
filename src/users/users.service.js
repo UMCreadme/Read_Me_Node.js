@@ -1,31 +1,11 @@
-import {
-    findById,
-    findEachFollowWithKeyword,
-    findFollowerNumByUserId,
-    findFollowingNumByUserId,
-    hasRecentPostForUser,
-    checkIsFollowed,
-    findMeFollowWithKeyword,
-    findMeWithKeyword,
-    findMyFollowWithKeyword,
-    findUserBooksById,
-    findUserLikeShortsById,
-    findUserShortsById,
-    findUsersWithKeyword,
-    followUserAdd,
-    userLogin,
-    userSignUp, checkDuplicateAccount
-} from "./users.dao.js";
+import * as dao from "./users.dao.js";
 import {
     userBookResponseDTO,
-    userFollowResponseDTO,
     userInfoResponseDTO,
-    otherUserInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
     userSignUpResponseDTO
 } from "./users.dto.js";
-
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
@@ -33,8 +13,7 @@ import {refresh, sign} from "../jwt/jwt-util.js";
 
 // 회원가입 후 토큰 반환
 export const join = async(body, provider) => {
-
-    const duplicateAccountCheck = await checkDuplicateAccount(body.account)
+    const duplicateAccountCheck = await dao.checkDuplicateAccount(body.account)
 
     const accountCheck = (account) => {
         const regex = /^[a-zA-Z0-9]{1,30}$/;
@@ -57,7 +36,7 @@ export const join = async(body, provider) => {
     }
 
     const refreshToken = refresh()
-    const newUser = await userSignUp(body, provider, refreshToken);
+    const newUser = await dao.userSignUp(body, provider, refreshToken);
 
     const tokenToUser = {user_id: newUser.user_id, email: newUser.email}
     const accessToken = sign(tokenToUser)
@@ -67,13 +46,12 @@ export const join = async(body, provider) => {
 
 // 이미 존재하는 유저가 다시 로그인해서 토큰 값 줄때
 export const login = async(body, provider) => {
-
     if(!body.uniqueId || !body.email){
         throw new BaseError(status.PARAMETER_IS_WRONG)
     }
 
     const refreshToken = refresh()
-    const foundUser = await userLogin(body, provider, refreshToken)
+    const foundUser = await dao.userLogin(body, provider, refreshToken)
 
     if(!foundUser){
         return null
@@ -87,44 +65,42 @@ export const login = async(body, provider) => {
 
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
-    const userData = await findById(userId)
     // 없는 유저 확인
+    const userData = await dao.findById(userId)
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    const isRecentPost = await hasRecentPostForUser(userId);
-    const followingNum = await findFollowingNumByUserId(userId);
-    const followerNum = await findFollowerNumByUserId(userId);
+    const isRecentPost = await dao.hasRecentPostForUser(userId); // 프로필 띠 기능
+    const followingNum = await dao.findFollowingNumByUserId(userId);
+    const followerNum = await dao.findFollowerNumByUserId(userId);
+    const readBookNum = await dao.findUserBooksCountById(userId);
 
-    return userInfoResponseDTO( userData, isRecentPost, followerNum, followingNum);
+    return userInfoResponseDTO(userData, isRecentPost, followerNum, followingNum, readBookNum);
 }
 
-// 다른 유저 정보 조회 로직
-export const findOneOther = async(myId, userId) => {
-    const userData = await findById(userId)
+// 다른 유저 팔로잉 여부 확인 로직
+export const isFollowing = async(myId, userId) => {
     // 없는 유저 확인
+    const userData = await dao.findById(userId)
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    const isRecentPost = await hasRecentPostForUser(userId); // 프로필 띠 기능
-    const followStatus = await checkIsFollowed(myId, userId); // 팔로우 여부 체크
-    const followingNum = await findFollowingNumByUserId(userId); // 팔로잉 수
-    const followerNum = await findFollowerNumByUserId(userId); // 팔로우 수
+    const followStatus = await dao.checkIsFollowed(myId, userId); // 팔로우 여부 체크
 
-    return otherUserInfoResponseDTO(userData, isRecentPost, followStatus, followerNum, followingNum);
+    return followStatus;
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
     // 없는 유저 확인
-    const userData = await findById(userId)
+    const userData = await dao.findById(userId)
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    const userShorts = await findUserShortsById(userId, offset, limit);
+    const userShorts = await dao.findUserShortsById(userId, offset, limit);
     const userShortsResponseDTOList = [];
 
 
@@ -141,12 +117,12 @@ export const findUserShorts = async(userId, offset, limit) => {
 export const findUserLikeShorts = async(userId, offset, limit) => {
 
     // 없는 유저 확인
-    const userData = await findById(userId)
+    const userData = await dao.findById(userId)
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    const userLikeShorts = await findUserLikeShortsById(userId, offset, limit);
+    const userLikeShorts = await dao.findUserLikeShortsById(userId, offset, limit);
     const userShortsResponseDTOList = [];
 
     for (const userLikeShort of userLikeShorts) {
@@ -160,14 +136,13 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 
 // 유저가 읽은 책 리스트 조회 로직
 export const findUserBooks = async(userId, offset, limit) => {
-        
     // 없는 유저 확인
-    const userData = await findById(userId)
+    const userData = await dao.findById(userId)
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    const userBooks = await findUserBooksById(userId, offset, limit);
+    const userBooks = await dao.findUserBooksById(userId, offset, limit);
     const userBookResponseDTOList = [];
 
     for (const userBook of userBooks) {
@@ -179,41 +154,58 @@ export const findUserBooks = async(userId, offset, limit) => {
 }
 
 // 유저(본인)가 다른 유저 팔로우하는 로직
-export const followNewUser = async(userId, followUserId) => {
+export const followNewUser = async(userId, followUserId) =>{
     // 없는 유저 확인
-    const userData = await findById(userId)
-    const followUserData = await findById(followUserId)
-    if((userData === -1) || (followUserData === -1)){
+    const followUserData = await dao.findById(followUserId)
+    if(followUserData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
-
-    const followingId = parseInt(followUserId, 10)
-    const followStatus = await followUserAdd(userId, followingId)
+    
+    const followStatus = await dao.followUserAdd(userId, followUserId)
 
     // 중복팔로우 예외 처리 + 본인이 본인을 팔로우하려는 경우
     if(!followStatus){
-        throw new BaseError(status.BAD_REQUEST)
+        throw new BaseError(status.FOLLOW_EXIST)
+    }
+}
+
+// 유저(본인)가 다른 유저 팔로우 취소하는 로직
+export const unfollowUser = async(myId, unfollowUserId) => {
+    // 유저 존재 확인
+    const unfollowUserData = await dao.findById(unfollowUserId)
+    if(unfollowUserData === -1){
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    return userFollowResponseDTO(userId, followingId)
+    // 현재 팔로우 상태 확인
+    const isFollowing = await dao.checkIsFollowed(myId, unfollowUserId);
+    if (!isFollowing) {
+        throw new BaseError(status.FOLLOW_NOT_FOUND);
+    }
+
+    // 팔로우 취소
+    const unfollowStatus = await dao.followUserCancel(myId, unfollowUserId);
+    if(!unfollowStatus){
+        throw new BaseError(status.BAD_REQUEST)
+    }
 }
 
 // 유저 검색 기능 로직
 export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     // 키워드에 나 자신의 이름이 섞이는 경우
-    const searchMySelf = await findMeWithKeyword(userId, keyword);
+    const searchMySelf = await dao.findMeWithKeyword(userId, keyword);
 
     // 키워드 + 맞팔인 사람 리스트 (account 기준)
-    const eachFollowUsersListByAccount = await findEachFollowWithKeyword(userId, keyword, 'account');
+    const eachFollowUsersListByAccount = await dao.findEachFollowWithKeyword(userId, keyword, 'account');
 
     // 키워드 + 내가 팔로우하는 사람 리스트 (account 기준)
-    const myFollowUsersListByAccount = await findMyFollowWithKeyword(userId, keyword, 'account');
+    const myFollowUsersListByAccount = await dao.findMyFollowWithKeyword(userId, keyword, 'account');
 
     // 키워드 + 나를 팔로우하는 사람 리스트 (account 기준)
-    const meFollowUsersListByAccount = await findMeFollowWithKeyword(userId, keyword, 'account');
+    const meFollowUsersListByAccount = await dao.findMeFollowWithKeyword(userId, keyword, 'account');
 
     // 키워드에 해당하는 모든 사람 리스트 (account 기준)
-    const allUsersListByAccount = await findUsersWithKeyword(userId, keyword, 'account')
+    const allUsersListByAccount = await dao.findUsersWithKeyword(userId, keyword, 'account')
 
     // 키워드로 검색한 최종 유저 목록 (account 기준)
     const searchFollowUserByAccountList = eachFollowUsersListByAccount.concat(myFollowUsersListByAccount, meFollowUsersListByAccount)
@@ -222,17 +214,18 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const uniqueUsers = allUsersListByAccount.filter(user => !searchUserSet.has(user.user_id));
     const searchUserByAccountList= [...searchFollowUserByAccountList, ...uniqueUsers];
 
+
     // 키워드 + 맞팔인 사람 리스트 (nickname 기준)
-    const eachFollowUsersListByNickname = await findEachFollowWithKeyword(userId, keyword, 'nickname');
+    const eachFollowUsersListByNickname = await dao.findEachFollowWithKeyword(userId, keyword, 'nickname');
 
     // 키워드 + 내가 팔로우하는 사람 리스트 (nickname 기준)
-    const myFollowUsersListByNickname = await findMyFollowWithKeyword(userId, keyword, 'nickname');
+    const myFollowUsersListByNickname = await dao.findMyFollowWithKeyword(userId, keyword, 'nickname');
 
     // 키워드 + 나를 팔로우하는 사람 리스트 (nickname 기준)
-    const meFollowUsersListByNickname = await findMeFollowWithKeyword(userId, keyword, 'nickname');
+    const meFollowUsersListByNickname = await dao.findMeFollowWithKeyword(userId, keyword, 'nickname');
 
     // 키워드에 해당하는 모든 사람 리스트 (nickname 기준)
-    const allUsersListByNickname = await findUsersWithKeyword(userId, keyword, 'nickname')
+    const allUsersListByNickname = await dao.findUsersWithKeyword(userId, keyword, 'nickname')
 
     // 키워드로 검색한 최종 유저 목록 (nickname 기준)
     const searchFollowUserByNicknameList = eachFollowUsersListByNickname.concat(myFollowUsersListByNickname, meFollowUsersListByNickname)
@@ -240,6 +233,7 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const searchUserSet2 = new Set(searchFollowUserByNicknameList.map(user => user.user_id));
     const uniqueUsers2 = allUsersListByNickname.filter(user => !searchUserSet2.has(user.user_id));
     const searchUserByNicknameList= [...searchFollowUserByNicknameList, ...uniqueUsers2];
+
 
     // 최종 리스트
     const mergedList = searchUserByAccountList.length >= searchUserByNicknameList.length
@@ -255,4 +249,18 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     }
 
     return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
+}
+
+// 카테고리 수정
+export const ChangeCategoryService = async(user_id, category) => {
+    const hasDuplicates = (arr) => {
+        return new Set(arr).size !== arr.length;
+    };
+
+    // category 배열에 중복된 값이 있는지 검사
+    if (hasDuplicates(category)) {
+        throw new BaseError(status.CATEGORY_DUPLICATED);
+    }
+
+    return await dao.changeCategoryDao(user_id, category);
 }

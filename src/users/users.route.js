@@ -11,8 +11,10 @@ import {
     getUserLikeShortsForGuest,
     getUserBooksForGuest,
     followUser,
+    unfollow,
     searchUser,
-    kakaoSignUp, kakaoLogin
+    kakaoSignUp, kakaoLogin,
+    changeCategory
 } from "./users.controller.js"
 import {authJWT, authJWTNoUserRequired} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
@@ -38,6 +40,9 @@ userRouter.post("/:userId/follow", asyncHandler(authJWT), asyncHandler(followUse
 // 다른 유저 정보 조회 (로그인 필요 X)
 userRouter.get('/:userId', asyncHandler(authJWTNoUserRequired), asyncHandler(getOtherUserInfo));
 
+// 다른 유저 팔로우 취소
+userRouter.delete("/:userId/follow", asyncHandler(authJWT), asyncHandler(unfollow));
+
 // 로그인 후 유저 검색 기능
 userRouter.get("/my/search", asyncHandler(authJWT), asyncHandler(searchUser));
 
@@ -53,7 +58,12 @@ userRouter.post("/login", asyncHandler(kakaoLogin));
 //액세스 토큰 만료, 리프레시 토큰을 이용해 엑세스토큰 재발급
 userRouter.get("/refresh", asyncHandler(refresh))
 
+
+//카테고리 수정
+userRouter.patch("/my/categories", asyncHandler(authJWT), asyncHandler(changeCategory));
+
 // 다른 유저의 피드 조회 (로그인 필요 X)
 userRouter.get('/:userId/shorts', asyncHandler(getUserShortsForGuest));
 userRouter.get('/:userId/likes', asyncHandler(getUserLikeShortsForGuest));
 userRouter.get('/:userId/books', asyncHandler(getUserBooksForGuest));
+

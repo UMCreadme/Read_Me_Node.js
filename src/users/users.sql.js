@@ -20,7 +20,11 @@ export const getUserLikeShortsIdById = "SELECT shorts_id FROM LIKE_SHORTS WHERE 
 
 export const getUserReadBooksIdById = "SELECT book_id FROM USER_BOOK WHERE user_id = ? ORDER BY CREATED_AT DESC LIMIT ? OFFSET ?";
 
+export const getUserReadBooksByUserId = "SELECT book_id FROM USER_BOOK WHERE user_id = ?";
+
 export const addFollowUser = "INSERT INTO FOLLOW(follower, user_id) VALUES(?, ?)";
+
+export const cancelFollowUser = "DELETE FROM FOLLOW WHERE follower = ? AND user_id = ?";
 
 export const findFollowStatus = "SELECT * FROM FOLLOW WHERE follower = ? AND user_id = ?";
 
@@ -43,9 +47,11 @@ export const findAllIfContainsKeywordOrdered = `
   ORDER BY follower_count DESC;
 `;
 
+
 // 최근 24시간 이내의 게시물 수를 가져오는 쿼리
 export const getLatestPostCount = `
   SELECT COUNT(*) AS count
   FROM SHORTS
   WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
 `;
+
