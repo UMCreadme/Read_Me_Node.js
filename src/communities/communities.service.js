@@ -1,8 +1,18 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-import { getCommunities, createCommunityWithCheck, getCommunityCurrentCount, getCommunityCapacity, isUserAlreadyInCommunity, joinCommunity } from './communities.dao.js';
+import { deleteCommunityDao, 
+         checkCommunityExistenceDao, 
+         checkCommunityOwnerDao,
+         getCommunities, 
+         createCommunityWithCheck, 
+         getCommunityCurrentCount, 
+         getCommunityCapacity, 
+         isUserAlreadyInCommunity, 
+         joinCommunity } from './communities.dao.js';
 import { getCommunitiesDto } from './communities.dto.js';
 import { pageInfo } from '../../config/pageInfo.js';
+
+
 
 // 커뮤니티 생성 서비스
 export const createCommunityService = async (userId, bookId, address, tag, capacity) => {
@@ -68,3 +78,19 @@ export const getCommunitiesService = async (page, size) => {
         pageInfo: pageInfo(page, actualSize, hasNext, totalElements)
     };
 };
+
+
+export const deleteCommunityService = async (user_id, community_id) => {
+    const exists = await checkCommunityExistenceDao(community_id);
+    if (!exists) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    }
+
+    const owner = await checkCommunityOwnerDao(community_id);
+    if ( owner !== user_id) {
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    await deleteCommunityDao(community_id);
+};
+

@@ -49,17 +49,7 @@ userRouter.get("/my/likes", asyncHandler(authJWT), asyncHandler(getUserLikeShort
 userRouter.get("/my/books", asyncHandler(authJWT), asyncHandler(getUserBooks));
 
 // 로그인 안하고 유저 검색 기능
-userRouter.get("", asyncHandler(authJWTNoUserRequired), asyncHandler(searchUser))
-
-// 다른 유저 팔로잉
-userRouter.post("/:userId/follow", asyncHandler(authJWT), asyncHandler(followUser));
-
-
-// 다른 유저 정보 조회 (로그인 필요 X)
-userRouter.get('/:userId', asyncHandler(authJWTNoUserRequired), asyncHandler(getOtherUserInfo));
-
-// 다른 유저 팔로우 취소
-userRouter.delete("/:userId/follow", asyncHandler(authJWT), asyncHandler(unfollow));
+userRouter.get("", asyncHandler(authJWTNoUserRequired), asyncHandler(searchUser));
 
 // 카카오 회원가입
 userRouter.post("/sign", asyncHandler(kakaoSignUp));
@@ -73,6 +63,13 @@ userRouter.get("/refresh", asyncHandler(refresh))
 
 //카테고리 수정
 userRouter.patch("/my/categories", asyncHandler(authJWT), asyncHandler(changeCategory));
+
+// 다른 유저 정보 조회 (로그인 필요 X)
+userRouter.get('/:userId', asyncHandler(authJWTNoUserRequired), asyncHandler(getOtherUserInfo));
+// 다른 유저 팔로잉
+userRouter.post("/:userId/follow", asyncHandler(authJWT), asyncHandler(followUser));
+// 다른 유저 팔로우 취소
+userRouter.delete("/:userId/follow", asyncHandler(authJWT), asyncHandler(unfollow));
 
 // 다른 유저의 피드 조회 (로그인 필요 X)
 userRouter.get('/:userId/shorts', asyncHandler(getUserShortsForGuest));
