@@ -253,6 +253,10 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
         userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement))
     }
 
+    if(!userId){
+        return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
+    }
+
     const recentSerachId = await getResearchId(userId, keyword);
     if(!recentSerachId) {
         await addSearchDao(userId, keyword);
