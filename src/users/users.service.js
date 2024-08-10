@@ -99,12 +99,32 @@ export const isFollowing = async(myId, userId) => {
 
 //유저 프로필 이미지 수정
 export const updateUserImageService = async(userId, profileImg) =>{
-    await dao.editUserImageDao(userId, profileImg)
+    await dao.updateUserImageDao(userId, profileImg)
 }
 
 //유저 프로필 이미지 삭제
 export const deleteUserImageService = async (userId) => {
     await dao.deleteUserImageDao(userId)
+}
+
+// 유저 프로필 내용 수정
+export const updateUserInfoService = async(userId, userData) => {
+
+    const accountCheck = (account) => {
+        const regex = /^[a-zA-Z0-9]{1,30}$/;
+        return regex.test(account);
+    }
+
+    const nicknameCheck = (nickname) => {
+        const regex = /^[a-zA-Z0-9가-힣]{1,12}$/;
+        return regex.test(nickname);
+    }
+
+    if(!accountCheck(userData.account) || !nicknameCheck(userData.nickname)){
+        throw new BaseError(status.PARAMETER_IS_WRONG)
+    }
+
+    await dao.updateUserInfoDao(userId, userData)
 }
 
 // 유저가 만든 쇼츠 리스트 조회 로직

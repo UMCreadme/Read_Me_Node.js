@@ -59,3 +59,17 @@ export const updateUserImageSql = `
     SET image_url = COALESCE(?, image_url)
     WHERE user_id = ?
 `;
+
+export const deleteUserImageSql = `
+    UPDATE USERS
+    SET image_url =  "https://readme-image.s3.ap-northeast-2.amazonaws.com/profile/default-profile.png"
+    WHERE user_id = ?
+`
+
+export const updateUserInfoSql = `
+    UPDATE USERS
+    SET nickname = COALESCE(?, nickname), 
+        account = COALESCE(?, account), 
+        comment = COALESCE(?, comment)
+    WHERE user_id = ?
+`
