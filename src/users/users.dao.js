@@ -27,7 +27,7 @@ export const userSignUp = async (body, provider, refreshToken) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -49,7 +49,7 @@ export const userLogin = async (body, provider, refreshToken) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -68,7 +68,7 @@ export const findById = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -82,7 +82,7 @@ export const findFollowingNumByUserId = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -96,7 +96,7 @@ export const findFollowerNumByUserId = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -110,7 +110,7 @@ export const hasRecentPostForUser = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -128,7 +128,7 @@ export const checkIsFollowed = async (myId, userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -142,7 +142,7 @@ export const findUserShortsById = async (userId, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -163,7 +163,7 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -184,7 +184,7 @@ export const findUserBooksById = async(userId, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -198,7 +198,7 @@ export const findUserBooksCountById = async(userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -219,7 +219,7 @@ export const followUserAdd = async(userId, followingId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -234,7 +234,7 @@ export const followUserCancel = async(userId, unfollowUserId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -249,7 +249,7 @@ export const findMeWithKeyword = async(userId, keyword) =>{
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -272,7 +272,7 @@ export const findEachFollowWithKeyword = async(userId, keyword, target) =>{
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -295,7 +295,7 @@ export const findMyFollowWithKeyword = async(userId, keyword, target) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -318,7 +318,7 @@ export const findMeFollowWithKeyword = async (userId, keyword, target) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -332,7 +332,7 @@ export const findUsersWithKeyword = async (userId, keyword, target) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -345,7 +345,7 @@ export const checkDuplicateAccount = async(account) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -374,7 +374,7 @@ export const changeCategoryDao = async (user_id, category) => {
         await conn.rollback();
         throw error;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 

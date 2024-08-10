@@ -44,7 +44,7 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
         console.error(err); // 에러 로그 출력
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -58,7 +58,7 @@ export const getCommunityCurrentCount = async (communityId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -72,7 +72,7 @@ export const getCommunityCapacity = async (communityId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -86,7 +86,7 @@ export const isUserAlreadyInCommunity = async (communityId, userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -99,7 +99,7 @@ export const joinCommunity = async (communityId, userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -116,7 +116,7 @@ export const getCommunities = async (page, size) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 
 };
@@ -158,7 +158,7 @@ export const deleteCommunityDao = async (community_id) => {
         await conn.query('ROLLBACK');
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
     
 };
