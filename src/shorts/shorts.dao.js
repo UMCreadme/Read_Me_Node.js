@@ -1,8 +1,11 @@
 import { pool } from "../../config/db.config.js";
+import { BaseError } from "../../config/error.js";
+import { status } from "../../config/response.status.js";
 import { isUserReadBookById } from "../book/book.sql.js";
 import { insertObject } from "../common/common.dao.js";
 import { addComment, getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
 import { checkLike, removeLike, addLike } from "./shorts.sql.js";
+
 
 // 책 제목으로 쇼츠 검색
 export const getShortsToTitleKeyword = async (keyword) => {
@@ -175,12 +178,21 @@ export const getLikeCntDao = async (shorts_id) => {
 export const checkShortsOwnerDao = async (shorts_id) => {
     const conn = await pool.getConnection();
 
-    const [result] = await conn.query('SELECT user_id FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
-    if (result.length === 0) {
+    try {
+        const [result] = await conn.query('SELECT user_id FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+        if (result.length === 0) {
         throw new BaseError(status.SHORTS_NOT_FOUND);
+        }
+        return result[0].user_id;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
-    return result[0].user_id;
 };
+
+
 
 //쇼츠 삭제 - softdelete
 export const deleteShortsDao = async (shorts_id) => {
@@ -205,5 +217,6 @@ export const deleteShortsDao = async (shorts_id) => {
     } finally {
         conn.release();
     }
+    
     
 };
