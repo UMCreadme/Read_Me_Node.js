@@ -6,6 +6,7 @@ import { shortsInfoDto } from "./shorts.dto.js";
 import { bookInfoDto } from "../book/book.dto.js";
 import { addCommentService } from "./shorts.service.js";
 import { likeShortsService } from "./shorts.service.js";
+import { deleteShortsService } from "./shorts.service.js";
 
 export const getShortsDetail = async (req, res, next) => {
     const { category, keyword, book, user, like, page=1, size=10 } = req.query;
@@ -93,4 +94,16 @@ export const likeShorts = async (req, res, next) => {
     const responseStatus = action === 'added' ? status.CREATED : status.SUCCESS;
     res.send(response(responseStatus, likeCnt));
 
+}
+
+export const deleteShorts = async (req, res, next) => {
+    const user_id = req.user_id;
+    const shorts_id  = req.params.shortsId;
+
+
+    if ( !shorts_id || !user_id ) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+    await deleteShortsService(user_id, shorts_id);
+    res.send(response(status.SUCCESS));
 }
