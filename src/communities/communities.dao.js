@@ -123,9 +123,8 @@ export const getCommunities = async (page, size) => {
 
 // 제목으로 커뮤니티 검색
 export const searchCommunitiesByTitleKeyword = async (keyword) => {
-    let conn; // conn 변수를 먼저 정의합니다.
+    const conn = await pool.getConnection();
     try {
-        conn = await pool.getConnection();
         const [results] = await conn.query(GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
         return results;
     } catch (err) {
@@ -138,9 +137,8 @@ export const searchCommunitiesByTitleKeyword = async (keyword) => {
 
 // 태그로 커뮤니티 검색
 export const searchCommunitiesByTagKeyword = async (keyword) => {
-    let conn;
+    const conn = await pool.getConnection()
     try {
-        conn = await pool.getConnection();
         const [shortsTag] = await conn.query(GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
         return shortsTag;
     } catch (err) {
