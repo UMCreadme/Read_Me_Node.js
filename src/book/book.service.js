@@ -58,7 +58,7 @@ export const updateBookIsRead = async (book, cid, userId) => {
     }
 };
 
-export const searchBookService = async (userId, keyword, page, size) => {
+export const searchBookService = async (userId, keyword, preview, page, size) => {
     const BASE_URL = `http://www.aladin.co.kr/ttb/api/ItemSearch.aspx?ttbkey=${process.env.TTB_KEY}&output=js&Version=20131101`;
 
     // 전체 몰 검색
@@ -76,8 +76,8 @@ export const searchBookService = async (userId, keyword, page, size) => {
     const hasNext = bookList.length > size;
     if(hasNext) bookList.pop();
 
-    // 검색어 저장 - 회원인 경우
-    if(!userId) {
+    // 검색어 저장 : 회원이거나 미리보기가 아닌 경우에만 저장
+    if(!userId || preview) {
         return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
     }
 
