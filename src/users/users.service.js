@@ -14,21 +14,8 @@ import { addSearchDao, getResearchId, updateSearchDao } from "../research/resear
 
 // 회원가입 후 토큰 반환
 export const join = async(body, provider) => {
-    const duplicateAccountCheck = await dao.checkDuplicateAccount(body.account)
 
-    if(duplicateAccountCheck){
-        throw new BaseError(status.DUPLICATE_ACCOUNT)
-    }
-
-    const accountCheck = (account) => {
-        const regex = /^[a-zA-Z0-9]{1,30}$/;
-        return regex.test(account);
-    }
-
-    const nicknameCheck = (nickname) => {
-        const regex = /^[a-zA-Z0-9가-힣]{1,12}$/;
-        return regex.test(nickname);
-    }
+    await duplicateAccountCheck(body.account)
 
     const categoryCheck = (category) => {
         const duplicateCategory = (new Set(category).size !== category.length)
@@ -111,20 +98,7 @@ export const deleteUserImageService = async (userId) => {
 export const updateUserInfoService = async(userId, userData) => {
 
     if(userData.account) {
-        const duplicateAccountCheck = await dao.checkDuplicateAccount(userData.account)
-        if(duplicateAccountCheck){
-            throw new BaseError(status.DUPLICATE_ACCOUNT)
-        }
-    }
-
-    const accountCheck = (account) => {
-        const regex = /^[a-zA-Z0-9]{1,30}$/;
-        return regex.test(account);
-    }
-
-    const nicknameCheck = (nickname) => {
-        const regex = /^[a-zA-Z0-9가-힣]{1,12}$/;
-        return regex.test(nickname);
+       await duplicateAccountCheck(userData.account)
     }
 
     const commentCheck = (comment) => {
@@ -137,6 +111,27 @@ export const updateUserInfoService = async(userId, userData) => {
 
     await dao.updateUserInfoDao(userId, userData)
 }
+
+
+// 중복 계정 체크
+const duplicateAccountCheck = async(account) => {
+    if(await dao.checkDuplicateAccount(account)){
+        throw new BaseError(status.DUPLICATE_ACCOUNT)
+    }
+}
+
+// 계정 30자, 기호 체크
+const accountCheck = (account) => {
+    const regex = /^[a-zA-Z0-9]{1,30}$/;
+    return regex.test(account);
+}
+
+// 닉네임 12자, 기호 체크
+const nicknameCheck = (nickname) => {
+    const regex = /^[a-zA-Z0-9가-힣]{1,12}$/;
+    return regex.test(nickname);
+}
+
 
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
