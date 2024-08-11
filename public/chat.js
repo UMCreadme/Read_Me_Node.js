@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageSize = 20;
     let loadingMessages = false;
     let noMoreMessages = false;
+    let isAtBottom = true; // 스크롤이 하단에 있는지 여부
 
     joinRoomButton.addEventListener('click', () => {
         const communityId = document.getElementById('communityId').value;
@@ -21,8 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (communityId && userId) {
             currentUserId = userId;
             if (!roomJoined) {
-                socket.emit('joinRoom', { communityId, userId, page: currentPage, size: pageSize });
+                socket.emit('joinRoom', { communityId, userId });
                 roomJoined = true;
+                loadMessages(); // 방에 참여할 때 초기 메시지 로드
             } else {
                 alert('이미 방에 참여했습니다.');
             }
@@ -54,11 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 메시지 로드 요청
-    function loadMessages() {
+    function loadMessages(page = currentPage) {
         const communityId = document.getElementById('communityId').value;
         if (!loadingMessages && !noMoreMessages) {
             loadingMessages = true;
-            socket.emit('loadMessages', { communityId, page: currentPage, size: pageSize });
+            socket.emit('loadMessages', { communityId, page, size: pageSize });
         }
     }
 
@@ -67,9 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (messages.length < pageSize) {
                 noMoreMessages = true;
             }
-
+    
             // 메시지를 역순으로 추가
-            messages.reverse().forEach((message) => {
+            messages.forEach((message) => {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message');
                 if (message.userId === currentUserId) {
@@ -78,48 +80,52 @@ document.addEventListener('DOMContentLoaded', () => {
                     messageElement.classList.add('theirs');
                 }
                 messageElement.textContent = `${message.userId}: ${message.content}`;
-                messagesContainer.prepend(messageElement); // 역순으로 추가
+                messagesContainer.prepend(messageElement); // 새 메시지를 컨테이너의 최상단에 추가
             });
-
-            if (currentPage === 1) {
-                // 초기 로드 시 스크롤을 맨 아래로
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            } else {
-                // 이전 메시지 로드 후 스크롤 위치 유지
-                const currentScrollHeight = messagesContainer.scrollHeight;
-                const scrollOffset = currentScrollHeight - messagesContainer.scrollHeight;
-                messagesContainer.scrollTop += scrollOffset;
+    
+            // 최신 메시지의 읽음 상태 업데이트
+            if (messages.length > 0) {
+                const latestMessageId = messages[0].messageId; // 수정: message_id -> messageId
+                console.log(`로드된 메시지 ID: ${latestMessageId}`); // 디버그용 로그 추가
+                if (latestMessageId) {
+                    socket.emit('messageRead', { messageId: latestMessageId });
+                } else {
+                    console.error('로드된 메시지 ID가 유효하지 않습니다.');
+                }
             }
+    
             loadingMessages = false;
         } else {
             console.error('메시지 로드 중 문제가 발생했습니다.');
             loadingMessages = false;
         }
     });
+    
 
-    // 메시지 수신 시 읽음 상태 업데이트 요청
-    socket.on('message', (data) => {
-        if (data && data.userId && data.content && data.messageId) {
-            const { userId, content, messageId } = data;
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message');
-            if (userId === currentUserId) {
-                messageElement.classList.add('mine');
-            } else {
-                messageElement.classList.add('theirs');
-            }
-            messageElement.textContent = `${userId}: ${content}`;
-            messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight; // 최신 메시지가 보이도록 스크롤 조정
-
-            // 메시지를 수신하면 읽음 상태 업데이트 요청
-            if (roomJoined) {
-                socket.emit('messageRead', { messageId });
-            }
+   socket.on('message', (data) => {
+    if (data && data.userId && data.content && data.messageId) {
+        const { userId, content, messageId } = data;
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        if (userId === currentUserId) {
+            messageElement.classList.add('mine');
         } else {
-            console.error('받은 메시지가 유효하지 않거나 messageId가 없습니다.');
+            messageElement.classList.add('theirs');
         }
-    });
+        messageElement.textContent = `${userId}: ${content}`;
+        messagesContainer.appendChild(messageElement);
+
+        // 새로운 메시지를 수신하면 스크롤을 하단으로 이동
+        if (isAtBottom) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 메시지를 수신하면 읽음 상태 업데이트 요청
+        socket.emit('messageRead', { messageId });
+    } else {
+        console.error('받은 메시지가 유효하지 않거나 messageId가 없습니다.');
+    }
+});
 
     socket.on('messageRead', (messageId) => {
         if (messageId) {
@@ -134,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             statusDiv.textContent = data.message;
             currentUserId = data.userId || currentUserId;
             loadMessages(); // 방 참여 성공 후 메시지 로드
-            socket.emit('updateReadStatus', { communityId: document.getElementById('communityId').value, userId: currentUserId });
         } else {
             console.error('방 참여 성공 메시지가 유효하지 않습니다.');
         }
@@ -153,7 +158,27 @@ document.addEventListener('DOMContentLoaded', () => {
     messagesContainer.addEventListener('scroll', () => {
         if (messagesContainer.scrollTop === 0 && !loadingMessages && !noMoreMessages) {
             currentPage++;
-            loadMessages();
+            loadMessages(currentPage);
+        }
+
+        // 스크롤이 하단에 위치한 경우 상태 업데이트
+        isAtBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop === messagesContainer.clientHeight);
+    });
+
+    // 페이지 로드 시 스크롤을 하단으로 이동
+    window.addEventListener('load', () => {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    });
+
+    // 메시지가 추가된 후 스크롤을 하단으로 이동
+    function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // 메시지를 추가할 때 스크롤 위치 조정
+    socket.on('message', () => {
+        if (isAtBottom) {
+            scrollToBottom();
         }
     });
 });

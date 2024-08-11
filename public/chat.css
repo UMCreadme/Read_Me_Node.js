@@ -59,11 +59,10 @@ body {
     flex-direction: column;
     box-sizing: border-box; /* 패딩과 테두리를 포함하여 계산 */
 }
-
 .message {
     margin-bottom: 10px;
     display: flex;
-    max-width: 100%;
+    align-items: center;
 }
 
 .message.user-message {
@@ -72,6 +71,26 @@ body {
 
 .message.other-message {
     justify-content: flex-start;
+}
+
+.message .profile {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    background-size: cover;
+    background-position: center;
+}
+
+.message.user-message .profile {
+    margin-right: 0;
+    margin-left: 10px;
 }
 
 .message .bubble {
@@ -91,6 +110,12 @@ body {
     background-color: #ffffff;
     border: 1px solid #ddd;
     border-bottom-left-radius: 0;
+}
+
+.message .time {
+    font-size: 0.8rem;
+    color: #888;
+    margin-left: 10px;
 }
 
 #status {
