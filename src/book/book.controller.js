@@ -76,14 +76,13 @@ export const searchBook = async (req, res, next) => {
 // 책 검색어 추가
 export const createBookSearch = async (req, res, next) => {
     const userId = req.user_id;
-    const keyword = req.body.keyword;
     const ISBN = req.params.ISBN;
 
-    if(!keyword || !ISBN) {
+    if(!ISBN) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    await service.createBookSearchService(ISBN, keyword, userId);
+    await service.createBookSearchService(ISBN, userId);
 
     res.send(response(status.CREATED));
 };

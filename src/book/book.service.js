@@ -144,7 +144,7 @@ export const searchBookService = async (userId, keyword, preview, page, size) =>
     return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
 };
 
-export const createBookSearchService = async (ISBN, keyword, userId) => {
+export const createBookSearchService = async (ISBN, userId) => {
     let bookId = await dao.getBookIdByISBN(ISBN);
     if(!bookId) {
         const aladinBookInfo = await searchBookByISBN(ISBN);
@@ -159,5 +159,5 @@ export const createBookSearchService = async (ISBN, keyword, userId) => {
         bookId = await dao.saveBook(book);
     }
 
-    await addSearchDao(userId, keyword, bookId);
+    await addSearchDao(userId, null, bookId);
 };
