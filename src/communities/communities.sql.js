@@ -45,14 +45,14 @@ export const GET_COMMUNITIES = `
 // 제목으로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TITLE_KEYWORD = `
 SELECT 
-    c.community_id AS community_id,
-    c.user_id AS user_id,
-    c.book_id AS book_id,
+    c.community_id,
+    c.user_id,
+    c.book_id,
     c.address,
-    c.tag AS tags,
+    c.tag,
     c.capacity,
-    c.created_at AS created_at,
-    c.updated_at AS updated_at
+    c.created_at,
+    c.updated_at
 FROM COMMUNITY c
 JOIN BOOK b ON c.book_id = b.book_id
 WHERE REPLACE(b.title, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
@@ -63,14 +63,14 @@ ORDER BY c.created_at DESC;
 // 태그로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TAG_KEYWORD = `
 SELECT 
-    c.community_id AS community_id,
-    c.user_id AS user_id,
-    c.book_id AS book_id,
+    c.community_id,
+    c.user_id,
+    c.book_id,
     c.address,
-    c.tag AS tags,
+    c.tag,
     c.capacity,
-    c.created_at AS created_at,
-    c.updated_at AS updated_at
+    c.created_at,
+    c.updated_at  
 FROM COMMUNITY c
 WHERE REPLACE(c.tag, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
 ORDER BY c.created_at DESC;

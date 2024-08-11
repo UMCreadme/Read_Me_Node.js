@@ -2,9 +2,6 @@
 import { StatusCodes } from "http-status-codes";
 
 export const status = {
-  // error
-
-  // token err
 
   // success
   SUCCESS: { status: StatusCodes.OK, "isSuccess": true, "code": 2000, "message": "SUCCESS!" },

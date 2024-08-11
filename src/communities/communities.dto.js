@@ -5,7 +5,7 @@ export const getCommunitiesDto = (data) => {
         userId: community.user_id,
         bookId: community.book_id,
         address: community.address ? community.address.split('|') : [], // check for undefined
-        tags: community.tags ? community.tags.split('|') : [], // check for undefined
+        tags: community.tag ? community.tag.split('|') : [],
         capacity: community.capacity,
         createdAt: community.created_at,
         updatedAt: community.updated_at

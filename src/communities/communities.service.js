@@ -83,7 +83,7 @@ export const searchCommunityService = async (keyword, page = 1, size = 10) => {
     }
 
     let communities;
-    const decodedKeyword = decodeURIComponent(keyword.trim()); // URL 디코딩
+    const decodedKeyword = decodeURIComponent(keyword.trim().replace(/\s+/g, '')); // URL 디코딩 및 공백 제거
     const isTagSearch = decodedKeyword.startsWith('#');
 
     if (isTagSearch) {
