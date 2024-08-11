@@ -25,9 +25,18 @@ export const ShortsByCategory = async (category_name, offset, limit) => {
 export const getMainInfo = async(user_id, offset, limit) => {
     
     // 카테고리 리스트 가져오기
-    const categories = user_id
+    let categories = user_id
     ? await getUserCategoriesById(user_id)
     : await getAllCategory();
+
+    console.log(user_id);
+
+    if(user_id) {
+        categories = [
+            { name: "추천" },
+            ...categories
+        ]
+    }
 
     // 추천 숏츠 리스트 가져오기
     const shorts = user_id
