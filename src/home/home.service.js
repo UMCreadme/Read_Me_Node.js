@@ -29,8 +29,6 @@ export const getMainInfo = async(user_id, offset, limit) => {
     ? await getUserCategoriesById(user_id)
     : await getAllCategory();
 
-    console.log(user_id);
-
     if(user_id) {
         categories = [
             { name: "추천" },
