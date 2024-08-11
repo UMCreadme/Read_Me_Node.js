@@ -120,7 +120,11 @@ export const updateUserInfoService = async(userId, userData) => {
         return regex.test(nickname);
     }
 
-    if(!accountCheck(userData.account) || !nicknameCheck(userData.nickname)){
+    const commentCheck = (comment) => {
+        return comment.length <= 50
+    }
+
+    if(!accountCheck(userData.account) || !nicknameCheck(userData.nickname) || !commentCheck(userData.comment)){
         throw new BaseError(status.PARAMETER_IS_WRONG)
     }
 
