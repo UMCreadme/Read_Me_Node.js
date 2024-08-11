@@ -3,20 +3,20 @@ import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
 import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
-import { checkIsReadById, getBookIdByISBN, findUserRecentBookList,  saveBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid, findBookById } from "./book.dao.js"
+import * as dao from "./book.dao.js";
 import { bookDetailResponseDto, createBookRequestDto, aladinBookSearchResultDto, bookSearchResponseDto } from "./book.dto.js";
 import axios from "axios";
 
 export const getBookDetailInfoById = async (bookId, page, size, userId) => {
     // 책 정보 조회
-    const book = await findBookById(bookId);
+    const book = await dao.findBookById(bookId);
 
     if(!book) {
         throw new BaseError(status.BOOK_NOT_FOUND);
     }
 
     // 책 읽음 여부 (회원인 경우 DB 조회 / 비회원인 경우 false)
-    const isRead = userId ? await checkIsReadById(userId, bookId) : false;
+    const isRead = userId ? await dao.checkIsReadById(userId, bookId) : false;
     // 책에 해당하는 쇼츠 조회
     const shorts = await getShortsDetailToBook(-1, bookId, size+1, (page-1)*size);
 
@@ -28,7 +28,7 @@ export const getBookDetailInfoById = async (bookId, page, size, userId) => {
 
 export const getBookDetailInfoByISBN = async (ISBN, page, size, userId) => {
     // 책 ID 조회
-    const bookId = await getBookIdByISBN(ISBN);
+    const bookId = await dao.getBookIdByISBN(ISBN);
     
     // 책이 저장되지 않았을 경우 ISBN으로 책 정보 조회 (알라딘 api)
     if(!bookId) {
@@ -40,24 +40,24 @@ export const getBookDetailInfoByISBN = async (ISBN, page, size, userId) => {
 }
 
 export const findUserRecentBook = async (userId, offset, limit) => {
-    return await findUserRecentBookList(userId, offset, limit)
+    return await dao.findUserRecentBookList(userId, offset, limit)
 }
 
 export const createBook = async (ISBN) => {
     // 책 ID 조회
-    let bookId = await getBookIdByISBN(ISBN);
+    let bookId = await dao.getBookIdByISBN(ISBN);
 
     if(!bookId) {
         // ISBN으로 책 정보 조회 (알라딘 api)
         let book = await searchBookByISBN(ISBN);
-        const categoryId = await getCategoryIdByAladinCid(book.cid);
+        const categoryId = await dao.getCategoryIdByAladinCid(book.cid);
         if(!categoryId) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
         }
     
         book.category_id = categoryId;
         book = createBookRequestDto(book);
-        bookId = await saveBook(book);
+        bookId = await dao.saveBook(book);
     }
 
     return bookId;
@@ -65,19 +65,19 @@ export const createBook = async (ISBN) => {
 
 export const updateBookIsRead = async (bookId, userId) => {
     // 책 ID로 정보 있는지 확인
-    const book = await findBookById(bookId);
+    const book = await dao.findBookById(bookId);
     if(!book) {
         throw new BaseError(status.BOOK_NOT_FOUND);
     }
 
-    const isRead = await checkIsReadById(userId, bookId);
+    const isRead = await dao.checkIsReadById(userId, bookId);
     // 읽은 책일 경우 삭제
     if(isRead) {
-        await deleteBookIsReadToUser(userId, bookId);
+        await dao.deleteBookIsReadToUser(userId, bookId);
         return status.NO_CONTENT;
     } else {
         // 읽지 않은 책일 경우 읽음 처리
-        await updateBookIsReadToUser(userId, bookId);
+        await dao.updateBookIsReadToUser(userId, bookId);
         return status.CREATED;
     }
 };
@@ -145,10 +145,10 @@ export const searchBookService = async (userId, keyword, preview, page, size) =>
 };
 
 export const createBookSearchService = async (ISBN, keyword, userId) => {
-    let bookId = await getBookIdByISBN(ISBN);
+    let bookId = await dao.getBookIdByISBN(ISBN);
     if(!bookId) {
         const aladinBookInfo = await searchBookByISBN(ISBN);
-        const categoryId = await getCategoryIdByAladinCid(aladinBookInfo.cid);
+        const categoryId = await dao.getCategoryIdByAladinCid(aladinBookInfo.cid);
         if(!categoryId) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
         }
@@ -156,7 +156,7 @@ export const createBookSearchService = async (ISBN, keyword, userId) => {
         const book = createBookRequestDto(aladinBookInfo);
     
         book.category_id = categoryId;
-        bookId = await saveBook(book);
+        bookId = await dao.saveBook(book);
     }
 
     await addSearchDao(userId, keyword, bookId);

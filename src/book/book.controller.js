@@ -1,6 +1,6 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { getBookDetailInfoByISBN, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService, getBookDetailInfoById, createBook } from "./book.service.js";
+import * as service from "./book.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { BaseError } from "../../config/error.js";
 
@@ -15,10 +15,10 @@ export const getBookDetail = async (req, res, next) => {
     }
 
     if(isBookId === 'true') {
-        const result = await getBookDetailInfoById(parseInt(id), parseInt(page), parseInt(size), userId);
+        const result = await service.getBookDetailInfoById(parseInt(id), parseInt(page), parseInt(size), userId);
         return res.send(response(status.SUCCESS, result.data, result.pageInfo));
     } else {
-        const result = await getBookDetailInfoByISBN(id, parseInt(page), parseInt(size), userId);
+        const result = await service.getBookDetailInfoByISBN(id, parseInt(page), parseInt(size), userId);
         return res.send(response(status.SUCCESS, result.data, result.pageInfo));
     }
 };
@@ -38,10 +38,10 @@ export const updateIsRead = async (req, res, next) => {
     if(isBookId === 'true') {
         bookId = parseInt(id);
     } else {
-        bookId = await createBook(id);
+        bookId = await service.createBook(id);
     }
 
-    res.send(response(await updateBookIsRead(bookId, userId)));
+    res.send(response(await service.updateBookIsRead(bookId, userId)));
 };
 
 // 최근 선택한 책
@@ -51,7 +51,7 @@ export const getUserRecentBook = async (req, res, next) => {
     const offset = (page -1) * size
     const userId = req.user_id;
 
-    const result = await findUserRecentBook(userId, offset, size+1)
+    const result = await service.findUserRecentBook(userId, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -68,7 +68,7 @@ export const searchBook = async (req, res, next) => {
     }
 
     keyword = keyword.trim();
-    const book = await searchBookService(userId, keyword, preview === 'true', parseInt(page), parseInt(size));
+    const book = await service.searchBookService(userId, keyword, preview === 'true', parseInt(page), parseInt(size));
 
     res.send(response(status.SUCCESS, book.data, book.pageInfo));
 };
@@ -83,7 +83,7 @@ export const createBookSearch = async (req, res, next) => {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    await createBookSearchService(ISBN, keyword, userId);
+    await service.createBookSearchService(ISBN, keyword, userId);
 
     res.send(response(status.CREATED));
 };
