@@ -8,10 +8,14 @@ import {
     isUserAlreadyInCommunity,
     searchCommunitiesByTagKeyword,
     searchCommunitiesByTitleKeyword,
-    joinCommunity
+    joinCommunity,
+    deleteCommunityDao,
+    checkCommunityExistenceDao,
+    checkCommunityOwnerDao,
 } from './communities.dao.js';
 import { getCommunitiesDto } from './communities.dto.js';
 import { pageInfo } from '../../config/pageInfo.js';
+
 
 // 커뮤니티 생성 서비스
 export const createCommunityService = async (userId, bookId, address, tag, capacity) => {
@@ -106,4 +110,18 @@ export const searchCommunityService = async (keyword, page = 1, size = 10) => {
         communityList: getCommunitiesDto({ communities: paginatedCommunities.slice(0, actualSize) }),
         pageInfo: pageInfo(page, actualSize, hasNext, communities.length)
     };
+};
+
+export const deleteCommunityService = async (user_id, community_id) => {
+    const exists = await checkCommunityExistenceDao(community_id);
+    if (!exists) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    }
+
+    const owner = await checkCommunityOwnerDao(community_id);
+    if ( owner !== user_id) {
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    await deleteCommunityDao(community_id);
 };

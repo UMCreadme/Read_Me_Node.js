@@ -5,16 +5,30 @@ import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategory
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
-import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao} from "./shorts.dao.js";
+import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao,
+deleteShortsDao, checkShortsOwnerDao} from "./shorts.dao.js";
+import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 
 
 // 쇼츠 검색
-export const getSearchShorts = async (keyword, page, size) => {
+export const getSearchShorts = async (userId, keyword, page, size) => {
     let result = await getSearchShortsNoPaging(keyword);
     result = result.slice((page-1)*size, (page-1)*size + size + 1);
     
     const hasNext = result.length > size;
     if(hasNext) result.pop();
+
+    // 검색어 저장 - 회원인 경우
+    if(!userId) {
+        return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+    }
+
+    const recentSerachId = await getResearchId(userId, keyword);
+    if(!recentSerachId) {
+        await addSearchDao(userId, keyword);
+    } else {
+        await updateSearchDao(recentSerachId);
+    }
 
     return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
 };
@@ -220,3 +234,16 @@ export const likeShortsService = async (shorts_id, user_id) => {
 
 };
 
+export const deleteShortsService = async (user_id, shorts_id) => {
+    const exists = await checkShortsExistenceDao(shorts_id);
+    if (!exists) {
+        throw new BaseError(status.SHORTS_NOT_FOUND);
+    }
+
+    const owner = await checkShortsOwnerDao(shorts_id);
+    if (owner !== user_id) {
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    await deleteShortsDao(shorts_id);
+};

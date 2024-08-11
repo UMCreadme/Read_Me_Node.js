@@ -1,349 +1,377 @@
-import { BaseError } from "../../config/error.js";
-import { status } from "../../config/response.status.js";
 import { pool } from "../../config/db.config.js";
-import {
-    getUserReadBooksIdById,
-    getUserFollowers,
-    getUserFollowings,
-    getUserById,
-    getUserLikeShortsIdById,
-    getUserShortsById,
-    addFollowUser,
-    cancelFollowUser,
-    findFollowStatus,
-    findIfContainsKeywordWithUserId,
-    getEachFollowIdList,
-    getMeFollowIdList,
-    getMyFollowIdList,
-    findAllIfContainsKeywordOrdered,
-    save,
-    updateRefreshToken,
-    insertUserFavorite,
-    getUserByUniqueIdAndEmail,
-    getLatestPostCount
-} from "./users.sql.js";
+import * as sql from "./users.sql.js";
 import { getShortsById } from "../shorts/shorts.sql.js";
 import { getBookById } from "../book/book.sql.js";
 
 // 유저 회원가입
 export const userSignUp = async (body, provider, refreshToken) => {
-    try{
-        const conn = await pool.getConnection();
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
 
-        const [result] = await pool.query(save, [body.uniqueId, body.email, body.account, body.nickname, provider, refreshToken])
-        const [newUser] = await pool.query(getUserById, result.insertId)
+        const [result] = await conn.query(sql.save, [body.uniqueId, body.email, body.account, body.nickname, provider, refreshToken]);
+        const [newUser] = await conn.query(sql.getUserById, result.insertId);
 
-        const userFavoriteIdList = body.categoryIdList
+        const userFavoriteIdList = body.categoryIdList;
 
         for (const userFavoriteIdListElement of userFavoriteIdList) {
-            await pool.query(insertUserFavorite, [newUser[0].user_id, userFavoriteIdListElement])
+            await conn.query(sql.insertUserFavorite, [newUser[0].user_id, userFavoriteIdListElement]);
         }
 
-        conn.release()
+        await conn.commit();
         return newUser[0];
-    }
-    catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+    } catch (err) {
+        await conn.rollback();
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 이미 존재하는 유저가 다시 로그인
 export const userLogin = async (body, provider, refreshToken) => {
-
-    try{
-        const conn = await pool.getConnection();
-        const [user] = await pool.query(getUserByUniqueIdAndEmail, [body.uniqueId, body.email])
+    const conn = await pool.getConnection();
+    try {
+        const [user] = await conn.query(sql.getUserByUniqueIdAndEmail, [body.uniqueId, body.email]);
 
         if(user[0] === undefined){
-            return null
+            return null;
         }
 
-        const realUserId = user[0].user_id
-        await pool.query(updateRefreshToken, [refreshToken, realUserId])
+        const realUserId = user[0].user_id;
+        await conn.query(sql.updateRefreshToken, [refreshToken, realUserId]);
 
-        conn.release()
-        return user[0]
-    }
-
-    catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        return user[0];
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 유저 정보 조회
 export const findById = async (userId) => {
+    const conn = await pool.getConnection();
     try {
-        const conn = await pool.getConnection();
-        const [user] = await pool.query(getUserById, userId);
+        const [user] = await conn.query(sql.getUserById, userId);
 
         if(user.length === 0){
             return -1;
         }
 
-        conn.release();
         return user[0];
-
     } catch (err) {
-        throw new BaseError(status.BAD_REQUEST);
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
-
 // 유저 정보 조회시 필요한 팔로잉수
 export const findFollowingNumByUserId = async (userId) => {
-
+    const conn = await pool.getConnection();
     try {
-        const conn = await pool.getConnection();
-        const [followings] = await pool.query(getUserFollowings, userId)
-
-        conn.release();
-
+        const [followings] = await conn.query(sql.getUserFollowings, userId);
         return followings.length;
-    }
-    catch (err) {
-        throw new BaseError(status.BAD_REQUEST)
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 유저 정보 조회시 필요한 팔로워 수
 export const findFollowerNumByUserId = async (userId) => {
-    try{
-        const conn = await pool.getConnection();
-        const [followers] = await pool.query(getUserFollowers, userId)
-        conn.release();
-
+    const conn = await pool.getConnection();
+    try {
+        const [followers] = await conn.query(sql.getUserFollowers, userId);
         return followers.length;
-    }
-    catch (err) {
-        throw new BaseError(status.BAD_REQUEST)
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 유저 정보 조회시 필요한 24h 이내 게시물 게시 여부
 export const hasRecentPostForUser = async (userId) => {
     const conn = await pool.getConnection();
-    
     try {
-        const [recent] = await conn.query(getLatestPostCount, [userId]);
-
-        // 24시간 이내 게시된 게시물 수가 0개 초과인지 반환
-        return recent[0].count > 0;
+        const [recent] = await conn.query(sql.getLatestPostCount, [userId]);
+        return recent[0].count > 0; // 24시간 이내 게시된 게시물 수가 0개 초과인지 반환
+    } catch (err) {
+        console.log(err);
+        throw err;
     } finally {
         conn.release();
     }
-};
+}
 
-// 다른 유저 정보 조회시 필요한 팔로우 여부 -- feat/13번이랑 충돌날거라 머지 후 수정 예정
+// 다른 유저 정보 조회시 필요한 팔로우 여부
 export const checkIsFollowed = async (myId, userId) => {
-    const conn = await pool.getConnection();
     if (myId === null) {
         return false;
     }
-    
+
+    const conn = await pool.getConnection();
     try {
-        const [followStatus] = await conn.query(findFollowStatus, [myId, userId]);
+        const [followStatus] = await conn.query(sql.findFollowStatus, [myId, userId]);
         return followStatus.length > 0;
+    } catch (err) {
+        console.log(err);
+        throw err;
     } finally {
         conn.release();
     }
 }
 
 // 유저가 만든 쇼츠 리스트 조회
-export const findUserShortsById = async (userId, offset ,limit) => {
-
+export const findUserShortsById = async (userId, offset, limit) => {
+    const conn = await pool.getConnection();
     try {
-        const conn = await pool.getConnection();
-        const [user] = await pool.query(getUserById, userId);
-        const [userShorts] = await pool.query(getUserShortsById, [userId, limit, offset]);
-
-
-        conn.release();
-
+        const [userShorts] = await conn.query(sql.getUserShortsById, [userId, limit, offset]);
         return userShorts;
-
-    }
-    catch(err){
-        throw new BaseError(status.BAD_REQUEST);
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 유저가 찜한 쇼츠 리스트 조회
 export const findUserLikeShortsById = async(userId, offset, limit) => {
-
-    try{
-        const conn = await pool.getConnection();
-        const [userLikeShortsIdList] = await pool.query(getUserLikeShortsIdById, [userId, limit, offset]);
-        const userLikeShorts =[]
+    const conn = await pool.getConnection();
+    try {
+        const [userLikeShortsIdList] = await conn.query(sql.getUserLikeShortsIdById, [userId, limit, offset]);
+        const userLikeShorts = []
 
         for (const userLikeShortsId of userLikeShortsIdList) {
-            let [userLikeShort] = await pool.query(getShortsById,userLikeShortsId.shorts_id)
-            userLikeShorts.push(userLikeShort[0])
+            let [userLikeShort] = await conn.query(getShortsById,userLikeShortsId.shorts_id);
+            userLikeShorts.push(userLikeShort[0]);
         }
-        conn.release();
-        return userLikeShorts;
-    }
-    catch (err) {
-        throw new BaseError(status.BAD_REQUEST);
-    }
 
+        return userLikeShorts;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
+    }
 }
 
-// 유저가 읽은 책 리스트 조회
+// 유저가 읽은 책 리스트 조회 (페이지네이션)
 export const findUserBooksById = async(userId, offset, limit) => {
-    try{
-        const conn = await pool.getConnection();
-        const [userBooksIdList] = await pool.query(getUserReadBooksIdById, [userId, limit, offset])
+    const conn = await pool.getConnection();
+    try {
+        const [userBooksIdList] = await conn.query(sql.getUserReadBooksIdById, [userId, limit, offset]);
         const userBooks = []
 
         for (const userBooksId of userBooksIdList) {
-            let [userBook] = await pool.query(getBookById, userBooksId.book_id)
-            userBooks.push(userBook[0])
+            let [userBook] = await conn.query(getBookById, userBooksId.book_id);
+            userBooks.push(userBook[0]);
         }
 
-        conn.release();
         return userBooks;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
-    catch(err){
-        throw new BaseError(status.BAD_REQUEST)
+}
+
+// 유저가 읽은 책 권수 조회
+export const findUserBooksCountById = async(userId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [userBooksIdList] = await conn.query(sql.getUserReadBooksByUserId, [userId]);
+        return userBooksIdList.length;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 유저(본인)가 다른 유저 팔로잉
 export const followUserAdd = async(userId, followingId) => {
-
-    try{
-        const conn = await pool.getConnection();
-
-        const [followStatus] = await pool.query(findFollowStatus, [userId, followingId])
+    const conn = await pool.getConnection();
+    try {
+        const [followStatus] = await conn.query(sql.findFollowStatus, [userId, followingId]);
 
         // 기존에 팔로우한 내역이 있으면 또 팔로우 할수 없게 만드는 로직, 중복 제거 + 본인이 본인을 팔로우하려는 경우 제거
         if(followStatus[0] || (followingId === userId)){
-           return false
+           return false;
         }
 
-        await pool.query(addFollowUser, [userId, followingId]);
+        await conn.query(sql.addFollowUser, [userId, followingId]);
+        return true;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
         conn.release();
-
-        return true
-    }
-    catch (err){
-        throw new BaseError(status.BAD_REQUEST)
     }
 }
 
 // 유저(본인)가 다른 유저 팔로우 취소
 export const followUserCancel = async(userId, unfollowUserId) => {
-
-    try{
-        const conn = await pool.getConnection();
-
-         // 팔로우 취소 쿼리 실행
-        await conn.query(cancelFollowUser, [userId, unfollowUserId]);
+    const conn = await pool.getConnection();
+    try {
+        // 팔로우 취소 쿼리 실행
+        await conn.query(sql.cancelFollowUser, [userId, unfollowUserId]);
+        return true; // 팔로우 취소 성공
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
         conn.release();
-
-         return true; // 팔로우 취소 성공
-    }
-    catch (err){
-        console.log(err)
-        throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
 }
 
 // 키워드 검색으로 조회되는 나를 찾기
 export const findMeWithKeyword = async(userId, keyword) =>{
-    try{
-        const conn = await pool.getConnection();
-        const [findMeByAccount] = await pool.query(findIfContainsKeywordWithUserId, [userId, 'account', keyword]);
-        const [findMeByNickname] = await pool.query(findIfContainsKeywordWithUserId, [userId, 'nickname', keyword]);
-
-        conn.release()
-
+    const conn = await pool.getConnection();
+    try {
+        const [findMeByAccount] = await conn.query(sql.findIfContainsKeywordWithUserId, [userId, 'account', keyword]);
+        const [findMeByNickname] = await conn.query(sql.findIfContainsKeywordWithUserId, [userId, 'nickname', keyword]);
         return findMeByAccount[0] || findMeByNickname[0] || null;
-
-    }
-    catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 키워드 검색으로 조회되는 유저중 맞팔로우 되어있는 사람 찾기
 export const findEachFollowWithKeyword = async(userId, keyword, target) =>{
-    try{
-        const conn = await pool.getConnection();
-        const [eachFollowIdList] = await pool.query(getEachFollowIdList, [userId, userId]);
-        const resultList = []
+    const conn = await pool.getConnection();
+    try {
+        const [eachFollowIdList] = await conn.query(sql.getEachFollowIdList, [userId, userId]);
+        const resultList = [];
 
         for (const eachFollowUserId of eachFollowIdList) {
-            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[eachFollowUserId.follower, target, keyword])
+            const [resultUser] = await conn.query(sql.findIfContainsKeywordWithUserId,[eachFollowUserId.follower, target, keyword]);
             if(resultUser[0]){
-                resultList.push(resultUser[0])
+                resultList.push(resultUser[0]);
             }
         }
 
-        conn.release()
-
-        return resultList
-
-    }
-    catch (err){
-        throw new BaseError(status.BAD_REQUEST)
+        return resultList;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
     }
 }
 
 // 키워드 검색으로 조회되는 유저중 맞팔로우가 아닌 본인이 팔로우 하는 사람 찾기
-export const findMyFollowWithKeyword = async(userId, keyword, target)=>{
-    try{
-        const conn = await pool.getConnection();
-        const [myFollowIdList] = await pool.query(getMyFollowIdList, [userId, userId])
-        const resultList = []
+export const findMyFollowWithKeyword = async(userId, keyword, target) => {
+    const conn = await pool.getConnection();
+    try {
+        const [myFollowIdList] = await conn.query(sql.getMyFollowIdList, [userId, userId]);
+        const resultList = [];
 
         for (const myFollowUserId of myFollowIdList) {
-            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[myFollowUserId.user_id, target, keyword])
+            const [resultUser] = await conn.query(sql.findIfContainsKeywordWithUserId,[myFollowUserId.user_id, target, keyword]);
             if(resultUser[0]){
-                resultList.push(resultUser[0])
+                resultList.push(resultUser[0]);
             }
         }
 
+        return resultList;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
         conn.release();
-
-        return resultList
-
-    }
-    catch (err){
-        throw new BaseError(status.BAD_REQUEST)
     }
 }
 
 // 키워드 검색으로 조회되는 유저중 맞팔로우가 아닌 나를 팔로우 하는 사람 찾기
 export const findMeFollowWithKeyword = async (userId, keyword, target) => {
-    try{
-        const conn = await pool.getConnection()
-        const [meFollowIdList] = await pool.query(getMeFollowIdList, [userId, userId])
-        const resultList = []
+    const conn = await pool.getConnection();
+    try {
+        const [meFollowIdList] = await conn.query(sql.getMeFollowIdList, [userId, userId]);
+        const resultList = [];
 
         for (const meFollowUserId of meFollowIdList) {
-            const [resultUser] = await pool.query(findIfContainsKeywordWithUserId,[meFollowUserId.follower, target, keyword])
+            const [resultUser] = await conn.query(sql.findIfContainsKeywordWithUserId,[meFollowUserId.follower, target, keyword]);
             if(resultUser[0]){
-                resultList.push(resultUser[0])
+                resultList.push(resultUser[0]);
             }
         }
 
+        return resultList;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
         conn.release();
-
-        return resultList
-
-    }
-    catch (err){
-       throw new BaseError(status.BAD_REQUEST)
     }
 }
 
 // 키워드에 해당하는 모든 유저 찾기 (팔로워 많은 순으로)
 export const findUsersWithKeyword = async (userId, keyword, target) => {
-    const conn = await pool.getConnection()
-    const [allFindWithKeyword] = await pool.query(findAllIfContainsKeywordOrdered,[target, keyword])
+    const conn = await pool.getConnection();
+    try {
+        const [allFindWithKeyword] = await conn.query(sql.findAllIfContainsKeywordOrdered,[target, keyword]);
+        return allFindWithKeyword;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
+    }
+}
 
-    conn.release()
+export const checkDuplicateAccount = async(account) => {
+    const conn = await pool.getConnection();
+    try {
+        const [rows] = await conn.query('SELECT COUNT(*) as count FROM USERS WHERE account = ?', [account]);
+        return rows[0].count > 0;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        conn.release();
+    }
+}
 
-    return allFindWithKeyword;
+export const changeCategoryDao = async (user_id, category) => {
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        // 기존 카테고리 삭제
+        await conn.query('DELETE FROM USER_FAVORITE WHERE user_id = ?', [user_id]);
+
+        // 새로운 카테고리 삽입
+        const insertValues = category.map(catId => [user_id, catId]);
+        const insertCategoryQuery = 'INSERT INTO USER_FAVORITE (user_id, category_id) VALUES ?';
+        await conn.query(insertCategoryQuery, [insertValues]);
+
+        // 트랜잭션 커밋
+        await conn.commit();
+
+        // 업데이트된 카테고리 리스트 반환
+        const [rows] = await conn.query('SELECT category_id FROM USER_FAVORITE WHERE user_id = ? ORDER BY category_id;', [user_id]);
+        const result = rows.map(row => row.category_id);
+        return result.join(',');
+    } catch(error) {
+        console.error('Error in changeCategoryDao:', error); // 에러 로그 추가
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
 }
