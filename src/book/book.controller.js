@@ -1,7 +1,6 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService, getBookDetailInfoById, createBook } from "./book.service.js";
-import { bookInfoDto } from "./book.dto.js";
+import { getBookDetailInfoByISBN, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService, getBookDetailInfoById, createBook } from "./book.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { BaseError } from "../../config/error.js";
 
@@ -19,7 +18,7 @@ export const getBookDetail = async (req, res, next) => {
         const result = await getBookDetailInfoById(parseInt(id), parseInt(page), parseInt(size), userId);
         return res.send(response(status.SUCCESS, result.data, result.pageInfo));
     } else {
-        const result = await getBookDetailInfo(id, parseInt(page), parseInt(size), userId);
+        const result = await getBookDetailInfoByISBN(id, parseInt(page), parseInt(size), userId);
         return res.send(response(status.SUCCESS, result.data, result.pageInfo));
     }
 };
@@ -28,16 +27,18 @@ export const getBookDetail = async (req, res, next) => {
 export const updateIsRead = async (req, res, next) => {
     const isBookId = req.query.isBookId;
     const userId = req.user_id;
+    const id = req.params.id;
 
-    // 책 ID로 들어온 요청이 아닐 경우에만 책 정보 저장
+    if(!id) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    // 책 ID로 들어온 요청이 아닐 경우(ISBN으로 요청)에만 책 정보 저장
     let bookId;
     if(isBookId === 'true') {
-        bookId = parseInt(req.params.id);
+        bookId = parseInt(id);
     } else {
-        req.body.ISBN = req.params.id;
-    
-        const book = bookInfoDto(req.body);
-        bookId = await createBook(book, req.body.cid, userId);
+        bookId = await createBook(id);
     }
 
     res.send(response(await updateBookIsRead(bookId, userId)));
@@ -76,10 +77,13 @@ export const searchBook = async (req, res, next) => {
 export const createBookSearch = async (req, res, next) => {
     const userId = req.user_id;
     const keyword = req.body.keyword;
-    req.body.ISBN = req.params.ISBN;
-    const book = bookInfoDto(req.body);
+    const ISBN = req.params.ISBN;
 
-    await createBookSearchService(book, req.body.cid, keyword, userId);
+    if(!keyword || !ISBN) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    await createBookSearchService(ISBN, keyword, userId);
 
     res.send(response(status.CREATED));
 };

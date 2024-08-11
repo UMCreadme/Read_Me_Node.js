@@ -166,21 +166,7 @@ export const getShortsDetailUserLike = async (shortsId, userId, page, size) => {
 };
 
 // 쇼츠 생성
-export const createShorts = async (book, shorts, cid) => {
-    // ISBN 값으로 book_id 조회
-    let bookId = await getBookIdByISBN(book.ISBN);
-    
-    // book_id 값이 존재하지 않을 경우 책 정보 생성
-    if(!bookId) {
-        const categoryId = await getCategoryIdByAladinCid(cid);
-        if(!categoryId) {
-            throw new BaseError(status.CATEGORY_NOT_FOUND);
-        }
-
-        book.category_id = categoryId;
-        bookId = await saveBook(book);
-    }
-
+export const createShorts = async (shorts) => {
     // 쇼츠 정보 글자수 제한 확인
     if(shorts.title.length > 30) {
         throw new BaseError(status.SHORTS_TITLE_TOO_LONG);
@@ -202,7 +188,6 @@ export const createShorts = async (book, shorts, cid) => {
 
     // 쇼츠 정보 생성
     shorts.tag = shorts.tag.join("|");
-    shorts.book_id = bookId;
     return await shortsDao.createShorts(shorts);
 };
 

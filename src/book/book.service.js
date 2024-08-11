@@ -4,7 +4,7 @@ import { status } from "../../config/response.status.js";
 import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
 import { checkIsReadById, getBookIdByISBN, findUserRecentBookList,  saveBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid, findBookById } from "./book.dao.js"
-import { bookDetailDto, bookInfoDto, bookListInfoDto } from "./book.dto.js";
+import { bookDetailResponseDto, createBookRequestDto, aladinBookSearchResultDto, bookSearchResponseDto } from "./book.dto.js";
 import axios from "axios";
 
 export const getBookDetailInfoById = async (bookId, page, size, userId) => {
@@ -23,17 +23,17 @@ export const getBookDetailInfoById = async (bookId, page, size, userId) => {
     const hasNext = shorts.length > size;
     if(hasNext) shorts.pop();
 
-    return {"data": bookDetailDto(book, isRead, shorts), "pageInfo": pageInfo(page, shorts.length, hasNext)};
+    return {"data": bookDetailResponseDto(book, isRead, shorts), "pageInfo": pageInfo(page, shorts.length, hasNext)};
 }
 
-export const getBookDetailInfo = async (ISBN, page, size, userId) => {
+export const getBookDetailInfoByISBN = async (ISBN, page, size, userId) => {
     // 책 ID 조회
     const bookId = await getBookIdByISBN(ISBN);
     
     // 책이 저장되지 않았을 경우 ISBN으로 책 정보 조회 (알라딘 api)
     if(!bookId) {
         const book = await searchBookByISBN(ISBN);
-        return {"data": bookDetailDto(book, false, []), "pageInfo": pageInfo(page, 0, false)};
+        return {"data": bookDetailResponseDto(book, false, []), "pageInfo": pageInfo(page, 0, false)};
     } else {
         return getBookDetailInfoById(bookId, page, size, userId);
     }
@@ -43,17 +43,20 @@ export const findUserRecentBook = async (userId, offset, limit) => {
     return await findUserRecentBookList(userId, offset, limit)
 }
 
-export const createBook = async (book, cid, userId) => {
+export const createBook = async (ISBN) => {
     // 책 ID 조회
-    let bookId = await getBookIdByISBN(book.ISBN);
+    let bookId = await getBookIdByISBN(ISBN);
 
     if(!bookId) {
-        const categoryId = await getCategoryIdByAladinCid(cid);
+        // ISBN으로 책 정보 조회 (알라딘 api)
+        let book = await searchBookByISBN(ISBN);
+        const categoryId = await getCategoryIdByAladinCid(book.cid);
         if(!categoryId) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
         }
     
         book.category_id = categoryId;
+        book = createBookRequestDto(book);
         bookId = await saveBook(book);
     }
 
@@ -83,7 +86,7 @@ export const searchBookByISBN = async (ISBN) => {
     const BASE_URL = `http://www.aladin.co.kr/ttb/api/ItemLookUp.aspx?ttbkey=${process.env.TTB_KEY}&output=js&Version=20131101`;
 
     // ISBN이 10자리인 경우 itemIdType = ISBN / 13자리인 경우 itemIdType = ISBN13
-    let url;
+    let url; let result;
     if (ISBN.length === 10) {
         url = `${BASE_URL}&itemIdType=ISBN&ItemId=${ISBN}`;
     } else if (ISBN.length === 13) {
@@ -92,7 +95,6 @@ export const searchBookByISBN = async (ISBN) => {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    let book;
     await axios.get(url)
         .then(response => {
             // JSON 데이터 파싱 후 DTO로 변환
@@ -101,12 +103,12 @@ export const searchBookByISBN = async (ISBN) => {
                 throw new BaseError(status.BOOK_NOT_FOUND);
             }
 
-            book = bookListInfoDto(bookData)[0];
+            result = aladinBookSearchResultDto(bookData)[0];
         }).catch(error => {
         console.error('Error fetching data from API:', error);
     });
 
-    return {...bookInfoDto(book), "cid": book.cid};
+    return result;
 }
 
 export const searchBookService = async (userId, keyword, preview, page, size) => {
@@ -119,7 +121,7 @@ export const searchBookService = async (userId, keyword, preview, page, size) =>
         .then(response => {
             // JSON 데이터 파싱 후 DTO로 변환
             const bookDataList = response.data.item;
-            bookList = bookListInfoDto(bookDataList);
+            bookList = bookSearchResponseDto(bookDataList);
         }).catch(error => {
         console.error('Error fetching data from API:', error);
     });
@@ -142,13 +144,16 @@ export const searchBookService = async (userId, keyword, preview, page, size) =>
     return {"data": bookList, "pageInfo": pageInfo(page, bookList.length, hasNext)};
 };
 
-export const createBookSearchService = async (book, cid, keyword, userId) => {
-    let bookId = await getBookIdByISBN(book.ISBN);
+export const createBookSearchService = async (ISBN, keyword, userId) => {
+    let bookId = await getBookIdByISBN(ISBN);
     if(!bookId) {
-        const categoryId = await getCategoryIdByAladinCid(cid);
+        const aladinBookInfo = await searchBookByISBN(ISBN);
+        const categoryId = await getCategoryIdByAladinCid(aladinBookInfo.cid);
         if(!categoryId) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
         }
+
+        const book = createBookRequestDto(aladinBookInfo);
     
         book.category_id = categoryId;
         bookId = await saveBook(book);

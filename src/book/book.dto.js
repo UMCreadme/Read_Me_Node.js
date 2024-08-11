@@ -1,7 +1,21 @@
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 
-export const bookListInfoDto = (data) => {
+export const bookSearchResponseDto = (data) => {
+    const books = aladinBookSearchResultDto(data);
+    const result = books.map(book => {
+        return {
+            "ISBN": book.ISBN,
+            "bookCover": book.bookCover,
+            "bookTitle": book.bookTitle,
+            "author": book.author,
+        }
+    })
+
+    return result;
+}
+
+export const aladinBookSearchResultDto = (data) => {
     const mallType = ['BOOK', 'EBOOK', 'FOREIGN'];
     const result = data.map(book => {
         if (!mallType.includes(book.mallType)) {
@@ -28,28 +42,28 @@ export const bookListInfoDto = (data) => {
 };
 
 // 데이터 베이스에 저장할 책 정보
-export const bookInfoDto = (data) => {
-    if (!data || !data.ISBN || !data.bookTitle || !data.cid || !data.bookCover || !data.author || !data.link) {
+export const createBookRequestDto = (data) => {
+    if (!data || !data.ISBN || !data.bookTitle || !data.category_id || !data.bookCover || !data.author || !data.link) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
     return {
         "ISBN": data.ISBN,
         "title": data.bookTitle,
+        "category_id": data.category_id,
         "image_url": data.bookCover,
         "author": data.author,
         "link": data.link
     };
 };
 
-export const bookDetailDto = (book, isRead, shorts) => {
+export const bookDetailResponseDto = (book, isRead, shorts) => {
     return {
         "book": {
             "bookId": book.book_id,
             "ISBN": book.ISBN,
-            "bookCover": book.image_url,
-            "cid": book.cid,
-            "bookTitle": book.title,
+            "bookCover": book.image_url ? book.image_url : book.bookCover,
+            "bookTitle": book.title ? book.title : book.bookTitle,
             "author": book.author,
             "link": book.link,
             "isRead": Boolean(isRead)
