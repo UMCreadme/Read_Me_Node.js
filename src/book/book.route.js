@@ -12,7 +12,7 @@ bookRouter.get('', asyncHandler(authJWTNoUserRequired), asyncHandler(searchBook)
 bookRouter.get('/recent', asyncHandler(authJWT), asyncHandler(getUserRecentBook));
 
 // 책 상세 정보 조회 (로그인 선택)
-bookRouter.get('/:ISBN', asyncHandler(authJWTNoUserRequired), asyncHandler(getBookDetail));
+bookRouter.get('/:id', asyncHandler(authJWTNoUserRequired), asyncHandler(getBookDetail));
 
 // 책 검색어 추가
 bookRouter.post('/:ISBN', asyncHandler(authJWTNoUserRequired), asyncHandler(createBookSearch));

@@ -8,6 +8,10 @@ export const bookListInfoDto = (data) => {
             return null;
         }
 
+        if(book.mallType === 'EBOOK') {
+            book.title = `[EBOOK] ${book.title}`;
+        }
+
         const author = book.author.split(' (지은이)')[0].trim();
 
         return {
@@ -16,14 +20,14 @@ export const bookListInfoDto = (data) => {
             "bookTitle": book.title,
             "author": author,
             "cid": book.categoryId,
-            "mallType": book.mallType,
             "link": book.link
         }
     })
 
-    return result;
+    return result.filter(book => book !== null);
 };
 
+// 데이터 베이스에 저장할 책 정보
 export const bookInfoDto = (data) => {
     if (!data || !data.ISBN || !data.bookTitle || !data.cid || !data.bookCover || !data.author || !data.link) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
@@ -38,14 +42,21 @@ export const bookInfoDto = (data) => {
     };
 };
 
-export const bookDetailDto = (isRead, bookId, data) => {
+export const bookDetailDto = (book, isRead, shorts) => {
     return {
-        "isRead": Boolean(isRead),
-        "bookId": bookId,
-        "shorts": data.map(short => ({
+        "book": {
+            "bookId": book.book_id ? book.book_id : null,
+            "ISBN": book.ISBN,
+            "bookCover": book.image_url,
+            "bookTitle": book.title,
+            "author": book.author,
+            "link": book.link,
+            "isRead": Boolean(isRead)
+        },
+        "shorts": shorts? shorts.map(short => ({
             shortsId: short.shorts_id,
             shortsImg: short.shorts_img,
             phrase: short.phrase
-        }))
+        })) : []
     };
 };

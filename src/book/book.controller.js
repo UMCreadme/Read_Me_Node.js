@@ -1,19 +1,27 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService } from "./book.service.js";
+import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService, getBookDetailInfoById } from "./book.service.js";
 import { bookInfoDto } from "./book.dto.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { BaseError } from "../../config/error.js";
 
 // 책 상세 정보 조회
 export const getBookDetail = async (req, res, next) => {
-    const ISBN = req.params.ISBN;
-    const { page=1, size=10 } = req.query;
+    const id = req.params.id;
+    const { page=1, size=10, isBookId } = req.query;
     const userId = req.user_id;
-    
-    const book = await getBookDetailInfo(ISBN, parseInt(page), parseInt(size), userId);
 
-    res.send(response(status.SUCCESS, book.data, book.pageInfo));
+    if(!id) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    if(isBookId === 'true') {
+        const result = await getBookDetailInfoById(parseInt(id), parseInt(page), parseInt(size), userId);
+        return res.send(response(status.SUCCESS, result.data, result.pageInfo));
+    } else {
+        const result = await getBookDetailInfo(id, parseInt(page), parseInt(size), userId);
+        return res.send(response(status.SUCCESS, result.data, result.pageInfo));
+    }
 };
 
 // 책 읽음 여부 업데이트
