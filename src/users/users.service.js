@@ -70,7 +70,7 @@ export const login = async(body, provider) => {
 
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
-    const userData = await findById(userId)
+    const userData = await dao.findById(userId)
     // 없는 유저 확인
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
@@ -109,6 +109,13 @@ export const deleteUserImageService = async (userId) => {
 
 // 유저 프로필 내용 수정
 export const updateUserInfoService = async(userId, userData) => {
+
+    if(userData.account) {
+        const duplicateAccountCheck = await dao.checkDuplicateAccount(userData.account)
+        if(duplicateAccountCheck){
+            throw new BaseError(status.DUPLICATE_ACCOUNT)
+        }
+    }
 
     const accountCheck = (account) => {
         const regex = /^[a-zA-Z0-9]{1,30}$/;

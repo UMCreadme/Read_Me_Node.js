@@ -48,22 +48,25 @@ export const updateUserImage = async(req, res, next) => {
     if(!req.file){
         throw new BaseError(status.INTERNAL_SERVER_ERROR)
     }
-    res.send(response(status.SUCCESS, await service.updateUserImageService(req.user_id, req.file.location)))
+    await service.updateUserImageService(req.user_id, req.file.location)
+    res.send(response(status.SUCCESS))
 }
 
 // 유저 프로필 이미지 삭제
 export const deleteUserImage = async(req, res, next) => {
-    res.send(response(status.SUCCESS, await service.deleteUserImageService(req.user_id)))
+    await service.deleteUserImageService(req.user_id)
+    res.send(response(status.SUCCESS))
 }
 
 // 유저 프로필 내용 수정
 export const updateUserInfo = async(req, res, next)=> {
-    res.send(response(status.SUCCESS, await service.updateUserInfoService(req.user_id, req.body)))
+    await service.updateUserInfoService(req.user_id, req.body)
+    res.send(response(status.SUCCESS))
 }
 
 // 유저가 만든 쇼츠 리스트 조회
 export const getUserShorts = async(req, res, next)=> {
-t
+
     const page = parseInt(req.query.page) || 1;
     const size = parseInt(req.query.size) || 20;
     const offset = (page -1) * size
