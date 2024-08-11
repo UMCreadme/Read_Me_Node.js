@@ -3,7 +3,7 @@ import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
 import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 import { getShortsDetailToBook } from "../shorts/shorts.detail.dao.js";
-import { checkIsReadById, getBookIdByISBN, findUserRecentBookList,  createBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid, findBookById } from "./book.dao.js"
+import { checkIsReadById, getBookIdByISBN, findUserRecentBookList,  saveBook, deleteBookIsReadToUser, updateBookIsReadToUser, getCategoryIdByAladinCid, findBookById } from "./book.dao.js"
 import { bookDetailDto, bookInfoDto, bookListInfoDto } from "./book.dto.js";
 import axios from "axios";
 
@@ -43,19 +43,28 @@ export const findUserRecentBook = async (userId, offset, limit) => {
     return await findUserRecentBookList(userId, offset, limit)
 }
 
-export const updateBookIsRead = async (book, cid, userId) => {
+export const createBook = async (book, cid, userId) => {
     // 책 ID 조회
     let bookId = await getBookIdByISBN(book.ISBN);
 
-    // 책이 저장되지 않았을 경우 책 저장
     if(!bookId) {
         const categoryId = await getCategoryIdByAladinCid(cid);
         if(!categoryId) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
         }
-
+    
         book.category_id = categoryId;
-        bookId = await createBook(book);
+        bookId = await saveBook(book);
+    }
+
+    return bookId;
+}
+
+export const updateBookIsRead = async (bookId, userId) => {
+    // 책 ID로 정보 있는지 확인
+    const book = await findBookById(bookId);
+    if(!book) {
+        throw new BaseError(status.BOOK_NOT_FOUND);
     }
 
     const isRead = await checkIsReadById(userId, bookId);
@@ -93,12 +102,11 @@ export const searchBookByISBN = async (ISBN) => {
             }
 
             book = bookListInfoDto(bookData)[0];
-            console.log(book);
         }).catch(error => {
         console.error('Error fetching data from API:', error);
     });
 
-    return bookInfoDto(book);
+    return {...bookInfoDto(book), "cid": book.cid};
 }
 
 export const searchBookService = async (userId, keyword, preview, page, size) => {
@@ -143,7 +151,7 @@ export const createBookSearchService = async (book, cid, keyword, userId) => {
         }
     
         book.category_id = categoryId;
-        bookId = await createBook(book);
+        bookId = await saveBook(book);
     }
 
     await addSearchDao(userId, keyword, bookId);

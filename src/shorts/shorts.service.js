@@ -1,7 +1,7 @@
 import { BaseError } from "../../config/error.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
-import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
+import { saveBook, findBookById, getBookCategory, getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
@@ -178,7 +178,7 @@ export const createShorts = async (book, shorts, cid) => {
         }
 
         book.category_id = categoryId;
-        bookId = await createBook(book);
+        bookId = await saveBook(book);
     }
 
     // 쇼츠 정보 글자수 제한 확인

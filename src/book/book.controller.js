@@ -1,6 +1,6 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService, getBookDetailInfoById } from "./book.service.js";
+import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService, getBookDetailInfoById, createBook } from "./book.service.js";
 import { bookInfoDto } from "./book.dto.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { BaseError } from "../../config/error.js";
@@ -26,12 +26,21 @@ export const getBookDetail = async (req, res, next) => {
 
 // 책 읽음 여부 업데이트
 export const updateIsRead = async (req, res, next) => {
-    req.body.ISBN = req.params.ISBN;
+    const isBookId = req.query.isBookId;
     const userId = req.user_id;
 
-    const book = bookInfoDto(req.body);
+    // 책 ID로 들어온 요청이 아닐 경우에만 책 정보 저장
+    let bookId;
+    if(isBookId === 'true') {
+        bookId = parseInt(req.params.id);
+    } else {
+        req.body.ISBN = req.params.id;
+    
+        const book = bookInfoDto(req.body);
+        bookId = await createBook(book, req.body.cid, userId);
+    }
 
-    res.send(response(await updateBookIsRead(book, req.body.cid, userId)));
+    res.send(response(await updateBookIsRead(bookId, userId)));
 };
 
 // 최근 선택한 책
@@ -66,10 +75,6 @@ export const searchBook = async (req, res, next) => {
 // 책 검색어 추가
 export const createBookSearch = async (req, res, next) => {
     const userId = req.user_id;
-    if(!userId) {
-        res.send(response(status.NO_CONTENT));
-    }
-
     const keyword = req.body.keyword;
     req.body.ISBN = req.params.ISBN;
     const book = bookInfoDto(req.body);

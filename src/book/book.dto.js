@@ -45,9 +45,10 @@ export const bookInfoDto = (data) => {
 export const bookDetailDto = (book, isRead, shorts) => {
     return {
         "book": {
-            "bookId": book.book_id ? book.book_id : null,
+            "bookId": book.book_id,
             "ISBN": book.ISBN,
             "bookCover": book.image_url,
+            "cid": book.cid,
             "bookTitle": book.title,
             "author": book.author,
             "link": book.link,
