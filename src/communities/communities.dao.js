@@ -106,38 +106,6 @@ export const joinCommunity = async (communityId, userId) => {
 
 // 모임 리스트 조회
 export const getCommunities = async (page, size) => {
-    const offset = (page - 1) * size;
-    const limit = parseInt(size) + 1;  // 요청한 size보다 하나 더 조회
-    const [rows] = await pool.query(GET_COMMUNITIES, [limit, parseInt(offset)]);
-    const [countResult] = await pool.query(COUNT_COMMUNITIES);
-    return { communities: rows, totalElements: countResult[0].count };
-};
-
-// 제목으로 커뮤니티 검색
-export const searchCommunitiesByTitleKeyword = async (keyword) => {
-    try {
-        const conn = await pool.getConnection();
-        const [results] = await conn.query(GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
-        conn.release();
-        return results;
-    } catch (err) {
-        console.error('Database query error:', err);
-        throw new BaseError(status.INTERNAL_SERVER_ERROR);
-    }
-};
-
-// 태그로 커뮤니티 검색
-export const searchCommunitiesByTagKeyword = async (keyword) => {
-    try {
-        const conn = await pool.getConnection();
-        const [shortsTag] = await conn.query(GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
-        conn.release();
-        return shortsTag;
-    } catch (err) {
-        console.log(err);
-        throw new BaseError(status.INTERNAL_SERVER_ERROR);
-    }
-
     const conn = await pool.getConnection();
     try {
         const offset = (page - 1) * size;
@@ -151,7 +119,36 @@ export const searchCommunitiesByTagKeyword = async (keyword) => {
     } finally {
         conn.release(); // 연결 해제
     }
+};
 
+// 제목으로 커뮤니티 검색
+export const searchCommunitiesByTitleKeyword = async (keyword) => {
+    let conn; // conn 변수를 먼저 정의합니다.
+    try {
+        conn = await pool.getConnection();
+        const [results] = await conn.query(GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
+        return results;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release(); // conn이 정의되어 있을 때만 release를 호출합니다.
+    }
+};
+
+// 태그로 커뮤니티 검색
+export const searchCommunitiesByTagKeyword = async (keyword) => {
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const [shortsTag] = await conn.query(GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
+        return shortsTag;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
 };
 
 export const checkCommunityExistenceDao = async (community_id) => {

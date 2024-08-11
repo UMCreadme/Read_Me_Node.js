@@ -28,13 +28,13 @@ export const createCommunityController = async (req, res, next) => {
 };
 
 export const deleteCommunityController = async (req, res, next) => {
-    const user_id  = req.user_id;
+    const user_id = req.user_id;
     const community_id = req.params.communityId;
 
     if (!user_id || !community_id) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
-  
+
     await deleteCommunityService(user_id, community_id);
     res.send(response(status.SUCCESS));
 }
@@ -59,31 +59,15 @@ export const getCommunitiesController = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const size = parseInt(req.query.size) || 10;
 
-    const { communityList, pageInfo } = await getCommunitiesService(page, size);
+    const result = await getCommunitiesService(page, size);
 
-    res.status(status.SUCCESS.status).send({
-        isSuccess: true,
-        code: status.SUCCESS.code,
-        message: "전체 모임 리스트 불러오기 성공",
-        pageInfo: pageInfo,
-        result: communityList
-    });
+    res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
 };
 
 // 커뮤니티 검색
 export const searchCommunityController = async (req, res, next) => {
     const { keyword, page = 1, size = 10 } = req.query;
+    const result = await searchCommunityService(keyword, page, size);
 
-    if (!keyword || keyword.trim() === "") {
-        return next(new BaseError(status.PARAMETER_IS_WRONG));
-    }
-        const result = await searchCommunityService(keyword, page, size);
-
-        res.status(status.SUCCESS.status).send({
-            isSuccess: true,
-            code: status.SUCCESS.code,
-            message: "검색한 모임 리스트 불러오기 성공",
-            pageInfo: result.pageInfo,
-            result: result.communityList
-        });
+    res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
 };

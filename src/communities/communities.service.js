@@ -48,8 +48,8 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
 };
 
 // 커뮤니티 가입 서비스
-export const joinCommunityService = async (communityId, userId) => { 
-    const userInCommunity = await isUserAlreadyInCommunity(communityId, userId); 
+export const joinCommunityService = async (communityId, userId) => {
+    const userInCommunity = await isUserAlreadyInCommunity(communityId, userId);
     if (userInCommunity) {
         throw new BaseError(status.ALREADY_IN_COMMUNITY);
     }
@@ -82,7 +82,7 @@ export const getCommunitiesService = async (page, size) => {
 // 커뮤니티 검색 서비스
 export const searchCommunityService = async (keyword, page = 1, size = 10) => {
     // 파라미터 검증
-    if (!keyword || page <= 0 || size <= 0) {
+    if (!keyword || page <= 0 || size <= 0 || keyword.trim() === "") {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
@@ -92,7 +92,7 @@ export const searchCommunityService = async (keyword, page = 1, size = 10) => {
 
     if (isTagSearch) {
         // 태그 검색
-        const formattedKeyword = decodedKeyword.startsWith('#') ? decodedKeyword.substring(1) : decodedKeyword; // #을 제거
+        const formattedKeyword = decodedKeyword.substring(1); 
         communities = await searchCommunitiesByTagKeyword(formattedKeyword);
     } else {
         // 제목 검색
@@ -119,7 +119,7 @@ export const deleteCommunityService = async (user_id, community_id) => {
     }
 
     const owner = await checkCommunityOwnerDao(community_id);
-    if ( owner !== user_id) {
+    if (owner !== user_id) {
         throw new BaseError(status.UNAUTHORIZED);
     }
 
