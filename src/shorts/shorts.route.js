@@ -10,8 +10,8 @@ export const shortsRouter = express.Router({mergeParams:true});
 shortsRouter.get('', asyncHandler(authJWTNoUserRequired), asyncHandler(searchShorts));
 shortsRouter.get('/:shortsId', asyncHandler(getShortsDetail));
 
-shortsRouter.post('/:shortsId/comments', asyncHandler(addComment));
-shortsRouter.post('/:shortsId/likes', asyncHandler(likeShorts));
+shortsRouter.post('/:shortsId/comments',asyncHandler(authJWT), asyncHandler(addComment));
+shortsRouter.post('/:shortsId/likes', asyncHandler(authJWT), asyncHandler(likeShorts));
 shortsRouter.delete('/:shortsId', asyncHandler(authJWT), asyncHandler(deleteShorts));
 
 // 쇼츠 생성 (로그인 필수)
