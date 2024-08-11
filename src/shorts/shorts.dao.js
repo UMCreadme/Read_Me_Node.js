@@ -188,7 +188,7 @@ export const checkShortsOwnerDao = async (shorts_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -215,7 +215,7 @@ export const deleteShortsDao = async (shorts_id) => {
         await conn.query('ROLLBACK');
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
     
     
