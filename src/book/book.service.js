@@ -152,10 +152,8 @@ export const createBookSearchService = async (ISBN, userId) => {
         if(!categoryId) {
             throw new BaseError(status.CATEGORY_NOT_FOUND);
         }
-
+        aladinBookInfo.category_id = categoryId;
         const book = createBookRequestDto(aladinBookInfo);
-    
-        book.category_id = categoryId;
         bookId = await dao.saveBook(book);
     }
 
