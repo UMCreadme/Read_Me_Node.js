@@ -1,4 +1,3 @@
-// src/config/response.status.js
 import { StatusCodes } from "http-status-codes";
 
 export const status = {
@@ -22,20 +21,8 @@ export const status = {
     INVALID_CAPACITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY1002", "message": "커뮤니티의 수용 인원(capacity)은 최대 10명까지 허용됩니다." },
     COMMUNITY_FULL: { status: StatusCodes.BAD_REQUEST, isSuccess: false, code: "COMMUNITY4003", "message": "참여 인원 초과로 참여하실 수 없습니다." },
     ALREADY_IN_COMMUNITY: { status: StatusCodes.BAD_REQUEST, isSuccess: false, code: "COMMUNITY4004", "message": "이미 이 커뮤니티에 참여 중입니다." },
-    COMMUNITY_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4005", "message": "존재하지 않는 커뮤니티입니다." },
-
-    // member err
-    MEMBER_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다." },
-    NICKNAME_NOT_EXIST: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4002", "message": "닉네임은 필수입니다." },
-    FOLLOW_EXIST : { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4003", "message": "이미 처리된 팔로우 혹은 본인입니다." },
-    FOLLOW_NOT_FOUND : { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4004", "message": "현재 팔로우 상태가 아닙니다." },
-    DUPLICATE_ACCOUNT : {status: StatusCodes.BAD_REQUEST, "isSuccess" : false, "code" : "MEMBER4005", "message" : "아이디 중복"},
-
-    // category err
-    CATEGORY_NOT_FOUND: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다."},
-    CATEGORY_COUNT_IS_WRONG: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4002", "message": "카테고리 개수는 4~8개로 입력해주세요."},
-    CATEGORY_DUPLICATED: {status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4003", "message": "카테고리는 중복되지 않게 선택해주세요."},
-
+    COMMUNITY_NOT_FOUND: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4005", "message": "존재하지 않는 커뮤니티입니다." },
+    COMMUNITY_INVALID_PAGE_SIZE: { status: StatusCodes.BAD_REQUEST, isSuccess: false, code: "COMMUNITY4006", message: "유효한 페이지 크기를 입력해 주세요." },
 
     // shorts err
     SHORTS_TAG_COUNT_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4001", "message": "태그는 10개 이내로 입력해주세요." },
@@ -43,7 +30,19 @@ export const status = {
     SHORTS_TITLE_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4003", "message": "제목은 30자 이내로 입력해주세요." },
     SHORTS_CONTENT_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4004", "message": "내용은 255자 이내로 입력해주세요." },
     SHORTS_PHRASE_TOO_LONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "SHORTS4005", "message": "책 구절은 150자 이내로 입력해주세요." },
-    SHORTS_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "SHORTS4006", "message": "존재하지 않는 쇼츠입니다." },
+    SHORTS_NOT_FOUND: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "SHORTS4006", "message": "존재하지 않는 쇼츠입니다." },
+
+    // member err
+    MEMBER_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다." },
+    NICKNAME_NOT_EXIST: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4002", "message": "닉네임은 필수입니다." },
+    FOLLOW_EXIST: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4003", "message": "이미 처리된 팔로우 혹은 본인입니다." },
+    FOLLOW_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4004", "message": "현재 팔로우 상태가 아닙니다." },
+    DUPLICATE_ACCOUNT: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4005", "message": "아이디 중복" },
+
+    // category err
+    CATEGORY_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4001", "message": "존재하지 않는 카테고리입니다." },
+    CATEGORY_COUNT_IS_WRONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4002", "message": "카테고리 개수는 4~8개로 입력해주세요." },
+    CATEGORY_DUPLICATED: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "CATEGORY4003", "message": "카테고리는 중복되지 않게 선택해주세요." },
 
     // token err
     NOT_EXISTING_ACCESS_TOKEN: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4001", "message": "존재하지 않는 엑세스 토큰 입니다." },
@@ -55,5 +54,4 @@ export const status = {
 
     // book err
     BOOK_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "BOOK4001", "message": "존재하지 않는 책입니다."},
-
 };

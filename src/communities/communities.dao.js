@@ -7,13 +7,14 @@ import {
     ADD_ADMIN_TO_COMMUNITY,
     COUNT_COMMUNITIES_BY_USER_AND_BOOK,
     CREATE_COMMUNITY,
-    GET_COMMUNITIES, 
-    COUNT_COMMUNITIES
+    COUNT_COMMUNITIES,
+    GET_COMMUNITIES,
+    GET_COMMUNITIES_BY_TAG_KEYWORD,
+    GET_COMMUNITIES_BY_TITLE_KEYWORD
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 
-  
 // 커뮤니티 생성과 관련된 전체 과정 처리
 export const createCommunityWithCheck = async (userId, bookId, address, tag, capacity) => {
     const conn = await pool.getConnection();
@@ -44,7 +45,7 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
         console.error(err); // 에러 로그 출력
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -58,7 +59,7 @@ export const getCommunityCurrentCount = async (communityId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -72,7 +73,7 @@ export const getCommunityCapacity = async (communityId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -86,7 +87,7 @@ export const isUserAlreadyInCommunity = async (communityId, userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -99,7 +100,7 @@ export const joinCommunity = async (communityId, userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
 };
 
@@ -116,9 +117,36 @@ export const getCommunities = async (page, size) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if(conn) conn.release(); // 연결 해제
     }
+};
 
+// 제목으로 커뮤니티 검색
+export const searchCommunitiesByTitleKeyword = async (keyword) => {
+    const conn = await pool.getConnection();
+    try {
+        const [results] = await conn.query(GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
+        return results;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release(); // conn이 정의되어 있을 때만 release를 호출합니다.
+    }
+};
+
+// 태그로 커뮤니티 검색
+export const searchCommunitiesByTagKeyword = async (keyword) => {
+    const conn = await pool.getConnection()
+    try {
+        const [shortsTag] = await conn.query(GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
+        return shortsTag;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
 };
 
 export const checkCommunityExistenceDao = async (community_id) => {
@@ -158,7 +186,7 @@ export const deleteCommunityDao = async (community_id) => {
         await conn.query('ROLLBACK');
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
-    
+
 };

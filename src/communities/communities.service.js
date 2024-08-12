@@ -1,17 +1,20 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-import { deleteCommunityDao, 
-         checkCommunityExistenceDao, 
-         checkCommunityOwnerDao,
-         getCommunities, 
-         createCommunityWithCheck, 
-         getCommunityCurrentCount, 
-         getCommunityCapacity, 
-         isUserAlreadyInCommunity, 
-         joinCommunity } from './communities.dao.js';
+import {
+    getCommunities,
+    createCommunityWithCheck,
+    getCommunityCurrentCount,
+    getCommunityCapacity,
+    isUserAlreadyInCommunity,
+    searchCommunitiesByTagKeyword,
+    searchCommunitiesByTitleKeyword,
+    joinCommunity,
+    deleteCommunityDao,
+    checkCommunityExistenceDao,
+    checkCommunityOwnerDao,
+} from './communities.dao.js';
 import { getCommunitiesDto } from './communities.dto.js';
 import { pageInfo } from '../../config/pageInfo.js';
-
 
 
 // 커뮤니티 생성 서비스
@@ -45,8 +48,8 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
 };
 
 // 커뮤니티 가입 서비스
-export const joinCommunityService = async (communityId, userId) => { 
-    const userInCommunity = await isUserAlreadyInCommunity(communityId, userId); 
+export const joinCommunityService = async (communityId, userId) => {
+    const userInCommunity = await isUserAlreadyInCommunity(communityId, userId);
     if (userInCommunity) {
         throw new BaseError(status.ALREADY_IN_COMMUNITY);
     }
@@ -60,9 +63,6 @@ export const joinCommunityService = async (communityId, userId) => {
 
     await joinCommunity(communityId, userId);
 };
-
-
-
 
 // 전체 모임 리스트 조회
 export const getCommunitiesService = async (page, size) => {
@@ -79,6 +79,38 @@ export const getCommunitiesService = async (page, size) => {
     };
 };
 
+// 커뮤니티 검색 서비스
+export const searchCommunityService = async (keyword, page = 1, size = 10) => {
+    // 파라미터 검증
+    if (!keyword || page <= 0 || size <= 0 || keyword.trim() === "") {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    let communities;
+    const decodedKeyword = decodeURIComponent(keyword.trim().replace(/\s+/g, '')); // URL 디코딩 및 공백 제거
+    const isTagSearch = decodedKeyword.startsWith('#');
+
+    if (isTagSearch) {
+        // 태그 검색
+        const formattedKeyword = decodedKeyword.substring(1); 
+        communities = await searchCommunitiesByTagKeyword(formattedKeyword);
+    } else {
+        // 제목 검색
+        communities = await searchCommunitiesByTitleKeyword(decodedKeyword);
+    }
+
+    // 페이지네이션 계산
+    const offset = (page - 1) * size;
+    const limit = size + 1; // 요청한 size보다 하나 더 조회
+    const paginatedCommunities = communities.slice(offset, offset + limit);
+    const hasNext = paginatedCommunities.length > size;
+    const actualSize = hasNext ? size : paginatedCommunities.length;
+
+    return {
+        communityList: getCommunitiesDto({ communities: paginatedCommunities.slice(0, actualSize) }),
+        pageInfo: pageInfo(page, actualSize, hasNext, communities.length)
+    };
+};
 
 export const deleteCommunityService = async (user_id, community_id) => {
     const exists = await checkCommunityExistenceDao(community_id);
@@ -87,10 +119,9 @@ export const deleteCommunityService = async (user_id, community_id) => {
     }
 
     const owner = await checkCommunityOwnerDao(community_id);
-    if ( owner !== user_id) {
+    if (owner !== user_id) {
         throw new BaseError(status.UNAUTHORIZED);
     }
 
     await deleteCommunityDao(community_id);
 };
-

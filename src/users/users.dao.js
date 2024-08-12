@@ -25,7 +25,7 @@ export const userSignUp = async (body, provider, refreshToken) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -47,7 +47,7 @@ export const userLogin = async (body, provider, refreshToken) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -66,7 +66,7 @@ export const findById = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -80,7 +80,7 @@ export const findFollowingNumByUserId = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -94,7 +94,7 @@ export const findFollowerNumByUserId = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -108,7 +108,7 @@ export const hasRecentPostForUser = async (userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -126,7 +126,7 @@ export const checkIsFollowed = async (myId, userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -140,7 +140,7 @@ export const findUserShortsById = async (userId, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -161,7 +161,7 @@ export const findUserLikeShortsById = async(userId, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -182,7 +182,7 @@ export const findUserBooksById = async(userId, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -196,7 +196,7 @@ export const findUserBooksCountById = async(userId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -217,7 +217,7 @@ export const followUserAdd = async(userId, followingId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -232,7 +232,7 @@ export const followUserCancel = async(userId, unfollowUserId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -247,7 +247,7 @@ export const findMeWithKeyword = async(userId, keyword) =>{
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -270,7 +270,7 @@ export const findEachFollowWithKeyword = async(userId, keyword, target) =>{
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -293,7 +293,7 @@ export const findMyFollowWithKeyword = async(userId, keyword, target) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -316,7 +316,7 @@ export const findMeFollowWithKeyword = async (userId, keyword, target) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -330,7 +330,7 @@ export const findUsersWithKeyword = async (userId, keyword, target) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -343,7 +343,7 @@ export const checkDuplicateAccount = async(account) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -372,6 +372,49 @@ export const changeCategoryDao = async (user_id, category) => {
         await conn.rollback();
         throw error;
     } finally {
-        conn.release();
+        if(conn) conn.release();
+    }
+}
+
+
+// 유저 프로필 편집 기능
+export const updateUserImageDao = async (userId, profileImg) => {
+    const conn = await pool.getConnection()
+    try{
+        await conn.query(sql.updateUserImageSql, [profileImg, userId])
+    }
+    catch(err){
+        console.log(err)
+    }
+    finally {
+        if(conn) conn.release()
+    }
+}
+
+// 유저 프로필 이미지 삭제 기능
+export const deleteUserImageDao = async (userId) => {
+    const conn = await pool.getConnection()
+    try{
+        await conn.query(sql.deleteUserImageSql, [userId])
+    }
+    catch (err) {
+        console.log(err)
+    }
+    finally {
+        if(conn) conn.release()
+    }
+}
+
+// 유저 프로필 내용 수정 기능
+export const updateUserInfoDao = async(userId, userData) => {
+    const conn = await pool.getConnection()
+    try{
+        await conn.query(sql.updateUserInfoSql, [userData.nickname, userData.account, userData.comment, userId])
+    }
+    catch (err) {
+        console.log(err)
+    }
+    finally {
+        if(conn) conn.release()
     }
 }
