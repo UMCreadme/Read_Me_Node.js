@@ -14,21 +14,8 @@ import { addSearchDao, getResearchId, updateSearchDao } from "../research/resear
 
 // 회원가입 후 토큰 반환
 export const join = async(body, provider) => {
-    const duplicateAccountCheck = await dao.checkDuplicateAccount(body.account)
 
-    if(duplicateAccountCheck){
-        throw new BaseError(status.DUPLICATE_ACCOUNT)
-    }
-
-    const accountCheck = (account) => {
-        const regex = /^[a-zA-Z0-9]{1,30}$/;
-        return regex.test(account);
-    }
-
-    const nicknameCheck = (nickname) => {
-        const regex = /^[a-zA-Z0-9가-힣]{1,12}$/;
-        return regex.test(nickname);
-    }
+    await duplicateAccountCheck(body.account)
 
     const categoryCheck = (category) => {
         const duplicateCategory = (new Set(category).size !== category.length)
@@ -70,8 +57,8 @@ export const login = async(body, provider) => {
 
 // 유저 정보 조회 로직
 export const findOne = async(userId) => {
-    // 없는 유저 확인
     const userData = await dao.findById(userId)
+    // 없는 유저 확인
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
@@ -96,6 +83,55 @@ export const isFollowing = async(myId, userId) => {
 
     return followStatus;
 }
+
+//유저 프로필 이미지 수정
+export const updateUserImageService = async(userId, profileImg) =>{
+    await dao.updateUserImageDao(userId, profileImg)
+}
+
+//유저 프로필 이미지 삭제
+export const deleteUserImageService = async (userId) => {
+    await dao.deleteUserImageDao(userId)
+}
+
+// 유저 프로필 내용 수정
+export const updateUserInfoService = async(userId, userData) => {
+
+    if(userData.account) {
+       await duplicateAccountCheck(userData.account)
+    }
+
+    const commentCheck = (comment) => {
+        return comment.length <= 50
+    }
+
+    if(!accountCheck(userData.account) || !nicknameCheck(userData.nickname) || !commentCheck(userData.comment)){
+        throw new BaseError(status.PARAMETER_IS_WRONG)
+    }
+
+    await dao.updateUserInfoDao(userId, userData)
+}
+
+
+// 중복 계정 체크
+const duplicateAccountCheck = async(account) => {
+    if(await dao.checkDuplicateAccount(account)){
+        throw new BaseError(status.DUPLICATE_ACCOUNT)
+    }
+}
+
+// 계정 30자, 기호 체크
+const accountCheck = (account) => {
+    const regex = /^[a-zA-Z0-9]{1,30}$/;
+    return regex.test(account);
+}
+
+// 닉네임 12자, 기호 체크
+const nicknameCheck = (nickname) => {
+    const regex = /^[a-zA-Z0-9가-힣]{1,12}$/;
+    return regex.test(nickname);
+}
+
 
 // 유저가 만든 쇼츠 리스트 조회 로직
 export const findUserShorts = async(userId, offset, limit) => {
@@ -141,6 +177,7 @@ export const findUserLikeShorts = async(userId, offset, limit) => {
 
 // 유저가 읽은 책 리스트 조회 로직
 export const findUserBooks = async(userId, offset, limit) => {
+        
     // 없는 유저 확인
     const userData = await dao.findById(userId)
     if(userData === -1){
@@ -165,7 +202,7 @@ export const followNewUser = async(userId, followUserId) =>{
     if(followUserData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
-    
+
     const followStatus = await dao.followUserAdd(userId, followUserId)
 
     // 중복팔로우 예외 처리 + 본인이 본인을 팔로우하려는 경우
@@ -193,6 +230,8 @@ export const unfollowUser = async(myId, unfollowUserId) => {
     if(!unfollowStatus){
         throw new BaseError(status.BAD_REQUEST)
     }
+
+    return userFollowResponseDTO(userId, followingId)
 }
 
 // 유저 검색 기능 로직
@@ -219,7 +258,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const uniqueUsers = allUsersListByAccount.filter(user => !searchUserSet.has(user.user_id));
     const searchUserByAccountList= [...searchFollowUserByAccountList, ...uniqueUsers];
 
-
     // 키워드 + 맞팔인 사람 리스트 (nickname 기준)
     const eachFollowUsersListByNickname = await dao.findEachFollowWithKeyword(userId, keyword, 'nickname');
 
@@ -238,7 +276,6 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
     const searchUserSet2 = new Set(searchFollowUserByNicknameList.map(user => user.user_id));
     const uniqueUsers2 = allUsersListByNickname.filter(user => !searchUserSet2.has(user.user_id));
     const searchUserByNicknameList= [...searchFollowUserByNicknameList, ...uniqueUsers2];
-
 
     // 최종 리스트
     const mergedList = searchUserByAccountList.length >= searchUserByNicknameList.length

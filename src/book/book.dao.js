@@ -12,7 +12,7 @@ export const findBookById = async (bookId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -26,7 +26,7 @@ export const getBookCategory = async (bookId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -43,7 +43,7 @@ export const getBookIdByISBN = async (ISBN) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -60,7 +60,7 @@ export const getCategoryIdByName = async (category) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -77,7 +77,7 @@ export const getCategoryIdByAladinCid = async (cid) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -91,7 +91,7 @@ export const createBook = async (book) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -105,7 +105,7 @@ export const checkIsReadById = async (userId, bookId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -118,7 +118,7 @@ export const updateBookIsReadToUser = async (userId, bookId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -131,7 +131,7 @@ export const deleteBookIsReadToUser = async (userId, bookId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -154,6 +154,6 @@ export const findUserRecentBookList = async (userId, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
