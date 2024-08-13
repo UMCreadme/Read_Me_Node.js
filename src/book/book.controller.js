@@ -1,29 +1,47 @@
 import { response } from "../../config/response.js";
 import { status } from "../../config/response.status.js";
-import { getBookDetailInfo, updateBookIsRead, findUserRecentBook, searchBookService, createBookSearchService } from "./book.service.js";
-import { bookInfoDto } from "./book.dto.js";
+import * as service from "./book.service.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { BaseError } from "../../config/error.js";
 
 // 책 상세 정보 조회
 export const getBookDetail = async (req, res, next) => {
-    const ISBN = req.params.ISBN;
-    const { page=1, size=10 } = req.query;
+    const id = req.params.id;
+    const { page=1, size=10, isBookId } = req.query;
     const userId = req.user_id;
-    
-    const book = await getBookDetailInfo(ISBN, parseInt(page), parseInt(size), userId);
 
-    res.send(response(status.SUCCESS, book.data, book.pageInfo));
+    if(!id) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    if(isBookId === 'true') {
+        const result = await service.getBookDetailInfoById(parseInt(id), parseInt(page), parseInt(size), userId);
+        return res.send(response(status.SUCCESS, result.data, result.pageInfo));
+    } else {
+        const result = await service.getBookDetailInfoByISBN(id, parseInt(page), parseInt(size), userId);
+        return res.send(response(status.SUCCESS, result.data, result.pageInfo));
+    }
 };
 
 // 책 읽음 여부 업데이트
 export const updateIsRead = async (req, res, next) => {
-    req.body.ISBN = req.params.ISBN;
+    const isBookId = req.query.isBookId;
     const userId = req.user_id;
+    const id = req.params.id;
 
-    const book = bookInfoDto(req.body);
+    if(!id) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
 
-    res.send(response(await updateBookIsRead(book, req.body.cid, userId)));
+    // 책 ID로 들어온 요청이 아닐 경우(ISBN으로 요청)에만 책 정보 저장
+    let bookId;
+    if(isBookId === 'true') {
+        bookId = parseInt(id);
+    } else {
+        bookId = await service.createBook(id);
+    }
+
+    res.send(response(await service.updateBookIsRead(bookId, userId)));
 };
 
 // 최근 선택한 책
@@ -33,7 +51,7 @@ export const getUserRecentBook = async (req, res, next) => {
     const offset = (page -1) * size
     const userId = req.user_id;
 
-    const result = await findUserRecentBook(userId, offset, size+1)
+    const result = await service.findUserRecentBook(userId, offset, size+1)
 
     const hasNext = result.length > size;
     if (hasNext) result.pop();
@@ -50,7 +68,7 @@ export const searchBook = async (req, res, next) => {
     }
 
     keyword = keyword.trim();
-    const book = await searchBookService(userId, keyword, preview === 'true', parseInt(page), parseInt(size));
+    const book = await service.searchBookService(userId, keyword, preview === 'true', parseInt(page), parseInt(size));
 
     res.send(response(status.SUCCESS, book.data, book.pageInfo));
 };
@@ -58,15 +76,13 @@ export const searchBook = async (req, res, next) => {
 // 책 검색어 추가
 export const createBookSearch = async (req, res, next) => {
     const userId = req.user_id;
-    if(!userId) {
-        res.send(response(status.NO_CONTENT));
+    const ISBN = req.params.ISBN;
+
+    if(!ISBN) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    const keyword = req.body.keyword;
-    req.body.ISBN = req.params.ISBN;
-    const book = bookInfoDto(req.body);
-
-    await createBookSearchService(book, req.body.cid, keyword, userId);
+    await service.createBookSearchService(ISBN, userId);
 
     res.send(response(status.CREATED));
 };

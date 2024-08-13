@@ -82,7 +82,7 @@ export const getCategoryIdByAladinCid = async (cid) => {
 }
 
 // 책 생성
-export const createBook = async (book) => {
+export const saveBook = async (book) => {
     const conn = await pool.getConnection();
     try {
         const result = await insertObject(conn, 'BOOK', book);
