@@ -1,22 +1,25 @@
-// 커뮤니티의 현재 참여자 수를 조회하는 쿼리
-export const GET_COMMUNITY_CURRENT_COUNT = `
-    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ?
-`;
-
 // 커뮤니티의 최대 인원수를 조회하는 쿼리
 export const GET_COMMUNITY_CAPACITY = `
     SELECT capacity FROM COMMUNITY WHERE community_id = ?
 `;
 
-// 사용자가 이미 커뮤니티에 참여하고 있는지 확인하는 쿼리
-export const IS_USER_ALREADY_IN_COMMUNITY = `
-    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?
+// 커뮤니티에 재가입하는 쿼리
+export const REJOIN_COMMUNITY = `
+    UPDATE COMMUNITY_USERS 
+    SET is_deleted = 0, updated_at = NOW(), deleted_at = NULL 
+    WHERE community_id = ? AND user_id = ?
 `;
 
 // 커뮤니티에 참여하는 쿼리
 export const JOIN_COMMUNITY = `
     INSERT INTO COMMUNITY_USERS (community_id, user_id)
     VALUES (?, ?)
+`;
+
+
+// 커뮤니티 현재 참여자 수 조회 쿼리 (탈퇴하지 않은 유저만 카운트)
+export const GET_COMMUNITY_CURRENT_COUNT = `
+    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = 0
 `;
 
 // 방장 추가 쿼리
@@ -40,4 +43,44 @@ export const GET_COMMUNITIES = `
     SELECT * FROM COMMUNITY 
     ORDER BY created_at DESC 
     LIMIT ? OFFSET ?;
+`;
+
+// 커뮤니티 탈퇴(소프트 딜리트) 쿼리
+export const LEAVE_COMMUNITY = `
+    UPDATE COMMUNITY_USERS 
+    SET is_deleted = 1, deleted_at = NOW(), updated_at = NOW() 
+    WHERE community_id = ? AND user_id = ?
+`;
+
+// 유저가 커뮤니티에 존재하는지 확인하고, is_deleted 상태를 반환
+export const CHECK_USER_IN_COMMUNITY = `
+    SELECT is_deleted 
+    FROM COMMUNITY_USERS 
+    WHERE community_id = ? AND user_id = ?
+`;
+
+// 커뮤니티 상세정보를 조회하는 쿼리
+export const GET_COMMUNITY_DETAILS = `
+    SELECT 
+        c.community_id,
+        c.address,
+        c.tag,
+        c.capacity,
+        c.created_at,
+        c.updated_at,
+        b.book_id,
+        b.title,
+        b.author,
+        b.image_url AS book_image,
+        u.user_id,
+        u.account AS leader_account,
+        u.nickname AS leader_nickname
+    FROM 
+        COMMUNITY c
+    JOIN 
+        BOOK b ON c.book_id = b.book_id
+    JOIN 
+        USERS u ON c.user_id = u.user_id
+    WHERE 
+        c.community_id = ? AND c.is_deleted = 0
 `;
