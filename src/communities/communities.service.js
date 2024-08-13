@@ -3,27 +3,42 @@ import { status } from '../../config/response.status.js';
 import { 
     getCommunities, 
     getMyCommunities,
-    createCommunityWithCheck, 
+    createCommunity, 
     getCommunityCurrentCount,
     getUnreadCnt,
     getCommunityBookInfo, 
     getCommunityCapacity, 
     isUserAlreadyInCommunity, 
     joinCommunity } from './communities.dao.js';
+import { createBook, getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
 import { communitiesInfoDTO, mycommunitiesInfoDTO } from './communities.dto.js';
 
 // 커뮤니티 생성 서비스
-export const createCommunityService = async (userId, bookId, address, tag, capacity) => {
-    // Capacity 값이 10을 초과하는지 체크
-    if (capacity > 10) {
+export const createCommunityService = async (book, community, cid) => {
+    // ISBN 값으로 book_id 조회
+    let bookId = await getBookIdByISBN(book.ISBN);
+    
+    // book_id 값이 존재하지 않을 경우 책 정보 생성
+    if(!bookId) {
+        const categoryId = await getCategoryIdByAladinCid(cid);
+        if(!categoryId) {
+            throw new BaseError(status.CATEGORY_NOT_FOUND);
+        }
+
+        book.category_id = categoryId;
+        bookId = await createBook(book);
+    }
+    
+    // Capacity 값이 4 이상, 10 이하인지 체크
+    if (community.capacity > 10 || community.capacity < 4) {
         throw new BaseError(status.INVALID_CAPACITY);
     }
 
     // 태그 유효성 검사
-    if (tag) {
+    if (community.tag) {
 
         // 태그 문자열을 '|'로 분리하여 배열로 변환
-        const tagsArray = tag.split('|');
+        const tagsArray = community.tag.split('|');
 
         // 태그 개수가 10개를 초과하면 오류 발생
         if (tagsArray.length > 10) {
@@ -38,8 +53,8 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
         }
     }
 
-    // 커뮤니티 생성과 관련된 전체 과정 처리
-    await createCommunityWithCheck(userId, bookId, address, tag, capacity);
+    // 모임 생성
+    return await createCommunity(community, bookId);
 };
 
 // 커뮤니티 가입 서비스
@@ -86,7 +101,7 @@ export const getMyCommunitiesService = async (myId, offset, limit) => {
     
     const myCommunities = await getMyCommunities(myId, offset, limit);
     const myCommunitiesDTOList = [];
-    
+
     for (const c of myCommunities) {
         //현재 참여자수
         let currentCount = await getCommunityCurrentCount(c.community_id);

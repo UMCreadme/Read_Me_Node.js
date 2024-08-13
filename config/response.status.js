@@ -23,7 +23,7 @@ export const status = {
 
     // community arr
     COMMUNITY_LIMIT_EXCEEDED: { status: StatusCodes.FORBIDDEN, "isSuccess": false, "code": "COMMUNITY001", "message": "한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없습니다." },
-    INVALID_CAPACITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY1002", "message": "커뮤니티의 수용 인원(capacity)은 최대 10명까지 허용됩니다." },
+    INVALID_CAPACITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY1002", "message": "커뮤니티의 수용 인원(capacity)이 4인 미만 혹은 10인 초과입니다." },
     COMMUNITY_FULL: { status: StatusCodes.BAD_REQUEST, isSuccess: false, code: "COMMUNITY4003", message: "참여 인원 초과로 참여하실 수 없습니다." },
     ALREADY_IN_COMMUNITY: { status: StatusCodes.BAD_REQUEST, isSuccess: false, code: "COMMUNITY4004", message: "이미 이 커뮤니티에 참여 중입니다." },
 

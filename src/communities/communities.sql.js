@@ -30,7 +30,7 @@ export const COUNT_COMMUNITIES_BY_USER_AND_BOOK = `
 `;
 
 // 그룹 생성 쿼리
-export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, address, tag, capacity) VALUES (?, ?, ?, ?, ?);";
+export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, content, location, tag, capacity) VALUES (?, ?, ?, ?, ?, ?);";
 
 // 모임 총 개수 조회 쿼리
 export const COUNT_COMMUNITIES = "SELECT COUNT(*) as count FROM COMMUNITY;";
@@ -43,15 +43,18 @@ export const GET_COMMUNITIES = `
 `;
 
 // 나의 참여 모임 리스트 조회 쿼리 (최신 메시지 온 순으로 정렬)
-export const getMyCommunities = `
+export const getMyCommunities =  `
     SELECT c.*
-    FROM COMMUNITY c
+    FROM COMMUNITY_USERS c
     LEFT JOIN MESSAGE m ON c.community_id = m.community_id
-    WHERE c.user_id = ?
+    WHERE c.user_id = ? AND c.is_deleted = 0
     GROUP BY c.community_id
-    ORDER BY MAX(m.created_at) DESC
+    ORDER BY 
+        MAX(m.created_at) DESC,
+        COUNT(m.message_id) ASC  -- 메시지가 없는 경우 아래로 정렬
     LIMIT ? OFFSET ?;
-`
+`;
+
 // 안읽은 개수 조회
 export const getUnreadCount = `
     SELECT COUNT(*) AS unread
@@ -59,7 +62,7 @@ export const getUnreadCount = `
     WHERE m.created_at > (
         SELECT MAX(r.created_at)
         FROM MESSAGE_READ_STATUS r
-        JOIN MESSAGE m ON r.message_id = m.message_id
+        JOIN MESSAGE m ON r.latest_message_id = m.message_id
         WHERE r.user_id = ? ) ;`;
 
 // 커뮤니티 ID로 책 id 조회

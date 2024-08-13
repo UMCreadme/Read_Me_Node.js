@@ -2,28 +2,25 @@ import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
 import { pageInfo } from "../../config/pageInfo.js";
+import { bookInfoDto } from "../book/book.dto.js";
+import { creatCommunityDto } from './communities.dto.js';
 import { createCommunityService, joinCommunityService, getCommunitiesService, getMyCommunitiesService } from './communities.service.js';
 
-// 커뮤니티 생성
+// 커뮤니티 생성 - 책정보 + 내용, 태그, 참여인원, 만남장소
 export const createCommunityController = async (req, res, next) => {
     const userId = req.user_id;
-    const { bookId, address, tag, capacity } = req.body;
+    const book = bookInfoDto(req.body);
 
-    // 누락된 파라미터 확인
-    const missingParams = [];
-    if (!userId) missingParams.push('userId');
-    if (!bookId) missingParams.push('bookId');
-    if (!address) missingParams.push('address');
-    if (!capacity) missingParams.push('capacity');
+    const community = creatCommunityDto(req.body, userId);
 
-    // 누락된 정보가 있을 경우
-    if (missingParams.length > 0) {
-        return next(new BaseError(status.PARAMETER_IS_WRONG));
+    console.log("컨트롤러. 커뮤니티 dto" , community);
+
+    const communityId = await createCommunityService(book, community, req.body.cid);
+
+    if(!communityId) {
+        throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
 
-    await createCommunityService(userId, bookId, address, tag, capacity);
-
-    // 성공 응답 전송
     res.send(response(status.CREATED));
 };
 
