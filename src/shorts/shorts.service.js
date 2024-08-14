@@ -6,7 +6,22 @@ import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
 import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
+import { shuffle } from "../common/common.algorithm.js";
 
+// 인기순 기준값
+export const POPULARITY_LIKE_CNT = 20;
+
+// 쇼츠 ID로 쇼츠 정보 조회
+export const getShortsDetailById = async (shortsId, userId) => {
+    const result = await shortsDetailDao.getShortsDetailToShortsId(shortsId, userId);
+
+    // 쇼츠 정보가 존재하지 않을 경우 에러 반환
+    if(result.length == 0) {
+        throw new BaseError(status.SHORTS_NOT_FOUND);
+    }
+
+    return getShortsDetailListDto(result);
+};
 
 // 쇼츠 검색
 export const getSearchShorts = async (userId, keyword, page, size) => {
@@ -58,23 +73,51 @@ export const getSearchShortsNoPaging = async (keyword, shortsId=null) => {
 };
 
 // 메인 화면 > 쇼츠 상세 조회
-export const getShortsDetailHome = async (shortsId, category, page, size) => {
-    let result = []; let hasNext;
-    
-    // 첫 번째 페이지일 경우 누른 쇼츠 정보를 먼저 조회
-    if (page == 1) {
-        result = await shortsDetailDao.getShortsDetailToShortsId(shortsId);
-        result.push(...await shortsDetailDao.getShortsDetailToCategory(shortsId, category, size, (page-1)*size));
+export const getShortsDetailHome = async (shortsId, userId, size, offset) => {
+    // shortsId에 해당하는 카테고리 조회
+    const categoryId = await shortsDao.getShortsCategoryById(shortsId);
+
+    // 카테고리에 해당하는 인기 쇼츠 개수 조회
+    const count = await shortsDao.countPopularShortsDetailToCategory(categoryId, POPULARITY_LIKE_CNT);
+
+    let popularShorts; let otherShorts; let result; let hasNext;
+    if (offset + size <= count) {
+        // 인기쇼츠만 내려보내면 되는 경우
+        popularShorts = await shortsDetailDao.getPopularShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset);
+
+        hasNext = popularShorts.length > size;
+        if(hasNext) popularShorts.pop();
+        hasNext = true; // 비인기 쇼츠 조회 필요
+
+        result = shuffle(popularShorts); // 랜덤으로 섞기
+    } else if (offset < count && count < offset + size) {
+        // 인기 쇼츠 & 비인기 쇼츠 모두 내려보내야 하는 경우
+        popularShorts = await shortsDetailDao.getPopularShortsDetailToCategory(shortsId, categoryId, userId, size, offset);
+        popularShorts = shuffle(popularShorts); // 랜덤으로 섞기
+
+        // 비인기 쇼츠에 맞는 페이지네이션 정보
+        size = size - popularShorts.length; offset = 0;
+        otherShorts = await shortsDetailDao.getShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset);
+
+        hasNext = otherShorts.length > size;
+        if(hasNext) otherShorts.pop();
+
+        otherShorts = shuffle(otherShorts); // 랜덤으로 섞기
+        popularShorts.push(...otherShorts);
+        result = popularShorts;
+    } else {
+        // 비인기 쇼츠만 내려보내면 되는 경우
+        otherShorts = await shortsDetailDao.getShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset - count);
 
         hasNext = result.length > size;
         if(hasNext) result.pop();
-    } else {
-        result = await shortsDetailDao.getShortsDetailToCategory(shortsId, category, size+1, (page-1)*size - 1);
-        hasNext = result.length > size;
-        if(hasNext) result.pop();
+
+        result = shuffle(otherShorts); // 랜덤으로 섞기
     }
 
-    return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+    console.log(result);
+
+    return { "data": getShortsDetailListDto(result), "hasNext": hasNext };
 };
 
 // 검색 화면 > 쇼츠 상세 조회
@@ -200,7 +243,7 @@ export const addCommentService = async (shorts_id, user_id, content) => {
 };
 
 export const likeShortsService = async (shorts_id, user_id) => {
-    const exists = await shortsDao.checkShortsExistenceDao(shorts_id);
+    const exists = await shortsDao.doesShortExistDao(shorts_id);
     if (!exists) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
@@ -218,7 +261,7 @@ export const likeShortsService = async (shorts_id, user_id) => {
 };
 
 export const deleteShortsService = async (user_id, shorts_id) => {
-    const exists = await shortsDao.checkShortsExistenceDao(shorts_id);
+    const exists = await shortsDao.doesShortExistDao(shorts_id);
     if (!exists) {
         throw new BaseError(status.SHORTS_NOT_FOUND);
     }

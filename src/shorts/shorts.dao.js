@@ -3,18 +3,55 @@ import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 import { isUserReadBookById } from "../book/book.sql.js";
 import { insertObject } from "../common/common.dao.js";
-import { addComment, getShortsByAuthorKeyword, getShortsByTagKeyword, getShortsByTitleKeyword } from "./shorts.sql.js";
-import { checkLike, removeLike, addLike } from "./shorts.sql.js";
+import * as sql from "./shorts.sql.js";
+
+// shorts ID 존재 여부 확인
+export const doesShortExistDao = async (shorts_id) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query('SELECT 1 FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
+        return result.length > 0;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
+
+// 쇼츠 ID에 해당하는 category_id 조회
+export const getShortsCategoryById = async (shortsId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.getCategoryByShortsId, [shortsId]);
+        return result[0].category_id;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
+
+// 카테고리에 해당하는 인기 쇼츠 개수 조회
+export const countPopularShortsDetailToCategory = async (categoryId, POPULARITY_LIKE_CNT) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.countPopularShortsByCategory, [categoryId, POPULARITY_LIKE_CNT]);
+        return result[0].total;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
 
 
 // 책 제목으로 쇼츠 검색
 export const getShortsToTitleKeyword = async (keyword) => {
     const conn = await pool.getConnection();
     try {
-        const [shortsTitle] = await conn.query(getShortsByTitleKeyword, [keyword]);
+        const [shortsTitle] = await conn.query(sql.getShortsByTitleKeyword, [keyword]);
         return shortsTitle;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -25,10 +62,9 @@ export const getShortsToTitleKeyword = async (keyword) => {
 export const getShortsToAuthorKeyword = async (keyword) => {
     const conn = await pool.getConnection();
     try {
-        const [shortsAuthor] = await conn.query(getShortsByAuthorKeyword, [keyword]);
+        const [shortsAuthor] = await conn.query(sql.getShortsByAuthorKeyword, [keyword]);
         return shortsAuthor;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -39,10 +75,9 @@ export const getShortsToAuthorKeyword = async (keyword) => {
 export const getShortsToTagKeyword = async (keyword) => {
     const conn = await pool.getConnection();
     try {
-        const [shortsTag] = await conn.query(getShortsByTagKeyword, [keyword]);
+        const [shortsTag] = await conn.query(sql.getShortsByTagKeyword, [keyword]);
         return shortsTag;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -72,7 +107,6 @@ export const createShorts = async (shorts) => {
         return shortsId;
     } catch (err) {
         await conn.query('ROLLBACK');
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -83,37 +117,8 @@ export const createShorts = async (shorts) => {
 export const addCommentDao = async (shorts_id, user_id, content) => {
     const conn = await pool.getConnection();
     try {
-        await conn.query(addComment, [shorts_id, user_id, content]);
+        await conn.query(sql.addComment, [shorts_id, user_id, content]);
     } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
-// shorts ID 존재 여부 확인
-export const doesShortExistDao = async (shorts_id) => {
-    const conn = await pool.getConnection();
-    try {
-        const [result] = await conn.query('SELECT 1 FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
-        return result.length > 0;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
-// 존재하는 쇼츠인지 확인
-export const checkShortsExistenceDao = async (shorts_id) => {
-    const conn = await pool.getConnection();
-    try {
-        const [rows] = await conn.query('SELECT COUNT(*) as count FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
-        return rows[0].count > 0;
-    } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -124,10 +129,9 @@ export const checkShortsExistenceDao = async (shorts_id) => {
 export const checkLikeDao = async (shorts_id, user_id) => {
     const conn = await pool.getConnection();
     try {
-        const [rows] = await conn.query(checkLike, [shorts_id, user_id]);
+        const [rows] = await conn.query(sql.checkLike, [shorts_id, user_id]);
         return rows[0].count > 0;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -138,9 +142,8 @@ export const checkLikeDao = async (shorts_id, user_id) => {
 export const addLikeDao = async (shorts_id, user_id) => {
     const conn = await pool.getConnection();
     try {
-        await conn.query(addLike, [shorts_id, user_id]);
+        await conn.query(sql.addLike, [shorts_id, user_id]);
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -151,9 +154,8 @@ export const addLikeDao = async (shorts_id, user_id) => {
 export const removeLikeDao = async (shorts_id, user_id) => {
     const conn = await pool.getConnection();
     try {
-        await conn.query(removeLike, [shorts_id, user_id]);
+        await conn.query(sql.removeLike, [shorts_id, user_id]);
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -167,7 +169,6 @@ export const getLikeCntDao = async (shorts_id) => {
         const [rows] = await conn.query('SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts_id = ?', [shorts_id]);
         return rows[0].count;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -185,13 +186,11 @@ export const checkShortsOwnerDao = async (shorts_id) => {
         }
         return result[0].user_id;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
     }
 };
-
 
 
 //쇼츠 삭제 - softdelete
@@ -216,7 +215,5 @@ export const deleteShortsDao = async (shorts_id) => {
         throw err;
     } finally {
         if(conn) conn.release();
-    }
-    
-    
+    } 
 };

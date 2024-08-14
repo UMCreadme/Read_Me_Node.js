@@ -4,6 +4,9 @@ export const isLikeShorts = "SELECT * FROM LIKE_SHORTS WHERE user_id = ? AND sho
 // 책에 해당하는 쇼츠 개수 조회
 export const countShortsDetailByBookId = "SELECT COUNT(*) AS total FROM SHORTS WHERE book_id = ? AND is_deleted = false;";
 
+// 쇼츠 ID에 해당하는 category_id 조회
+export const getCategoryByShortsId = "SELECT c.category_id FROM SHORTS s JOIN BOOK b ON s.book_id = b.book_id JOIN CATEGORY c ON b.category_id = c.category_id WHERE s.shorts_id = ?;";
+
 // 쇼츠 ID로 조회
 export const getShortsById = "SELECT * FROM SHORTS WHERE shorts_id = ?";
 
@@ -81,6 +84,21 @@ LEFT JOIN (
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE s.tag REGEXP ? AND is_deleted = false
 ORDER BY like_count DESC;`;
+
+// 카테고리에 해당하는 인기 쇼츠 개수 조회
+export const countPopularShortsByCategory = 
+`SELECT COUNT(*) AS total
+FROM SHORTS s
+LEFT JOIN BOOK b ON s.book_id = b.book_id
+LEFT JOIN CATEGORY c ON b.category_id = c.category_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS like_count
+    FROM LIKE_SHORTS
+    GROUP BY shorts_id
+) likes ON s.shorts_id = likes.shorts_id
+WHERE c.category_id = ?
+AND s.is_deleted = false
+AND likes.like_count >= ?;`;
 
 
 // 쇼츠에 댓글 달기

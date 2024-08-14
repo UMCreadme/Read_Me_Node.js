@@ -1,10 +1,11 @@
 import { pool } from "../../config/db.config.js";
 import { findFollowStatus } from "../users/users.sql.js";
 import * as sql from "./shorts.detail.sql.js";
+import { POPULARITY_LIKE_CNT } from "./shorts.service.js";
 import { countShortsDetailByBookId, isLikeShorts } from "./shorts.sql.js";
 
 // 쇼츠 ID로 쇼츠 상세 조회
-export const getShortsDetailToShortsId = async (shortsId, userId = null) => {
+export const getShortsDetailToShortsId = async (shortsId, userId) => {
     const conn = await pool.getConnection();
     try {
         const [shorts] = await conn.query(sql.getShortsDetailById, [shortsId]);
@@ -19,32 +20,54 @@ export const getShortsDetailToShortsId = async (shortsId, userId = null) => {
 
         return shorts;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
     }
 };
 
-// 카테고리별 쇼츠 상세 조회
-export const getShortsDetailToCategory = async (shortsId, category, size, offset, userId = null) => {
+// 카테고리별 인기 쇼츠 상세 조회
+export const getPopularShortsDetailToCategory = async (shortsId, categoryId, userId, size, offset) => {
     const conn = await pool.getConnection();
     try {
-        const [shorts] = await conn.query(sql.getShortsDetailByCategory, [category, shortsId, size, offset]);
+        const [shorts] = await conn.query(sql.getPopularShortsDetailByCategory, [shortsId, POPULARITY_LIKE_CNT, categoryId, size, offset]);
 
         if (userId != null) {
-            for (const short of shorts) {
+            shorts.map(async (short) => {
                 const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
                 const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;
-            }
+            });
+        }
+    
+        return shorts;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
+
+// 카테고리별 비인기 쇼츠 상세 조회
+export const getShortsDetailToCategory = async (shortsId, categoryId, userId, size, offset) => {
+    const conn = await pool.getConnection();
+    try {
+        const [shorts] = await conn.query(sql.getShortsDetailByCategory, [shortsId, POPULARITY_LIKE_CNT, categoryId, size, offset]);
+
+        if (userId != null) {
+            shorts.map(async (short) => {
+                const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
+                
+                short.isLike = isLike;
+                short.isFollow = isFollow;
+            });
         }
 
         return shorts;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -68,7 +91,6 @@ export const getShortsDetailToBook = async (shortsId, bookId, size, offset, user
 
         return shorts;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -81,7 +103,6 @@ export const countShortsDetailToBook = async (bookId) => {
         const [result] = await conn.query(countShortsDetailByBookId, [bookId]);
         return result[0].total;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -105,7 +126,6 @@ export const getShortsDetailToCategoryExcludeBook = async (category, bookId, siz
 
         return shorts;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -129,7 +149,6 @@ export const getShortsDetailToUser = async (shortsId, userId, size, offset, myId
 
         return shorts;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -153,7 +172,6 @@ export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, 
 
         return shorts;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();
@@ -185,7 +203,6 @@ export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordS
 
         return shorts;
     } catch (err) {
-        console.log(err);
         throw err;
     } finally {
         if(conn) conn.release();

@@ -3,31 +3,62 @@ import { status } from "../../config/response.status.js";
 import { response } from "../../config/response.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
-import { addCommentService } from "./shorts.service.js";
-import { likeShortsService } from "./shorts.service.js";
-import { deleteShortsService } from "./shorts.service.js";
 import { createBook } from "../book/book.service.js";
+import { pageInfo } from "../../config/pageInfo.js";
+
+const MAIN = "main"; const SEARCH = "search"; const BOOK = "book";
+const USER = "user"; const LIKE = "like";
 
 export const getShortsDetail = async (req, res, next) => {
-    const { category, keyword, book, user, like, page=1, size=10 } = req.query;
-    const shortsId = req.params.shortsId;
-    let shorts;
+    const { start, keyword } = req.query;
+    let { page=1, size=20 } = req.query; size = parseInt(size);
+    const shortsId = parseInt(req.params.shortsId);
+    const userId = req.user_id; // 좋아요 여부 체크를 위한 userId값
 
-    if (keyword !== undefined && category !== undefined) {
-        shorts = await service.getShortsDetailSearch(parseInt(shortsId), category, keyword, parseInt(page), parseInt(size));
-    } else if (book !== undefined) {
-        shorts = await service.getShortsDetailBook(parseInt(shortsId), book, parseInt(page), parseInt(size));
-    } else if (user !== undefined && like) {
-        shorts = await service.getShortsDetailUserLike(parseInt(shortsId), parseInt(user), parseInt(page), parseInt(size));
-    } else if (user !== undefined) {
-        shorts = await service.getShortsDetailUser(parseInt(shortsId), parseInt(user), parseInt(page), parseInt(size));
-    } else if (category !== undefined) {
-        shorts = await service.getShortsDetailHome(parseInt(shortsId), category, parseInt(page), parseInt(size));
+    // 필수 파라미터 체크
+    if(!start || !shortsId) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    // page, size 값 체크
+    page = parseInt(page); size = parseInt(size);
+    if((page) < 1 || size < 1) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    let shorts; let offset = (page - 1) * size - 1; // 가장 첫번째 조회되는 쇼츠 제외를 위한 offset
+    if(page === 1) {
+        // 1번 페이지의 경우에만 params로 들어온 shortsId에 해당하는 정보 가져오기
+        shorts = await service.getShortsDetailById(shortsId, userId);
+        size -= 1; offset += 1;
+    }
+
+    let result; let hasNext;
+    if (start === MAIN) {
+        // 추천 탭 경로
+        result = await service.getShortsDetailHome(shortsId, userId, size, offset);
+    } else if (start === SEARCH) {
+        // 검색 경로
+        result = await service.getShortsDetailSearch(shortsId, userId, size, offset);
+    } else if (start === BOOK) {
+        // 책 상세 경로
+        result = await service.getShortsDetailBook(shortsId, userId, size, offset);
+    } else if (start === USER) {
+        // 유저 올린 쇼츠 경로
+        result = await service.getShortsDetailUser(shortsId, userId, size, offset);
+    } else if (start === LIKE) {
+        // 유저 좋아요한 쇼츠 경로
+        result = await service.getShortsDetailUserLike(shortsId, userId, size, offset);
     } else {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    res.send(response(status.SUCCESS, shorts.data, shorts.pageInfo));
+    if(page === 1) {
+        shorts = [...shorts, ...result.data];
+    } else {
+        shorts = result.data;
+    }
+    res.send(response(status.SUCCESS, shorts, pageInfo(page, shorts.length, result.hasNext)));
 };
 
 export const searchShorts = async (req, res, next) => {
@@ -83,9 +114,9 @@ export const addComment = async (req, res, next) => {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    await addCommentService(shorts_id, user_id, content);
+    await service.addCommentService(shorts_id, user_id, content);
     res.send(response(status.CREATED));
-}
+};
 
 
 export const likeShorts = async (req, res, next) => {
@@ -96,11 +127,11 @@ export const likeShorts = async (req, res, next) => {
         return next(new BaseError(status.BAD_REQUEST));
     }
 
-    const { likeCnt, action } = await likeShortsService(shorts_id, user_id);
+    const { likeCnt, action } = await service.likeShortsService(shorts_id, user_id);
     const responseStatus = action === 'added' ? status.CREATED : status.SUCCESS;
     res.send(response(responseStatus, likeCnt));
 
-}
+};
 
 export const deleteShorts = async (req, res, next) => {
     const user_id = req.user_id;
@@ -110,6 +141,6 @@ export const deleteShorts = async (req, res, next) => {
     if ( !shorts_id || !user_id ) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
-    await deleteShortsService(user_id, shorts_id);
+    await service.deleteShortsService(user_id, shorts_id);
     res.send(response(status.SUCCESS));
-}
+};
