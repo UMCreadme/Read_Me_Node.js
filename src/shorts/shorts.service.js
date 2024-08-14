@@ -36,11 +36,11 @@ export const getSearchShorts = async (userId, keyword, page, size) => {
         return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
     }
 
-    const recentSerachId = await getResearchId(userId, keyword);
-    if(!recentSerachId) {
+    const recentSearchId = await getResearchId(userId, keyword);
+    if(!recentSearchId) {
         await addSearchDao(userId, keyword);
     } else {
-        await updateSearchDao(recentSerachId);
+        await updateSearchDao(recentSearchId);
     }
 
     return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
@@ -121,7 +121,7 @@ export const getShortsDetailHome = async (shortsId, userId, size, offset) => {
 };
 
 // 검색 화면 > 쇼츠 상세 조회
-export const getShortsDetailSearch = async (shortsId, category, keyword, page, size) => {
+export const getShortsDetailSearch = async (shortsId, userId, keyword, size, offset) => {
     // PM님 요구사항: 검색한 쇼츠에 해당하는 3-5개 쇼츠 이후 카테고리 관련 추천 쇼츠 반환
     const SEARCHSIZE = 5;
     let result; let hasNext;
