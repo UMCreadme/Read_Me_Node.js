@@ -48,8 +48,11 @@ export const getSearchShorts = async (userId, keyword, page, size) => {
 
 // 쇼츠 검색 (페이징 처리 x)
 export const getSearchShortsNoPaging = async (keyword, shortsId=null) => {
+    // 제목으로 쇼츠 검색
     const shortsTitle = await shortsDao.getShortsToTitleKeyword(keyword);
+    // 작가 이름으로 쇼츠 검색
     const shortsAuthor = await shortsDao.getShortsToAuthorKeyword(keyword);
+    // 태그로 쇼츠 검색
     const shortsTag = await shortsDao.getShortsToTagKeyword(keyword);
 
     // shortsTitle, shortsAuthor, shortsTag 중 길이가 가장 긴 배열 순서대로 합치기
@@ -62,7 +65,7 @@ export const getSearchShortsNoPaging = async (keyword, shortsId=null) => {
     // shorts_id 값 중복되는 것 제거
     result = result.filter((short, index) => result.findIndex(s => s.shorts_id === short.shorts_id) === index);
 
-    if(shortsId != null) {
+    if(!shortsId) {
         // shortsId에 해당하는 값부터 반환
         const idx = result.findIndex(short => short.shorts_id === shortsId);
         if(idx != -1) {
@@ -73,17 +76,29 @@ export const getSearchShortsNoPaging = async (keyword, shortsId=null) => {
 };
 
 // 메인 화면 > 쇼츠 상세 조회
-export const getShortsDetailHome = async (shortsId, userId, size, offset) => {
+export const getShortsDetailHome = async (shortsId, userId, size, offset, searchShorts) => {
     // shortsId에 해당하는 카테고리 조회
     const categoryId = await shortsDao.getShortsCategoryById(shortsId);
 
     // 카테고리에 해당하는 인기 쇼츠 개수 조회
-    const count = await shortsDao.countPopularShortsDetailToCategory(categoryId, POPULARITY_LIKE_CNT);
+    let count = await shortsDao.countPopularShortsDetailToCategory(categoryId, POPULARITY_LIKE_CNT);
+
+    if(searchShorts) {
+        // 검색어에 해당하는 쇼츠 중 같은 카테고리인 쇼츠 개수 계산
+        const sameCategoryCount = searchShorts.filter(short => short.category_id === categoryId).length;
+        count = count - sameCategoryCount;
+
+        searchShorts = searchShorts.map(short => short.shorts_id);
+    }
 
     let popularShorts; let otherShorts; let result; let hasNext;
     if (offset + size <= count) {
         // 인기쇼츠만 내려보내면 되는 경우
-        popularShorts = await shortsDetailDao.getPopularShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset);
+        if(searchShorts) {
+            popularShorts = await shortsDetailDao.getPopularShortsDetailToCategoryExcludeSearchShorts(searchShorts, categoryId, userId, size+1, offset);
+        } else {
+            popularShorts = await shortsDetailDao.getPopularShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset);
+        }
 
         hasNext = popularShorts.length > size;
         if(hasNext) popularShorts.pop();
@@ -92,58 +107,85 @@ export const getShortsDetailHome = async (shortsId, userId, size, offset) => {
         result = shuffle(popularShorts); // 랜덤으로 섞기
     } else if (offset < count && count < offset + size) {
         // 인기 쇼츠 & 비인기 쇼츠 모두 내려보내야 하는 경우
-        popularShorts = await shortsDetailDao.getPopularShortsDetailToCategory(shortsId, categoryId, userId, size, offset);
-        popularShorts = shuffle(popularShorts); // 랜덤으로 섞기
-
-        // 비인기 쇼츠에 맞는 페이지네이션 정보
-        size = size - popularShorts.length; offset = 0;
-        otherShorts = await shortsDetailDao.getShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset);
+        if(searchShorts) {
+            popularShorts = await shortsDetailDao.getPopularShortsDetailToCategoryExcludeSearchShorts(searchShorts, categoryId, userId, size, offset);
+    
+            // 비인기 쇼츠에 맞는 페이지네이션 정보
+            size = size - popularShorts.length; offset = 0;
+            otherShorts = await shortsDetailDao.getShortsDetailToCategoryExcludeSearchShorts(searchShorts, categoryId, userId, size+1, offset);
+        } else {
+            popularShorts = await shortsDetailDao.getPopularShortsDetailToCategory(shortsId, categoryId, userId, size, offset);
+    
+            // 비인기 쇼츠에 맞는 페이지네이션 정보
+            size = size - popularShorts.length; offset = 0;
+            otherShorts = await shortsDetailDao.getShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset);
+        }
 
         hasNext = otherShorts.length > size;
         if(hasNext) otherShorts.pop();
 
+        popularShorts = shuffle(popularShorts); // 랜덤으로 섞기
         otherShorts = shuffle(otherShorts); // 랜덤으로 섞기
         popularShorts.push(...otherShorts);
         result = popularShorts;
     } else {
         // 비인기 쇼츠만 내려보내면 되는 경우
-        otherShorts = await shortsDetailDao.getShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset - count);
+        if(searchShorts) {
+            otherShorts = await shortsDetailDao.getShortsDetailToCategoryExcludeSearchShorts(searchShorts, categoryId, userId, size+1, offset - count);
+        } else {
+            otherShorts = await shortsDetailDao.getShortsDetailToCategory(shortsId, categoryId, userId, size+1, offset - count);
+        }
 
-        hasNext = result.length > size;
-        if(hasNext) result.pop();
+        hasNext = otherShorts.length > size;
+        if(hasNext) otherShorts.pop();
 
         result = shuffle(otherShorts); // 랜덤으로 섞기
     }
 
-    console.log(result);
-
     return { "data": getShortsDetailListDto(result), "hasNext": hasNext };
 };
 
-// 검색 화면 > 쇼츠 상세 조회
+// 검색 화면 > 쇼츠 상세 조회 (검색한 쇼츠에 해당하는 3-5개 쇼츠 이후, 클릭한 쇼츠의 카테고리 관련 추천 쇼츠 반환)
 export const getShortsDetailSearch = async (shortsId, userId, keyword, size, offset) => {
-    // PM님 요구사항: 검색한 쇼츠에 해당하는 3-5개 쇼츠 이후 카테고리 관련 추천 쇼츠 반환
-    const SEARCHSIZE = 5;
-    let result; let hasNext;
+    const SEARCHSIZE = 4;
 
-    const totalPages = Math.ceil(SEARCHSIZE / size);
-    const lastCount = SEARCHSIZE % size;
+    let otherShorts; let result; let hasNext;
+    let searchShorts = await getSearchShortsNoPaging(keyword, shortsId);
+    if(offset + size <= SEARCHSIZE) {
+        // 검색한 쇼츠만 내려보내면 되는 경우
+        searchShorts = searchShorts.slice(offset, offset + size + 1);
+        
+        hasNext = searchShorts.length > size;
+        if(hasNext) searchShorts.pop();
+        hasNext = true; // 추천 쇼츠 조회 필요
 
-    let keywordShorts = await getSearchShortsNoPaging(keyword, shortsId);
-    keywordShorts = keywordShorts.slice(0, SEARCHSIZE);
+        searchShorts = shuffle(searchShorts); // 랜덤으로 섞기
+        result = getShortsDetailListDto(searchShorts);
+    } else if(offset < SEARCHSIZE && SEARCHSIZE < offset + size) {
+        // 검색한 쇼츠 & 추천 쇼츠 모두 내려보내야 하는 경우
+        searchShorts = searchShorts.slice(offset, offset + SEARCHSIZE);
+        searchShorts = shuffle(searchShorts); // 랜덤으로 섞기
 
-    if (page > totalPages) {
-        result = await shortsDetailDao.getShortsDetailToCategoryExcludeKeyword(category, keywordShorts.map(short => short.shorts_id), size+1, (page-totalPages-1)*size + lastCount);
-        hasNext = result.length > size;
-        if(hasNext) result.pop();
+        // 추천 쇼츠에 맞는 페이지네이션 정보
+        size = size - searchShorts.length; offset = 0;
+        const shorts = await getShortsDetailHome(shortsId, userId, size, offset, searchShorts);
+        otherShorts = shorts.data;
+        hasNext = shorts.hasNext;
+
+        otherShorts = shuffle(otherShorts); // 랜덤으로 섞기
+        result = getShortsDetailListDto(searchShorts);
+        result.push(...otherShorts);
     } else {
-        result = keywordShorts.slice((page-1)*size, (page-1)*size + Math.min(size, SEARCHSIZE));
-        result.push(...await shortsDetailDao.getShortsDetailToCategoryExcludeKeyword(category, result.map(short => short.shorts_id), size - result.length + 1, 0));
-        hasNext = result.length > size;
-        if(hasNext) result.pop();
+        // 추천 쇼츠만 내려보내면 되는 경우
+        otherShorts = await getShortsDetailHome(shortsId, userId, size, offset - SEARCHSIZE, searchShorts);
+        otherShorts = otherShorts.data;
+        hasNext = otherShorts.hasNext;
+
+        otherShorts = shuffle(otherShorts); // 랜덤으로 섞기
+        result = getShortsDetailListDto(otherShorts);
     }
 
-    return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+    return { "data": result, "hasNext": hasNext };
 };
 
 // 책 상세 화면 > 쇼츠 상세 조회

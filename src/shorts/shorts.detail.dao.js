@@ -74,6 +74,72 @@ export const getShortsDetailToCategory = async (shortsId, categoryId, userId, si
     }
 };
 
+// 검색 쇼츠를 제외한 카테고리별 인기 쇼츠 상세 조회
+export const getPopularShortsDetailToCategoryExcludeSearchShorts = async (keywordShorts, categoryId, userId, size, offset) => {
+    const conn = await pool.getConnection();
+    try {
+        let shorts;
+        if (keywordShorts.length === 0) {
+            [shorts] = await conn.query(sql.getPopularShortsDetailByCategory, [-1, POPULARITY_LIKE_CNT, categoryId, size, offset]);
+        } else {
+            const placeholders = keywordShorts.map(() => '?').join(',');
+            const query = sql.getPopularShortsDetailByCategoryExcludeSearchShorts.replace('<<placeholder>>', placeholders);
+
+            [shorts] = await conn.query(query, [...keywordShorts, POPULARITY_LIKE_CNT, categoryId,  size, offset]);
+        }
+
+        if (userId != null) {
+            shorts.map(async (short) => {
+                const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
+
+                short.isLike = isLike;
+                short.isFollow = isFollow;
+            });
+        }
+
+        return shorts;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
+
+// 검색 쇼츠를 제외한 카테고리별 비인기 쇼츠 상세 조회
+export const getShortsDetailToCategoryExcludeSearchShorts = async (keywordShorts, categoryId, userId, size, offset) => {
+    const conn = await pool.getConnection();
+    try {
+        let shorts;
+        if (keywordShorts.length === 0) {
+            [shorts] = await conn.query(sql.getShortsDetailByCategory, [-1, POPULARITY_LIKE_CNT, categoryId, size, offset]);
+        } else {
+            const placeholders = keywordShorts.map(() => '?').join(',');
+            const query = sql.getShortsDetailByCategoryExcludeSearchShorts.replace('<<placeholder>>', placeholders);
+
+            [shorts] = await conn.query(query, [...keywordShorts, POPULARITY_LIKE_CNT, categoryId, size, offset]);
+        }
+
+        if (userId != null) {
+            shorts.map(async (short) => {
+                const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
+                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
+
+                short.isLike = isLike;
+                short.isFollow = isFollow;
+            });
+        }
+
+        return shorts;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
+
+//--------------------------------------------------------------------------------------------------------
+
 export const getShortsDetailToBook = async (shortsId, bookId, size, offset, userId = null) => {
     const conn = await pool.getConnection();
     try {
@@ -102,29 +168,6 @@ export const countShortsDetailToBook = async (bookId) => {
     try {
         const [result] = await conn.query(countShortsDetailByBookId, [bookId]);
         return result[0].total;
-    } catch (err) {
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
-export const getShortsDetailToCategoryExcludeBook = async (category, bookId, size, offset, userId = null) => {
-    const conn = await pool.getConnection();
-    try {
-        const [shorts] = await conn.query(sql.getShortsDetailByCategoryExcludeBook, [category, bookId, size, offset]);
-
-        if (userId != null) {
-            for (const short of shorts) {
-                const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
-                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
-
-                short.isLike = isLike;
-                short.isFollow = isFollow;
-            }
-        }
-
-        return shorts;
     } catch (err) {
         throw err;
     } finally {
@@ -164,37 +207,6 @@ export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, 
             for (const short of shorts) {
                 const [isLike] = await conn.query(isLikeShorts, [myId, short.shorts_id]);
                 const [isFollow] = await conn.query(findFollowStatus, [myId, short.user_id]);
-
-                short.isLike = isLike;
-                short.isFollow = isFollow;
-            }
-        }
-
-        return shorts;
-    } catch (err) {
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
-export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordShorts, size, offset, userId = null) => {
-    const conn = await pool.getConnection();
-    try {
-        let shorts;
-        if (keywordShorts.length === 0) {
-            [shorts] = await conn.query(sql.getShortsDetailByCategory, [category, -1, size, offset]);
-        } else {
-            const placeholders = keywordShorts.map(() => '?').join(',');
-            const query = sql.getShortsDetailByCategoryExcludeKeyword.replace('<<placeholder>>', placeholders);
-
-            [shorts] = await conn.query(query, [category, ...keywordShorts, size, offset]);
-        }
-
-        if (userId != null) {
-            for (const short of shorts) {
-                const [isLike] = await conn.query(isLikeShorts, [userId, short.shorts_id]);
-                const [isFollow] = await conn.query(findFollowStatus, [userId, short.user_id]);
 
                 short.isLike = isLike;
                 short.isFollow = isFollow;

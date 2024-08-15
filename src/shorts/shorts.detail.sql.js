@@ -18,7 +18,7 @@ LEFT JOIN (
     FROM COMMENT
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
-WHERE s.shorts_id = ?;`;
+WHERE s.shorts_id = ? AND s.is_deleted = false;`;
 
 // 카테고리별 인기 쇼츠 상세 정보를 가져오는 쿼리
 export const getPopularShortsDetailByCategory =
@@ -82,7 +82,7 @@ ORDER BY like_count DESC
 LIMIT ? OFFSET ?;`;
 
 // 카테고리별 인기 쇼츠 상세 정보를 가져오는 쿼리 (검색어로 노출된 쇼츠 제외)
-export const getPopularShortsDetailByCategoryExcludeKeyword =
+export const getPopularShortsDetailByCategoryExcludeSearchShorts =
 `SELECT s.user_id, u.account, u.image_url as profile_img,
     s.shorts_id, s.image_url as shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     COALESCE(likes.like_count, 0) AS like_count,
@@ -113,7 +113,7 @@ ORDER BY like_count DESC
 LIMIT ? OFFSET ?;`;
 
 // 카테고리별 비인기 쇼츠 상세 정보를 가져오는 쿼리 (검색어로 노출된 쇼츠 제외)
-export const getShortsDetailByCategoryExcludeKeyword =
+export const getShortsDetailByCategoryExcludeSearchShorts =
 `SELECT s.user_id, u.account, u.image_url as profile_img,
     s.shorts_id, s.image_url as shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
     COALESCE(likes.like_count, 0) AS like_count,
@@ -133,7 +133,7 @@ LEFT JOIN (
 ) comments ON s.shorts_id = comments.shorts_id
 WHERE s.is_deleted = false
 AND s.shorts_id NOT IN (<<placeholder>>)
-AND COALESCE(likes.like_count, 0) >= ?
+AND COALESCE(likes.like_count, 0) < ?
 AND s.shorts_id IN (
     SELECT s.shorts_id
     FROM SHORTS s

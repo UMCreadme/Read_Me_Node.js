@@ -14,6 +14,7 @@ export const getShortsDetail = async (req, res, next) => {
     let { page=1, size=20 } = req.query; size = parseInt(size);
     const shortsId = parseInt(req.params.shortsId);
     const userId = req.user_id; // 좋아요 여부 체크를 위한 userId값
+    console.log('userId', userId);
 
     // 필수 파라미터 체크
     if(!start || !shortsId) {
@@ -26,20 +27,24 @@ export const getShortsDetail = async (req, res, next) => {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    let shorts; let offset = (page - 1) * size - 1; // 가장 첫번째 조회되는 쇼츠 제외를 위한 offset
+    let offset = (page - 1) * size - 1; // 가장 첫번째 조회되는 쇼츠 제외를 위한 offset
+
+    // params로 들어온 shortsId에 해당하는 정보 가져오기 (여기서 SHORTS_NOT_FOUND 예외 처리)
+    let shorts = await service.getShortsDetailById(shortsId, userId);
     if(page === 1) {
-        // 1번 페이지의 경우에만 params로 들어온 shortsId에 해당하는 정보 가져오기
-        shorts = await service.getShortsDetailById(shortsId, userId);
         size -= 1; offset += 1;
     }
 
-    let result; let hasNext;
+    let result;
     if (start === MAIN) {
         // 추천 탭 경로
         result = await service.getShortsDetailHome(shortsId, userId, size, offset);
     } else if (start === SEARCH) {
         // 검색 경로
-        result = await service.getShortsDetailSearch(shortsId, userId, size, offset);
+        if(!keyword) {
+            throw new BaseError(status.PARAMETER_IS_WRONG);
+        }
+        result = await service.getShortsDetailSearch(shortsId, userId, keyword, size, offset);
     } else if (start === BOOK) {
         // 책 상세 경로
         result = await service.getShortsDetailBook(shortsId, userId, size, offset);
