@@ -18,7 +18,8 @@ import {
     checkCommunityOwnerDao,
 } from './communities.dao.js';
 import { communitiesInfoDTO, mycommunitiesInfoDTO, getCommunitiesDto } from './communities.dto.js';
-import { createBook, getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
+import { getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
+import { createBook } from "../book/book.service.js";
 import { pageInfo } from '../../config/pageInfo.js';
 
 // 커뮤니티 생성 서비스
