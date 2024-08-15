@@ -72,8 +72,6 @@ export const saveMessageReadStatusService = async (messageId, userId) => {
     const [latestMessage] = await fetchMessagesDao(message.community_id, 1, 0);
     if (latestMessage?.message_id === messageId) {
         await saveMessageReadStatusDao(messageId, userId);
-    } else {
-        console.log(`메시지 ${messageId}는 최신 메시지가 아닙니다.`); // 디버그용 로그 추가
     }
 };
 
@@ -100,9 +98,6 @@ export const saveMessageService = async (communityId, userId, content, messageId
     const [latestMessage] = await fetchMessagesDao(message.community_id, 1, 0);
     if (latestMessage?.message_id === messageId) {
         await saveMessageReadStatusDao(messageId, userId);
-    } else {
-        console.log(`메시지 ${messageId}는 최신 메시지가 아닙니다.`); 
     }
-
     return message;
 };
