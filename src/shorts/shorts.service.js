@@ -1,7 +1,6 @@
 import { BaseError } from "../../config/error.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
-import { findBookById, getBookCategory } from "../book/book.dao.js";
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
@@ -224,21 +223,24 @@ export const getShortsDetailBook = async (shortsId, userId, size, offset) => {
 };
 
 // 유저 올린 쇼츠 > 쇼츠 상세 조회
-export const getShortsDetailUser = async (shortsId, userId, page, size) => {
-    const result = await shortsDetailDao.getShortsDetailToUser(shortsId, userId, size+1, (page-1)*size);
+export const getShortsDetailUser = async (shortsId, myId, size, offset) => {
+    // 쇼츠를 올린 유저 ID 조회
+    const userId = await shortsDao.getUserIdByShortsId(shortsId);
+
+    const result = await shortsDetailDao.getShortsDetailToUser(shortsId, myId, userId, size+1, offset);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
-    return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+    return {"data": getShortsDetailListDto(result), "hasNext": hasNext };
 };
 
 // 유저 좋아요한 쇼츠 > 쇼츠 상세 조회
-export const getShortsDetailUserLike = async (shortsId, userId, page, size) => {
-    const result = await shortsDetailDao.getShortsDetailToUserLike(shortsId, userId, size+1, (page-1)*size);
+export const getShortsDetailUserLike = async (shortsId, myId, size, offset) => {
+    const result = await shortsDetailDao.getShortsDetailToUserLike(shortsId, myId, userId, size+1, offset);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
-    return {"data": getShortsDetailListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+    return {"data": getShortsDetailListDto(result), "hasNext": hasNext };
 };
 
 // 쇼츠 생성

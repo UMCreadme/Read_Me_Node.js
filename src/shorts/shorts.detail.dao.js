@@ -138,8 +138,7 @@ export const getShortsDetailToCategoryExcludeShorts = async (keywordShorts, cate
     }
 };
 
-//--------------------------------------------------------------------------------------------------------
-
+// 책에 해당하는 쇼츠 상세 조회
 export const getShortsDetailToBook = async (bookId, size, offset, userId, pagination=true) => {
     const conn = await pool.getConnection();
     try {
@@ -168,19 +167,8 @@ export const getShortsDetailToBook = async (bookId, size, offset, userId, pagina
     }
 };
 
-export const countShortsDetailToBook = async (bookId) => {
-    const conn = await pool.getConnection();
-    try {
-        const [result] = await conn.query(countShortsDetailByBookId, [bookId]);
-        return result[0].total;
-    } catch (err) {
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
-export const getShortsDetailToUser = async (shortsId, userId, size, offset, myId = null) => {
+// 유저가 올린 쇼츠 상세 조회
+export const getShortsDetailToUser = async (shortsId, myId, userId, size, offset) => {
     const conn = await pool.getConnection();
     try {
         const [shorts] = await conn.query(sql.getShortsDetailByUser, [userId, shortsId, size, offset]);
@@ -203,6 +191,7 @@ export const getShortsDetailToUser = async (shortsId, userId, size, offset, myId
     }
 };
 
+// 유저가 좋아요한 쇼츠 상세 조회
 export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, myId = null) => {
     const conn = await pool.getConnection();
     try {

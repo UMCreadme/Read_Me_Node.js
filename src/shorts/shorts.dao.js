@@ -57,6 +57,19 @@ export const getBookIdByShortsId = async (shortsId) => {
     }
 };
 
+// 쇼츠 ID에 해당하는 유저 ID 조회
+export const getUserIdByShortsId = async (shortsId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.getUserIdByShortsId, [shortsId]);
+        return result[0].user_id;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
+
 // 책 제목으로 쇼츠 검색
 export const getShortsToTitleKeyword = async (keyword) => {
     const conn = await pool.getConnection();
