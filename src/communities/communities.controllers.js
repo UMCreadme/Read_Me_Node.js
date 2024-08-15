@@ -110,9 +110,7 @@ export const getChatroomDetailsController = async (req, res, next) => {
     return res.send(response(status.SUCCESS, detailedCommunityDetails));
 };
 
-import asyncHandler from 'express-async-handler';
-
-export const updateMeetingDetailsController = asyncHandler(async (req, res) => {
+export const updateMeetingDetailsController = async (req, res, next) => {
     const { meetingDate, latitude, longitude, address } = req.body;
     const communityId = req.params.communityId;
     const userId = req.user_id;
@@ -135,4 +133,4 @@ export const updateMeetingDetailsController = asyncHandler(async (req, res) => {
 
     // 성공 시 응답
     res.send(response(status.SUCCESS));
-});
+};

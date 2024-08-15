@@ -21,5 +21,5 @@ communitiesRouter.delete('/:communityId', asyncHandler(authJWT), asyncHandler(de
 communitiesRouter.delete('/:communityId/leave', asyncHandler(authJWT), asyncHandler(leaveCommunityController));
 communitiesRouter.get('/:communityId', asyncHandler(authJWTNoUserRequired), asyncHandler(getCommunityDetailsController));
 communitiesRouter.get('/:communityId/details', asyncHandler(authJWT), asyncHandler(getChatroomDetailsController));
-communitiesRouter.patch('/:communityId/details', asyncHandler(authJWT), updateMeetingDetailsController);
+communitiesRouter.patch('/:communityId/details', asyncHandler(authJWT), asyncHandler(updateMeetingDetailsController));
 
