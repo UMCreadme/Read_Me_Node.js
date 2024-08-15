@@ -1,5 +1,5 @@
 export class RecentSearchesDTO {
-    constructor({ query, recent_searches_id, book_id, bookImg, title, author}) {
+    constructor({ query, recent_searches_id, book_id, bookImg, title, author, ISBN, link}) {
         this.query = query;
         this.recent_searches_id = recent_searches_id;
         if (book_id) {
@@ -7,6 +7,8 @@ export class RecentSearchesDTO {
             this.bookImg = bookImg;
             this.title = title;
             this.author = author;
+            this.ISBN = ISBN;
+            this.link= link;
         }
     }
 }

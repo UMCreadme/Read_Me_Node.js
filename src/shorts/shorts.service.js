@@ -1,20 +1,32 @@
 import { BaseError } from "../../config/error.js";
 import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
-import { createBook, findBookById, getBookCategory, getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
+import { findBookById, getBookCategory } from "../book/book.dao.js";
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
 import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
-import { addCommentDao, addLikeDao, removeLikeDao, checkLikeDao, getLikeCntDao, checkShortsExistenceDao} from "./shorts.dao.js";
+import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 
 
 // 쇼츠 검색
-export const getSearchShorts = async (keyword, page, size) => {
+export const getSearchShorts = async (userId, keyword, page, size) => {
     let result = await getSearchShortsNoPaging(keyword);
     result = result.slice((page-1)*size, (page-1)*size + size + 1);
     
     const hasNext = result.length > size;
     if(hasNext) result.pop();
+
+    // 검색어 저장 - 회원인 경우
+    if(!userId) {
+        return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
+    }
+
+    const recentSerachId = await getResearchId(userId, keyword);
+    if(!recentSerachId) {
+        await addSearchDao(userId, keyword);
+    } else {
+        await updateSearchDao(recentSerachId);
+    }
 
     return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
 };
@@ -152,21 +164,7 @@ export const getShortsDetailUserLike = async (shortsId, userId, page, size) => {
 };
 
 // 쇼츠 생성
-export const createShorts = async (book, shorts, cid) => {
-    // ISBN 값으로 book_id 조회
-    let bookId = await getBookIdByISBN(book.ISBN);
-    
-    // book_id 값이 존재하지 않을 경우 책 정보 생성
-    if(!bookId) {
-        const categoryId = await getCategoryIdByAladinCid(cid);
-        if(!categoryId) {
-            throw new BaseError(status.CATEGORY_NOT_FOUND);
-        }
-
-        book.category_id = categoryId;
-        bookId = await createBook(book);
-    }
-
+export const createShorts = async (shorts) => {
     // 쇼츠 정보 글자수 제한 확인
     if(shorts.title.length > 30) {
         throw new BaseError(status.SHORTS_TITLE_TOO_LONG);
@@ -188,7 +186,6 @@ export const createShorts = async (book, shorts, cid) => {
 
     // 쇼츠 정보 생성
     shorts.tag = shorts.tag.join("|");
-    shorts.book_id = bookId;
     return await shortsDao.createShorts(shorts);
 };
 
@@ -198,25 +195,38 @@ export const addCommentService = async (shorts_id, user_id, content) => {
     if (!isShortsExist) {
         throw new BaseError(status.BAD_REQUEST);
     }
-    await addCommentDao(shorts_id, user_id, content);
+    await shortsDao.addCommentDao(shorts_id, user_id, content);
 
 };
 
 export const likeShortsService = async (shorts_id, user_id) => {
-    const exists = await checkShortsExistenceDao(shorts_id);
+    const exists = await shortsDao.checkShortsExistenceDao(shorts_id);
     if (!exists) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    const isLiked = await checkLikeDao(shorts_id, user_id);
+    const isLiked = await shortsDao.checkLikeDao(shorts_id, user_id);
 
     if (isLiked) {
-        await removeLikeDao(shorts_id, user_id);
-        return { likeCnt: await getLikeCntDao(shorts_id), action: 'remmoved'};
+        await shortsDao.removeLikeDao(shorts_id, user_id);
+        return { likeCnt: await shortsDao.getLikeCntDao(shorts_id), action: 'remmoved'};
     } else {
-        await addLikeDao(shorts_id, user_id);
-        return { likeCnt: await getLikeCntDao(shorts_id), action: 'added'};
+        await shortsDao.addLikeDao(shorts_id, user_id);
+        return { likeCnt: await shortsDao.getLikeCntDao(shorts_id), action: 'added'};
     }
 
 };
 
+export const deleteShortsService = async (user_id, shorts_id) => {
+    const exists = await shortsDao.checkShortsExistenceDao(shorts_id);
+    if (!exists) {
+        throw new BaseError(status.SHORTS_NOT_FOUND);
+    }
+
+    const owner = await shortsDao.checkShortsOwnerDao(shorts_id);
+    if (owner !== user_id) {
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    await shortsDao.deleteShortsDao(shorts_id);
+};

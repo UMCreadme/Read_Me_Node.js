@@ -162,3 +162,73 @@ export const getUnreadCnt = async (communityId, myId) => {
         if(conn) conn.release();
     }
 }
+
+// 제목으로 커뮤니티 검색
+export const searchCommunitiesByTitleKeyword = async (keyword) => {
+    const conn = await pool.getConnection();
+    try {
+        const [results] = await conn.query(sql.GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
+        return results;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+// 태그로 커뮤니티 검색
+export const searchCommunitiesByTagKeyword = async (keyword) => {
+    const conn = await pool.getConnection()
+    try {
+        const [shortsTag] = await conn.query(sql.GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
+        return shortsTag;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+export const checkCommunityExistenceDao = async (community_id) => {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.query('SELECT COUNT(*) as count FROM COMMUNITY WHERE community_id = ? AND is_deleted = 0', [community_id]);
+
+    conn.release();
+    return rows[0].count > 0;
+};
+
+export const checkCommunityOwnerDao = async (community_id) => {
+    const conn = await pool.getConnection();
+    
+    const [result] = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
+    if (result.length === 0) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    }
+    return result[0].user_id;
+};
+
+
+export const deleteCommunityDao = async (community_id) => {
+    const conn = await pool.getConnection();
+
+    try {
+        await conn.query('BEGIN');
+
+        // 커뮤니티 소프트 딜리트
+        await conn.query('UPDATE COMMUNITY SET is_deleted = 1 WHERE community_id = ?',[community_id]);
+        
+        // 커뮤니티 참가자 소프트 딜리트
+        await conn.query('UPDATE COMMUNITY_USERS SET is_deleted = 1 WHERE community_id = ?', [community_id]);
+
+        // 트랜잭션 커밋
+        await conn.query('COMMIT');
+    } catch (err) {
+        await conn.query('ROLLBACK');
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+
+};

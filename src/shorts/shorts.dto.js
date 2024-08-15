@@ -12,6 +12,8 @@ export const getShortsDetailListDto = (data) => {
             "isFollow": short.isFollow ? Boolean(short.isFollow) : false,
             "shortsImg": short.shorts_img,
             "phrase": short.phrase,
+            "phraseX": short.phrase_x,
+            "phraseY": short.phrase_y,
             "title": short.title,
             "content": short.content,
             "tags": short.tag ? short.tag.split("|") : [],
@@ -33,10 +35,11 @@ export const getSearchShortsListDto = (data) => {
             "shortsId": short.shorts_id,
             "shortsImg": short.shorts_img,
             "phrase": short.phrase,
+            "phraseX": short.phrase_x,
+            "phraseY": short.phrase_y,
             "category": short.category,
             "bookTitle": short.book_title,
             "author": short.author,
-            "translator": short.translator,
             "tags": short.tag ? short.tag.split("|") : []
         });
     }
@@ -45,7 +48,7 @@ export const getSearchShortsListDto = (data) => {
 };
 
 export const shortsInfoDto = (data, imgUrl, userId) => {
-    if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.shortsTitle || !data.content) {
+    if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.shortsTitle || !data.content || !data.phraseX || !data.phraseY) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
@@ -55,6 +58,8 @@ export const shortsInfoDto = (data, imgUrl, userId) => {
         "title": data.shortsTitle,
         "content": data.content,
         "tag": data.tags,
-        "user_id": userId
+        "user_id": userId,
+        "phrase_x": parseFloat(data.phraseX),
+        "phrase_y": parseFloat(data.phraseY)
     };
 }

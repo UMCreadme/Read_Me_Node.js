@@ -86,3 +86,37 @@ export const getCommunityBookID = "SELECT book_id FROM COMMUNITY WHERE community
 
 // 책 ID로 제목, 표지url 조회
 export const getBookInfo = "SELECT title, image_url FROM BOOK WHERE book_id = ?;";
+
+// 제목으로 커뮤니티 검색 (부분 검색 가능)
+export const GET_COMMUNITIES_BY_TITLE_KEYWORD = `
+SELECT 
+    c.community_id,
+    c.user_id,
+    c.book_id,
+    c.address,
+    c.tag,
+    c.capacity,
+    c.created_at,
+    c.updated_at
+FROM COMMUNITY c
+JOIN BOOK b ON c.book_id = b.book_id
+WHERE REPLACE(b.title, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
+ORDER BY c.created_at DESC;
+`;
+
+
+// 태그로 커뮤니티 검색 (부분 검색 가능)
+export const GET_COMMUNITIES_BY_TAG_KEYWORD = `
+SELECT 
+    c.community_id,
+    c.user_id,
+    c.book_id,
+    c.address,
+    c.tag,
+    c.capacity,
+    c.created_at,
+    c.updated_at  
+FROM COMMUNITY c
+WHERE REPLACE(c.tag, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
+ORDER BY c.created_at DESC;
+`;

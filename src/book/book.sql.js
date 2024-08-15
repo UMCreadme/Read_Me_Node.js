@@ -28,8 +28,7 @@ SELECT
     s.book_id,
     b.image_url,
     b.title,
-    b.author,
-    b.translator
+    b.author
 FROM 
     SHORTS s
 JOIN 
@@ -37,6 +36,7 @@ JOIN
 WHERE 
     s.user_id = ?
 ORDER BY 
-    s.created_at DESC
+    s.created_at DESC,
+    s.shorts_id DESC
 LIMIT ? OFFSET ?
 `;
