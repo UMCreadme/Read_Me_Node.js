@@ -13,8 +13,6 @@ export const createCommunityController = async (req, res, next) => {
 
     const community = creatCommunityDto(req.body, userId);
 
-    console.log("컨트롤러. 커뮤니티 dto" , community);
-
     const communityId = await createCommunityService(book, community, req.body.cid);
 
     if(!communityId) {

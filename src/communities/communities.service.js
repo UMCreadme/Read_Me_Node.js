@@ -110,7 +110,7 @@ export const getMyCommunitiesService = async (myId, offset, limit) => {
         let communityBook = await getCommunityBookInfo(c.community_id);
 
         // 안읽음 개수
-        let unreadCnt = await getUnreadCnt(myId);
+        let unreadCnt = await getUnreadCnt(c.community_id, myId);
         unreadCnt = Number(unreadCnt.unread);
         
         let result = mycommunitiesInfoDTO(c, communityBook, currentCount, unreadCnt);
