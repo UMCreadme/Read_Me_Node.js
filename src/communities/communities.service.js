@@ -143,7 +143,6 @@ export const getCommunityDetailsService = async (communityId, userId) => {
     return getCommunityDetailsDto(communityData, isUserParticipating);
 };
 
-// 채팅방 상세정보를 가져오는 서비스 함수
 export const getChatroomDetailsService = async (communityId, currentUserId) => {
     // 유저가 커뮤니티에 속해 있는지 확인
     const userStatus = await checkUserInCommunity(communityId, currentUserId);
@@ -153,13 +152,17 @@ export const getChatroomDetailsService = async (communityId, currentUserId) => {
         throw new BaseError(status.UNAUTHORIZED);
     }
 
-    const isParticipating = userId ? await checkUserParticipationInCommunityDao(communityId, userId) : false;
+    // 유저가 커뮤니티에 참여하고 있는지 확인
+    const isParticipating = currentUserId ? await checkUserParticipationInCommunityDao(communityId, currentUserId) : false;
 
+    // 커뮤니티 데이터 가져오기
+    const { communityData, membersData } = await getChatroomDetailsDao(communityId);
     if (!communityData || communityData.length === 0) {
         throw new BaseError(status.NOT_FOUND);
     }
 
-    return getCommunityDetailsDto(communityData, isParticipating);
+    // DTO 반환
+    return getChatroomDetailsDto(communityData, membersData, currentUserId);
 };
 
 

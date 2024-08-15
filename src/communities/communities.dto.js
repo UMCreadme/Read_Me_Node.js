@@ -47,7 +47,8 @@ export const getChatroomDetailsDto = (data, members, currentUserId) => {
         },
         meetingDate: community.meeting_date,
         members: members.map(member => ({
-            profileImage: member.profile_image_url,
+            userId: member.user_id,
+            profileImage: member.image_url,
             nickname: member.nickname,
             isMine: member.user_id === currentUserId
         }))
