@@ -39,11 +39,8 @@ export const getShortsDetail = async (req, res, next) => {
     if (start === MAIN) {
         // 추천 탭 경로
         result = await service.getShortsDetailHome(shortsId, userId, size, offset);
-    } else if (start === SEARCH) {
+    } else if (start === SEARCH && keyword) {
         // 검색 경로
-        if(!keyword) {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
-        }
         result = await service.getShortsDetailSearch(shortsId, userId, keyword, size, offset);
     } else if (start === BOOK) {
         // 책 상세 경로

@@ -44,6 +44,18 @@ export const countPopularShortsDetailToCategory = async (categoryId, POPULARITY_
     }
 };
 
+// 쇼츠 ID에 해당하는 책 ID 조회
+export const getBookIdByShortsId = async (shortsId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.getBookIdByShortsId, [shortsId]);
+        return result[0].book_id;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};
 
 // 책 제목으로 쇼츠 검색
 export const getShortsToTitleKeyword = async (keyword) => {

@@ -74,8 +74,8 @@ export const getShortsDetailToCategory = async (shortsId, categoryId, userId, si
     }
 };
 
-// 검색 쇼츠를 제외한 카테고리별 인기 쇼츠 상세 조회
-export const getPopularShortsDetailToCategoryExcludeSearchShorts = async (keywordShorts, categoryId, userId, size, offset) => {
+// 특정 쇼츠를 제외한 카테고리별 인기 쇼츠 상세 조회
+export const getPopularShortsDetailToCategoryExcludeShorts = async (keywordShorts, categoryId, userId, size, offset) => {
     const conn = await pool.getConnection();
     try {
         let shorts;
@@ -83,7 +83,7 @@ export const getPopularShortsDetailToCategoryExcludeSearchShorts = async (keywor
             [shorts] = await conn.query(sql.getPopularShortsDetailByCategory, [-1, POPULARITY_LIKE_CNT, categoryId, size, offset]);
         } else {
             const placeholders = keywordShorts.map(() => '?').join(',');
-            const query = sql.getPopularShortsDetailByCategoryExcludeSearchShorts.replace('<<placeholder>>', placeholders);
+            const query = sql.getPopularShortsDetailByCategoryExcludeShorts.replace('<<placeholder>>', placeholders);
 
             [shorts] = await conn.query(query, [...keywordShorts, POPULARITY_LIKE_CNT, categoryId,  size, offset]);
         }
@@ -106,8 +106,8 @@ export const getPopularShortsDetailToCategoryExcludeSearchShorts = async (keywor
     }
 };
 
-// 검색 쇼츠를 제외한 카테고리별 비인기 쇼츠 상세 조회
-export const getShortsDetailToCategoryExcludeSearchShorts = async (keywordShorts, categoryId, userId, size, offset) => {
+// 특정 쇼츠를 제외한 카테고리별 비인기 쇼츠 상세 조회
+export const getShortsDetailToCategoryExcludeShorts = async (keywordShorts, categoryId, userId, size, offset) => {
     const conn = await pool.getConnection();
     try {
         let shorts;
@@ -115,7 +115,7 @@ export const getShortsDetailToCategoryExcludeSearchShorts = async (keywordShorts
             [shorts] = await conn.query(sql.getShortsDetailByCategory, [-1, POPULARITY_LIKE_CNT, categoryId, size, offset]);
         } else {
             const placeholders = keywordShorts.map(() => '?').join(',');
-            const query = sql.getShortsDetailByCategoryExcludeSearchShorts.replace('<<placeholder>>', placeholders);
+            const query = sql.getShortsDetailByCategoryExcludeShorts.replace('<<placeholder>>', placeholders);
 
             [shorts] = await conn.query(query, [...keywordShorts, POPULARITY_LIKE_CNT, categoryId, size, offset]);
         }
@@ -140,10 +140,15 @@ export const getShortsDetailToCategoryExcludeSearchShorts = async (keywordShorts
 
 //--------------------------------------------------------------------------------------------------------
 
-export const getShortsDetailToBook = async (shortsId, bookId, size, offset, userId = null) => {
+export const getShortsDetailToBook = async (bookId, size, offset, userId, pagination=true) => {
     const conn = await pool.getConnection();
     try {
-        const [shorts] = await conn.query(sql.getShortsDetailByBook, [bookId, shortsId, size, offset]);
+        let shorts;
+        if (pagination) {
+            [shorts] = await conn.query(sql.getShortsDetailByBook, [bookId, size, offset]);
+        } else {
+            [shorts] = await conn.query(sql.getShortsDetailByBookWithoutPagination, [bookId]);
+        }
 
         if (userId != null) {
             for (const short of shorts) {

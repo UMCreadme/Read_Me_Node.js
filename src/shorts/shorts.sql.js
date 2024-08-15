@@ -7,6 +7,12 @@ export const countShortsDetailByBookId = "SELECT COUNT(*) AS total FROM SHORTS W
 // 쇼츠 ID에 해당하는 category_id 조회
 export const getCategoryByShortsId = "SELECT c.category_id FROM SHORTS s JOIN BOOK b ON s.book_id = b.book_id JOIN CATEGORY c ON b.category_id = c.category_id WHERE s.shorts_id = ?;";
 
+// 쇼츠 ID에 해당하는 책 ID 조회
+export const getBookIdByShortsId = "SELECT book_id FROM SHORTS WHERE shorts_id = ?;";
+
+// 쇼츠 ID에 해당하는 유저 ID 조회
+export const getUserIdByShortsId = "SELECT user_id FROM SHORTS WHERE shorts_id = ?;";
+
 // 쇼츠 ID로 조회
 export const getShortsById = "SELECT * FROM SHORTS WHERE shorts_id = ?";
 
