@@ -62,6 +62,9 @@ export const getUserIdByShortsId = async (shortsId) => {
     const conn = await pool.getConnection();
     try {
         const [result] = await conn.query(sql.getUserIdByShortsId, [shortsId]);
+        if (result.length === 0) {
+            throw new BaseError(status.SHORTS_NOT_FOUND);
+        }
         return result[0].user_id;
     } catch (err) {
         throw err;
@@ -199,24 +202,6 @@ export const getLikeCntDao = async (shorts_id) => {
         if(conn) conn.release();
     }
 };
-
-// 쇼츠 소유자 확인
-export const checkShortsOwnerDao = async (shorts_id) => {
-    const conn = await pool.getConnection();
-
-    try {
-        const [result] = await conn.query('SELECT user_id FROM SHORTS WHERE shorts_id = ?', [shorts_id]);
-        if (result.length === 0) {
-        throw new BaseError(status.SHORTS_NOT_FOUND);
-        }
-        return result[0].user_id;
-    } catch (err) {
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
 
 //쇼츠 삭제 - softdelete
 export const deleteShortsDao = async (shorts_id) => {

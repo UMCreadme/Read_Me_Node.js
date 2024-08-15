@@ -235,7 +235,13 @@ export const getShortsDetailUser = async (shortsId, myId, size, offset) => {
 };
 
 // 유저 좋아요한 쇼츠 > 쇼츠 상세 조회
-export const getShortsDetailUserLike = async (shortsId, myId, size, offset) => {
+export const getShortsDetailUserLike = async (shortsId, myId, userId, size, offset) => {
+    // 쇼츠를 좋아요한 userId값이 맞는지 확인
+    const likeUserId = await shortsDao.checkLikeDao(shortsId);
+    if(likeUserId !== userId) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+    
     const result = await shortsDetailDao.getShortsDetailToUserLike(shortsId, myId, userId, size+1, offset);
     const hasNext = result.length > size;
     if(hasNext) result.pop();
@@ -303,7 +309,7 @@ export const deleteShortsService = async (user_id, shorts_id) => {
         throw new BaseError(status.SHORTS_NOT_FOUND);
     }
 
-    const owner = await shortsDao.checkShortsOwnerDao(shorts_id);
+    const owner = await shortsDao.getUserIdByShortsId(shorts_id);
     if (owner !== user_id) {
         throw new BaseError(status.UNAUTHORIZED);
     }

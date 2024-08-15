@@ -10,11 +10,10 @@ const MAIN = "main"; const SEARCH = "search"; const BOOK = "book";
 const USER = "user"; const LIKE = "like";
 
 export const getShortsDetail = async (req, res, next) => {
-    const { start, keyword } = req.query;
+    const { start, keyword, userId } = req.query;
     let { page=1, size=20 } = req.query; size = parseInt(size);
     const shortsId = parseInt(req.params.shortsId);
-    const userId = req.user_id; // 좋아요 여부 체크를 위한 userId값
-    console.log('userId', userId);
+    const myId = req.user_id; // 좋아요 여부 체크를 위한 myId값
 
     // 필수 파라미터 체크
     if(!start || !shortsId) {
@@ -30,7 +29,7 @@ export const getShortsDetail = async (req, res, next) => {
     let offset = (page - 1) * size - 1; // 가장 첫번째 조회되는 쇼츠 제외를 위한 offset
 
     // params로 들어온 shortsId에 해당하는 정보 가져오기 (여기서 SHORTS_NOT_FOUND 예외 처리)
-    let shorts = await service.getShortsDetailById(shortsId, userId);
+    let shorts = await service.getShortsDetailById(shortsId, myId);
     if(page === 1) {
         size -= 1; offset += 1;
     }
@@ -38,19 +37,19 @@ export const getShortsDetail = async (req, res, next) => {
     let result;
     if (start === MAIN) {
         // 추천 탭 경로
-        result = await service.getShortsDetailHome(shortsId, userId, size, offset);
+        result = await service.getShortsDetailHome(shortsId, myId, size, offset);
     } else if (start === SEARCH && keyword) {
         // 검색 경로
-        result = await service.getShortsDetailSearch(shortsId, userId, keyword, size, offset);
+        result = await service.getShortsDetailSearch(shortsId, myId, keyword, size, offset);
     } else if (start === BOOK) {
         // 책 상세 경로
-        result = await service.getShortsDetailBook(shortsId, userId, size, offset);
+        result = await service.getShortsDetailBook(shortsId, myId, size, offset);
     } else if (start === USER) {
         // 유저 올린 쇼츠 경로
-        result = await service.getShortsDetailUser(shortsId, userId, size, offset);
-    } else if (start === LIKE) {
+        result = await service.getShortsDetailUser(shortsId, myId, size, offset);
+    } else if (start === LIKE && userId) {
         // 유저 좋아요한 쇼츠 경로
-        result = await service.getShortsDetailUserLike(shortsId, userId, size, offset);
+        result = await service.getShortsDetailUserLike(shortsId, myId, userId, size, offset);
     } else {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }

@@ -192,7 +192,7 @@ export const getShortsDetailToUser = async (shortsId, myId, userId, size, offset
 };
 
 // 유저가 좋아요한 쇼츠 상세 조회
-export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, myId = null) => {
+export const getShortsDetailToUserLike = async (shortsId, myId, userId, size, offset) => {
     const conn = await pool.getConnection();
     try {
         const [shorts] = await conn.query(sql.getShortsDetailByUserLike, [userId, userId, shortsId, size, offset]);
