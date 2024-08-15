@@ -171,17 +171,13 @@ export const getShortsDetailSearch = async (shortsId, userId, keyword, size, off
         hasNext = otherShorts.hasNext;
         otherShorts = otherShorts.data;
 
-        otherShorts = shuffle(otherShorts); // 랜덤으로 섞기
         result = getShortsDetailListDto(searchShorts);
         result.push(...otherShorts);
     } else {
         // 추천 쇼츠만 내려보내면 되는 경우
         otherShorts = await getShortsDetailHome(shortsId, userId, size, offset - SEARCHSIZE, searchShorts);
         hasNext = otherShorts.hasNext;
-        otherShorts = otherShorts.data;
-
-        otherShorts = shuffle(otherShorts); // 랜덤으로 섞기
-        result = getShortsDetailListDto(otherShorts);
+        result = otherShorts.data;
     }
 
     return { "data": result, "hasNext": hasNext };
