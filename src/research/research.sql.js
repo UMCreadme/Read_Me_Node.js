@@ -15,7 +15,7 @@ DELETE FROM RECENT_SEARCHES
 WHERE recent_searches_id = ?;
 `;
 
-export const getRecentResearchId = "SELECT recent_searches_id FROM RECENT_SEARCHES WHERE user_id = ? AND query = ?;";
+export const getRecentResearchId = "SELECT recent_searches_id FROM RECENT_SEARCHES WHERE user_id = ? AND query = ? AND book_id = null;";
 
 export const SearchUser = `SELECT user_id FROM RECENT_SEARCHES WHERE recent_searches_id = ?;`;
 
