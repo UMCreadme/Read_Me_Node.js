@@ -10,26 +10,46 @@ export const getCommunitiesDto = (data) => {
         updatedAt: community.updated_at
     }));
 };
-
-export const getCommunityDetailsDto = (data) => {
-    const community = data[0];  // 단일 커뮤니티 상세정보이므로 배열의 첫 번째 요소 사용
+export const getCommunityDetailsDto = (data, isParticipating) => {
+    const community = data[0];  
     return {
-        communityId: community.community_id,
-        address: community.address,
-        tags: community.tag ? community.tag.split('|') : [],
-        capacity: community.capacity,
-        createdAt: community.created_at,
-        updatedAt: community.updated_at,
         book: {
-            bookId: community.book_id,
             title: community.title,
             author: community.author,
             imageUrl: community.book_image
         },
         leader: {
-            userId: community.user_id,
+            imageUrl: community.leader_image,
             account: community.leader_account,
-            nickname: community.leader_nickname
-        }
+            nickname: community.leader_nickname,
+            userId: community.leader_id
+        },
+        location: community.location,
+        createdAt: community.created_at,
+        updatedAt: community.updated_at,
+        content: community.content,
+        tags: community.tag ? community.tag.split('|') : [],
+        capacity: community.capacity,
+        currentMembers: community.member_count,
+        isParticipating 
+    };
+};
+
+
+export const getChatroomDetailsDto = (data, members, currentUserId) => {
+    const community = data[0];
+    return {
+        title: community.title,
+        tags: community.tag ? community.tag.split('|') : [],
+        where: {
+            position: community.position,
+            address: community.address
+        },
+        meetingDate: community.meeting_date,
+        members: members.map(member => ({
+            profileImage: member.profile_image_url,
+            nickname: member.nickname,
+            isMine: member.user_id === currentUserId
+        }))
     };
 };

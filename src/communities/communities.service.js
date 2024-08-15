@@ -12,9 +12,13 @@ import {
     checkUserInCommunity,
     rejoinCommunity,
     leaveCommunityDao,
-    getCommunityDetailsDao
+    getCommunityDetailsDao,
+    getChatroomDetailsDao,
+    updateMeetingDetailsDao,
+    getCommunityUpdatedAtDao,
+    checkUserParticipationInCommunityDao
 } from './communities.dao.js';
-import { getCommunitiesDto,getCommunityDetailsDto } from './communities.dto.js';
+import { getCommunitiesDto, getCommunityDetailsDto, getChatroomDetailsDto } from './communities.dto.js';
 import { pageInfo } from '../../config/pageInfo.js';
 
 
@@ -49,8 +53,8 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
     await createCommunityWithCheck(userId, bookId, address, tag, capacity);
 };
 
-//커뮤니티 가입 서비스스
-export const joinCommunityService = async (communityId, userId) => { 
+//커뮤니티 가입 서비스
+export const joinCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 이미 존재하는지 확인하고 is_deleted 상태 반환
     const userStatus = await checkUserInCommunity(communityId, userId);
 
@@ -125,19 +129,57 @@ export const leaveCommunityService = async (communityId, userId) => {
 
 // 커뮤니티 상세정보를 가져오는 서비스 함수
 export const getCommunityDetailsService = async (communityId) => {
-    try {
-        // DAO를 통해 데이터베이스에서 커뮤니티 정보를 가져옴
-        const communityData = await getCommunityDetailsDao(communityId);
+    const communityData = await getCommunityDetailsDao(communityId);
 
-        // 커뮤니티 정보가 없으면 에러를 던짐
-        if (!communityData || communityData.length === 0) {
-            throw new BaseError(status.COMMUNITY_NOT_FOUND);
-        }
-
-        // DTO를 통해 데이터를 변환하여 반환
-        return getCommunityDetailsDto(communityData);
-    } catch (error) {
-        console.error(error);
-        throw error;
+    if (!communityData || communityData.length === 0) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
     }
+    const isUserParticipating = await checkUserParticipationInCommunityDao(communityId, userId);
+    return getCommunityDetailsDto(communityData);
+};
+
+// 채팅방 상세정보를 가져오는 서비스 함수
+export const getChatroomDetailsService = async (communityId, currentUserId) => {
+    // 유저가 커뮤니티에 속해 있는지 확인
+    const userStatus = await checkUserInCommunity(communityId, currentUserId);
+
+    if (userStatus === null || userStatus === 1) {
+        // 유저가 커뮤니티에 가입되어 있지 않거나 이미 탈퇴한 경우
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    const isParticipating = userId ? await checkUserParticipationInCommunityDao(communityId, userId) : false;
+
+    if (!communityData || communityData.length === 0) {
+        throw new BaseError(status.NOT_FOUND);
+    }
+
+    return getCommunityDetailsDto(communityData, isParticipating);
+};
+
+
+export const updateMeetingDetailsService = async (communityId, meetingDate, latitude, longitude, address, userId) => {
+
+    const exists = await checkCommunityExistenceDao(communityId);
+    if (!exists) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    }
+
+    const owner = await checkCommunityOwnerDao(communityId);
+    if (owner !== userId) {
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    const communityUpdatedAt = await getCommunityUpdatedAtDao(communityId);
+    const updatedAtDate = new Date(communityUpdatedAt);
+    const meetingDateDate = new Date(meetingDate);
+    const thirtyMinutesInMs = 30 * 60 * 1000;
+    const minAllowedMeetingDate = new Date(updatedAtDate.getTime() + thirtyMinutesInMs);
+
+    if (meetingDateDate < minAllowedMeetingDate) {
+        throw new BaseError(status.INVALID_MEETING_DATE);
+    }
+
+
+    await updateMeetingDetailsDao(communityId, meetingDate, latitude, longitude, address, userId);
 };

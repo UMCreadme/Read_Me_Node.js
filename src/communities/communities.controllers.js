@@ -7,7 +7,9 @@ import {
     joinCommunityService,
     getCommunitiesService,
     leaveCommunityService,
-    getCommunityDetailsService
+    getCommunityDetailsService,
+    getChatroomDetailsService,
+    updateMeetingDetailsService
 } from './communities.service.js';
 
 
@@ -47,7 +49,6 @@ export const deleteCommunityController = async (req, res, next) => {
     res.send(response(status.SUCCESS));
 }
 
-
 // 커뮤니티 가입 컨트롤러
 export const joinCommunityController = async (req, res, next) => {
     const communityId = req.params.communityId;
@@ -61,7 +62,6 @@ export const joinCommunityController = async (req, res, next) => {
     return res.send(response(status.JOINED));
 
 };
-
 
 export const getCommunitiesController = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
@@ -78,44 +78,61 @@ export const getCommunitiesController = async (req, res, next) => {
     });
 };
 
-
-// 커뮤니티 탈퇴 컨트롤러
+// 커뮤니티 탈퇴
 export const leaveCommunityController = async (req, res, next) => {
-    try {
-        const userId = req.user_id;
-        const communityId = req.params.communityId;
+    const userId = req.user_id;
+    const communityId = req.params.communityId;
 
-        if (!userId || !communityId) {
-            throw new BaseError(status.PARAMETER_IS_WRONG);
-        }
-
-        // 커뮤니티 탈퇴 서비스 호출
-        await leaveCommunityService(communityId, userId);
-
-        // 성공 응답 반환
-        return res.send(response(status.SUCCESS));
-    } catch (err) {
-        next(err);
+    if (!userId || !communityId) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
     }
+
+    await leaveCommunityService(communityId, userId);
+    return res.send(response(status.SUCCESS));
 };
 
-// 커뮤니티 상세정보를 조회하는 컨트롤러
+// 커뮤니티 상세정보 조회
 export const getCommunityDetailsController = async (req, res, next) => {
     const { communityId } = req.params;
+    const userId = req.user_id;
 
-    try {
-        // 서비스 계층을 호출하여 비즈니스 로직을 처리
-        const communityDetails = await getCommunityDetailsService(communityId);
-
-        return res.status(200).json({
-            status: 'success',
-            data: communityDetails
-        });
-    } catch (error) {
-        if (error instanceof BaseError) {
-            return next(error);
-        }
-        console.error(error);
-        return next(new BaseError(status.INTERNAL_SERVER_ERROR));
-    }
+    const communityDetails = await getCommunityDetailsService(communityId, userId);
+    return res.send(response(status.SUCCESS, communityDetails));
 };
+
+// 채팅방 상세정보 조회
+export const getChatroomDetailsController = async (req, res, next) => {
+    const userId = req.user_id;
+    const { communityId } = req.params;
+
+
+    const detailedCommunityDetails = await getChatroomDetailsService(communityId, userId);
+    return res.send(response(status.SUCCESS, detailedCommunityDetails));
+};
+
+import asyncHandler from 'express-async-handler';
+
+export const updateMeetingDetailsController = asyncHandler(async (req, res) => {
+    const { meetingDate, latitude, longitude, address } = req.body;
+    const communityId = req.params.communityId;
+    const userId = req.user_id;
+
+    if (!meetingDate || !latitude || !longitude || !address) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    console.log('Received request to update meeting details:', { communityId, meetingDate, latitude, longitude, address, userId });
+
+    // 서비스 호출
+    await updateMeetingDetailsService(
+        communityId,
+        meetingDate,
+        latitude,
+        longitude,
+        address,
+        userId
+    );
+
+    // 성공 시 응답
+    res.send(response(status.SUCCESS));
+});

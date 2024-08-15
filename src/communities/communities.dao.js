@@ -11,7 +11,12 @@ import {
     LEAVE_COMMUNITY,
     CHECK_USER_IN_COMMUNITY,
     REJOIN_COMMUNITY,
-    GET_COMMUNITY_DETAILS
+    GET_COMMUNITY_DETAILS,
+    GET_CHATROOM_DETAILS,
+    GET_CHATROOM_MEMBERS,
+    SET_MEETING_DETAILS,
+    GET_COMMUNITY_UPDATED_AT,
+    CHECK_USER_PARTICIPATION_QUERY
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
@@ -190,6 +195,73 @@ export const getCommunityDetailsDao = async (communityId) => {
         return rows;
     } catch (err) {
         console.error(err);
+        throw err;
+    } finally {
+        conn.release();
+    }
+};
+
+// 커뮤니티에 유저가 참여 중인지 확인하는 DAO 메서드
+export const checkUserParticipationInCommunityDao = async (communityId, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(CHECK_USER_PARTICIPATION_QUERY ,
+            [communityId, userId]
+        );
+        return result[0].count > 0;
+    } catch (err) {
+        throw err;
+    } finally {
+        conn.release();
+    }
+};
+
+export const getChatroomDetailsDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [communityData] = await conn.query(GET_CHATROOM_DETAILS, [communityId]);
+        const [membersData] = await conn.query(GET_CHATROOM_MEMBERS, [communityId]);
+
+        return { communityData, membersData };
+    } catch (err) {
+        console.error(err);
+        throw err;
+    } finally {
+        conn.release();
+    }
+};
+
+// 약속 설정 DAO
+export const updateMeetingDetailsDao = async (communityId, meetingDate, latitude, longitude, address, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        console.log('Executing query for communityId:', communityId);
+        const [result] = await conn.query(SET_MEETING_DETAILS, [
+            meetingDate,
+            `POINT(${latitude} ${longitude})`,
+            address,
+            communityId,
+            userId,
+        ]);
+
+        return result;
+    } catch (err) {
+        throw err;
+    } finally {
+        conn.release();
+    }
+};
+
+// 커뮤니티의 마지막 업데이트 시간을 가져옴
+export const getCommunityUpdatedAtDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(GET_COMMUNITY_UPDATED_AT, [communityId]);
+        if (result.length === 0) {
+            throw new BaseError(status.COMMUNITY_NOT_FOUND);
+        }
+        return result[0].updated_at;
+    } catch (err) {
         throw err;
     } finally {
         conn.release();
