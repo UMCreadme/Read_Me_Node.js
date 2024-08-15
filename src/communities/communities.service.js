@@ -18,7 +18,8 @@ import {
     getCommunityUpdatedAtDao,
     checkUserParticipationInCommunityDao,
     searchCommunitiesByTagKeyword,
-    searchCommunitiesByTitleKeyword
+    searchCommunitiesByTitleKeyword,
+    checkIfLeaderDao
 } from './communities.dao.js';
 import { getCommunitiesDto, getCommunityDetailsDto, getChatroomDetailsDto } from './communities.dto.js';
 import { pageInfo } from '../../config/pageInfo.js';
@@ -142,8 +143,6 @@ export const deleteCommunityService = async (user_id, community_id) => {
 
     await deleteCommunityDao(community_id);
 };
-
-// 커뮤니티 탈퇴 서비스
 export const leaveCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 존재하는지 확인
     const userStatus = await checkUserInCommunity(communityId, userId);
@@ -154,6 +153,13 @@ export const leaveCommunityService = async (communityId, userId) => {
     } else if (userStatus === 1) {
         // 유저가 이미 탈퇴한 경우
         throw new BaseError(status.ALREADY_LEFT_COMMUNITY);
+    }
+
+    // 유저가 방장인지 확인
+    const isLeader = await checkIfLeaderDao(communityId, userId);
+    if (isLeader) {
+        // 방장은 탈퇴할 수 없음
+        throw new BaseError(status.LEADER_CANNOT_LEAVE);
     }
 
     // 유저 탈퇴 처리 (소프트 딜리트 및 삭제 시간 기록)

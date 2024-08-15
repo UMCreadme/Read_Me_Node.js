@@ -170,3 +170,14 @@ WHERE REPLACE(c.tag, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
 ORDER BY c.created_at DESC;
 `;
 
+export const CHECK_IF_LEADER = `
+    SELECT role 
+    FROM COMMUNITY_USERS 
+    WHERE community_id = ? AND user_id = ? AND is_deleted = 0
+`;
+
+export const CHECK_COMMUNITY_EXISTENCE = `
+    SELECT COUNT(*) as count 
+    FROM COMMUNITY 
+    WHERE community_id = ? AND is_deleted = 0
+`;

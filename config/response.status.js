@@ -26,7 +26,7 @@ export const status = {
   CANNOT_LEAVE_OWNED_COMMUNITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4007", message: "방장은 커뮤니티를 탈퇴할 수 없습니다. 커뮤니티를 삭제하세요." },
   ALREADY_LEFT_COMMUNITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4008", message: "이미 해당 커뮤니티를 탈퇴하였습니다." },
   INVALID_MEETING_DATE: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4009", message: "미팅시간은 지금으로부터 적어도 30분이 지난 뒤로 설정해주세요." },
-
+  LEADER_CANNOT_LEAVE:{ status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4010", message: "방장은 커뮤니티를 탈퇴할 수 없습니다." },
 
   // member err
   MEMBER_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다." },

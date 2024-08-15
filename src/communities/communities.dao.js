@@ -6,6 +6,7 @@ import {
     ADD_ADMIN_TO_COMMUNITY,
     COUNT_COMMUNITIES_BY_USER_AND_BOOK,
     CREATE_COMMUNITY,
+    CHECK_IF_LEADER,
     LEAVE_COMMUNITY,
     CHECK_USER_IN_COMMUNITY,
     REJOIN_COMMUNITY,
@@ -18,8 +19,8 @@ import {
     COUNT_COMMUNITIES,
     GET_COMMUNITIES,
     GET_COMMUNITIES_BY_TAG_KEYWORD,
-    GET_COMMUNITIES_BY_TITLE_KEYWORD
-
+    GET_COMMUNITIES_BY_TITLE_KEYWORD,
+    CHECK_COMMUNITY_EXISTENCE
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
@@ -87,6 +88,17 @@ export const getCommunityCurrentCountDao = async (communityId) => {
     try {
         const [result] = await conn.query(GET_COMMUNITY_CURRENT_COUNT, [communityId]);
         return result[0].count;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+// 유저가 방장인지 확인하는 함수
+export const checkIfLeaderDao = async (communityId, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(CHECK_IF_LEADER, [communityId, userId]);
+        return result.length > 0 && result[0].role === 'admin';
     } finally {
         if (conn) conn.release();
     }
@@ -176,10 +188,12 @@ export const searchCommunitiesByTagKeyword = async (keyword) => {
 
 export const checkCommunityExistenceDao = async (community_id) => {
     const conn = await pool.getConnection();
-    const [rows] = await conn.query('SELECT COUNT(*) as count FROM COMMUNITY WHERE community_id = ? AND is_deleted = 0', [community_id]);
-
-    conn.release();
-    return rows[0].count > 0;
+    try {
+        const [rows] = await conn.query(CHECK_COMMUNITY_EXISTENCE, [community_id]);
+        return rows[0].count > 0;
+    } finally {
+        conn.release();
+    }
 };
 
 export const checkCommunityOwnerDao = async (community_id) => {
