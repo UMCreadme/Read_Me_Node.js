@@ -11,7 +11,7 @@ export const getShortsbyCategory = async (category_id, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -25,7 +25,7 @@ export const getAllCategory = async () => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -39,7 +39,7 @@ export const getUserCategoriesById = async(user_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -53,7 +53,7 @@ export const getRecommendedShorts = async (user_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -67,7 +67,7 @@ export const getShorts = async (offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }
 
@@ -82,6 +82,6 @@ export const getFollowersFeeds = async (user_id, offset, limit) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 }

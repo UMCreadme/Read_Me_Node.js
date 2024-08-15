@@ -14,15 +14,30 @@ import {
     unfollow,
     searchUser,
     kakaoSignUp, kakaoLogin,
-    changeCategory
+    changeCategory,
+    updateUserImage, deleteUserImage, updateUserInfo
 } from "./users.controller.js"
 import {authJWT, authJWTNoUserRequired} from "../jwt/authJWT.js";
 import {refresh} from "../jwt/refresh.js";
+import imgUploader from "../../config/s3.manager.js";
+
 
 export const userRouter = express.Router({mergeParams:true});
 
 // 나의 정보 조회
 userRouter.get('/my', asyncHandler(authJWT), asyncHandler(getUserInfo));
+
+// 나의 프로필 이미지 편집
+userRouter.put('/my', asyncHandler(authJWT),  imgUploader.single('image'), (req, res, next) => {
+    next(); // 다음 미들웨어로 넘어가기
+}, asyncHandler(updateUserImage));
+
+// 나의 프로필 이미지 삭제
+userRouter.delete('/my', asyncHandler(authJWT), asyncHandler(deleteUserImage))
+
+// 나의 프로필 내용 편집
+userRouter.patch('/my', asyncHandler(authJWT), asyncHandler(updateUserInfo))
+
 
 // 내가 만든 쇼츠 리스트 조회
 userRouter.get("/my/shorts", asyncHandler(authJWT), asyncHandler(getUserShorts));

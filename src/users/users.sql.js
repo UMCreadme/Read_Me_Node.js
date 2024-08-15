@@ -47,7 +47,6 @@ export const findAllIfContainsKeywordOrdered = `
   ORDER BY follower_count DESC;
 `;
 
-
 // 최근 24시간 이내의 게시물 수를 가져오는 쿼리
 export const getLatestPostCount = `
   SELECT COUNT(*) AS count
@@ -55,3 +54,22 @@ export const getLatestPostCount = `
   WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
 `;
 
+export const updateUserImageSql = `
+    UPDATE USERS
+    SET image_url = COALESCE(?, image_url)
+    WHERE user_id = ?
+`;
+
+export const deleteUserImageSql = `
+    UPDATE USERS
+    SET image_url =  "https://readme-image.s3.ap-northeast-2.amazonaws.com/profile/default-profile.png"
+    WHERE user_id = ?
+`
+
+export const updateUserInfoSql = `
+    UPDATE USERS
+    SET nickname = COALESCE(?, nickname), 
+        account = COALESCE(?, account), 
+        comment = COALESCE(?, comment)
+    WHERE user_id = ?
+`

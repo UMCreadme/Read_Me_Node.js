@@ -17,7 +17,7 @@ export const getShortsToTitleKeyword = async (keyword) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -31,7 +31,7 @@ export const getShortsToAuthorKeyword = async (keyword) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -45,7 +45,7 @@ export const getShortsToTagKeyword = async (keyword) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -75,7 +75,7 @@ export const createShorts = async (shorts) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -88,7 +88,7 @@ export const addCommentDao = async (shorts_id, user_id, content) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -102,7 +102,7 @@ export const doesShortExistDao = async (shorts_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -116,7 +116,7 @@ export const checkShortsExistenceDao = async (shorts_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -130,7 +130,7 @@ export const checkLikeDao = async (shorts_id, user_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -143,7 +143,7 @@ export const addLikeDao = async (shorts_id, user_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -156,7 +156,7 @@ export const removeLikeDao = async (shorts_id, user_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -170,7 +170,7 @@ export const getLikeCntDao = async (shorts_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -188,7 +188,7 @@ export const checkShortsOwnerDao = async (shorts_id) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -215,7 +215,7 @@ export const deleteShortsDao = async (shorts_id) => {
         await conn.query('ROLLBACK');
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
     
     

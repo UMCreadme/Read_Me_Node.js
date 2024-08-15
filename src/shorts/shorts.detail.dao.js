@@ -22,7 +22,7 @@ export const getShortsDetailToShortsId = async (shortsId, userId = null) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -47,7 +47,7 @@ export const getShortsDetailToCategory = async (shortsId, category, size, offset
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -71,7 +71,7 @@ export const getShortsDetailToBook = async (shortsId, bookId, size, offset, user
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -84,7 +84,7 @@ export const countShortsDetailToBook = async (bookId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -108,7 +108,7 @@ export const getShortsDetailToCategoryExcludeBook = async (category, bookId, siz
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -132,7 +132,7 @@ export const getShortsDetailToUser = async (shortsId, userId, size, offset, myId
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -156,7 +156,7 @@ export const getShortsDetailToUserLike = async (shortsId, userId, size, offset, 
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };
 
@@ -188,6 +188,6 @@ export const getShortsDetailToCategoryExcludeKeyword = async (category, keywordS
         console.log(err);
         throw err;
     } finally {
-        conn.release();
+        if(conn) conn.release();
     }
 };

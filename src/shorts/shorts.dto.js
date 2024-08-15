@@ -59,7 +59,7 @@ export const shortsInfoDto = (data, imgUrl, userId) => {
         "content": data.content,
         "tag": data.tags,
         "user_id": userId,
-        "phrase_x": data.phraseX,
-        "phrase_y": data.phraseY
+        "phrase_x": parseFloat(data.phraseX),
+        "phrase_y": parseFloat(data.phraseY)
     };
 }

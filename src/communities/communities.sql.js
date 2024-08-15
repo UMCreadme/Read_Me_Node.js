@@ -16,7 +16,6 @@ export const JOIN_COMMUNITY = `
     VALUES (?, ?)
 `;
 
-
 // 커뮤니티 현재 참여자 수 조회 쿼리 (탈퇴하지 않은 유저만 카운트)
 export const GET_COMMUNITY_CURRENT_COUNT = `
     SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = 0
@@ -136,3 +135,38 @@ SELECT COUNT(*) AS count
 FROM COMMUNITY_USERS
 WHERE community_id = ? AND user_id = ? AND is_deleted = 0;
 `;
+
+// 제목으로 커뮤니티 검색 (부분 검색 가능)
+export const GET_COMMUNITIES_BY_TITLE_KEYWORD = `
+SELECT 
+    c.community_id,
+    c.user_id,
+    c.book_id,
+    c.address,
+    c.tag,
+    c.capacity,
+    c.created_at,
+    c.updated_at
+FROM COMMUNITY c
+JOIN BOOK b ON c.book_id = b.book_id
+WHERE REPLACE(b.title, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
+ORDER BY c.created_at DESC;
+`;
+
+
+// 태그로 커뮤니티 검색 (부분 검색 가능)
+export const GET_COMMUNITIES_BY_TAG_KEYWORD = `
+SELECT 
+    c.community_id,
+    c.user_id,
+    c.book_id,
+    c.address,
+    c.tag,
+    c.capacity,
+    c.created_at,
+    c.updated_at  
+FROM COMMUNITY c
+WHERE REPLACE(c.tag, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%')
+ORDER BY c.created_at DESC;
+`;
+

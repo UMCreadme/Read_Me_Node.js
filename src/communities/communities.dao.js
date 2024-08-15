@@ -6,8 +6,6 @@ import {
     ADD_ADMIN_TO_COMMUNITY,
     COUNT_COMMUNITIES_BY_USER_AND_BOOK,
     CREATE_COMMUNITY,
-    GET_COMMUNITIES,
-    COUNT_COMMUNITIES,
     LEAVE_COMMUNITY,
     CHECK_USER_IN_COMMUNITY,
     REJOIN_COMMUNITY,
@@ -16,10 +14,16 @@ import {
     GET_CHATROOM_MEMBERS,
     SET_MEETING_DETAILS,
     GET_COMMUNITY_UPDATED_AT,
-    CHECK_USER_PARTICIPATION_QUERY
+    CHECK_USER_PARTICIPATION_QUERY,
+    COUNT_COMMUNITIES,
+    GET_COMMUNITIES,
+    GET_COMMUNITIES_BY_TAG_KEYWORD,
+    GET_COMMUNITIES_BY_TITLE_KEYWORD
+
 } from './communities.sql.js';
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
+
 
 
 // 커뮤니티 생성과 관련된 전체 과정 처리
@@ -52,7 +56,7 @@ export const createCommunityWithCheck = async (userId, bookId, address, tag, cap
         console.error(err); // 에러 로그 출력
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if (conn) conn.release(); // 연결 해제
     }
 };
 
@@ -62,7 +66,7 @@ export const rejoinCommunity = async (communityId, userId) => {
     try {
         await conn.query(REJOIN_COMMUNITY, [communityId, userId]);
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -72,10 +76,9 @@ export const joinCommunity = async (communityId, userId) => {
     try {
         await conn.query(JOIN_COMMUNITY, [communityId, userId]);
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
-
 
 
 // 커뮤니티의 현재 참여자 수 조회 (탈퇴하지 않은 유저만 카운트)
@@ -85,7 +88,7 @@ export const getCommunityCurrentCountDao = async (communityId) => {
         const [result] = await conn.query(GET_COMMUNITY_CURRENT_COUNT, [communityId]);
         return result[0].count;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -95,7 +98,7 @@ export const leaveCommunityDao = async (communityId, userId) => {
     try {
         await conn.query(LEAVE_COMMUNITY, [communityId, userId]);
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -107,7 +110,7 @@ export const checkUserInCommunity = async (communityId, userId) => {
         // 유저가 존재하지 않으면 null, 존재하면 is_deleted 상태 반환
         return rows.length > 0 ? rows[0].is_deleted : null;
     } finally {
-        conn.release();
+        if (conn) conn.release(); // 연결 해제
     }
 };
 
@@ -121,7 +124,7 @@ export const getCommunityCapacityDao = async (communityId) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if (conn) conn.release();
     }
 };
 
@@ -139,9 +142,36 @@ export const getCommunities = async (page, size) => {
         console.log(err);
         throw err;
     } finally {
-        conn.release(); // 연결 해제
+        if (conn) conn.release(); // 연결 해제
     }
+};
 
+// 제목으로 커뮤니티 검색
+export const searchCommunitiesByTitleKeyword = async (keyword) => {
+    const conn = await pool.getConnection();
+    try {
+        const [results] = await conn.query(GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
+        return results;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release(); // conn이 정의되어 있을 때만 release를 호출합니다.
+    }
+};
+
+// 태그로 커뮤니티 검색
+export const searchCommunitiesByTagKeyword = async (keyword) => {
+    const conn = await pool.getConnection()
+    try {
+        const [shortsTag] = await conn.query(GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
+        return shortsTag;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
 };
 
 export const checkCommunityExistenceDao = async (community_id) => {
@@ -181,7 +211,7 @@ export const deleteCommunityDao = async (community_id) => {
         await conn.query('ROLLBACK');
         throw err;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 
 };
@@ -197,7 +227,7 @@ export const getCommunityDetailsDao = async (communityId) => {
         console.error(err);
         throw err;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -205,14 +235,14 @@ export const getCommunityDetailsDao = async (communityId) => {
 export const checkUserParticipationInCommunityDao = async (communityId, userId) => {
     const conn = await pool.getConnection();
     try {
-        const [result] = await conn.query(CHECK_USER_PARTICIPATION_QUERY ,
+        const [result] = await conn.query(CHECK_USER_PARTICIPATION_QUERY,
             [communityId, userId]
         );
         return result[0].count > 0;
     } catch (err) {
         throw err;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -227,7 +257,7 @@ export const getChatroomDetailsDao = async (communityId) => {
         console.error(err);
         throw err;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -248,7 +278,7 @@ export const updateMeetingDetailsDao = async (communityId, meetingDate, latitude
     } catch (err) {
         throw err;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -264,6 +294,6 @@ export const getCommunityUpdatedAtDao = async (communityId) => {
     } catch (err) {
         throw err;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };

@@ -3,10 +3,10 @@ import { status } from "../../config/response.status.js";
 import { response } from "../../config/response.js";
 import { BaseError } from "../../config/error.js";
 import { shortsInfoDto } from "./shorts.dto.js";
-import { bookInfoDto } from "../book/book.dto.js";
 import { addCommentService } from "./shorts.service.js";
 import { likeShortsService } from "./shorts.service.js";
 import { deleteShortsService } from "./shorts.service.js";
+import { createBook } from "../book/book.service.js";
 
 export const getShortsDetail = async (req, res, next) => {
     const { category, keyword, book, user, like, page=1, size=10 } = req.query;
@@ -45,15 +45,21 @@ export const searchShorts = async (req, res, next) => {
 };
 
 export const createShorts = async (req, res, next) => {
-    const book = bookInfoDto(req.body);
+    const ISBN = req.body.ISBN;
     const userId = req.user_id;
+
+    if(!ISBN) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
 
     if(!req.file) {
         throw new BaseError(status.INTERNAL_SERVER_ERROR);
     }
+    const bookId = await createBook(req.body.ISBN);
     const shorts = shortsInfoDto(req.body, req.file.location, userId);
+    shorts.book_id = bookId;
 
-    const shortsId = await service.createShorts(book, shorts, req.body.cid);
+    const shortsId = await service.createShorts(shorts);
 
     if(!shortsId) {
         throw new BaseError(status.INTERNAL_SERVER_ERROR);
@@ -64,8 +70,8 @@ export const createShorts = async (req, res, next) => {
 
 export const addComment = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { content } = req.body;
-    const { user_id } = req.user_id;
+    const  content  = req.body.content;
+    const  user_id  = req.user_id;
 
     const MAX_COMMENT_LENGTH = 200; 
     
@@ -84,7 +90,7 @@ export const addComment = async (req, res, next) => {
 
 export const likeShorts = async (req, res, next) => {
     const shorts_id = req.params.shortsId;
-    const { user_id } = req.user_id;
+    const  user_id  = req.user_id;
 
     if (!shorts_id || !user_id) {
         return next(new BaseError(status.BAD_REQUEST));

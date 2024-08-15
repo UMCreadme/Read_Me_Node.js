@@ -1,4 +1,3 @@
-// src/config/response.status.js
 import { StatusCodes } from "http-status-codes";
 
 export const status = {
@@ -24,10 +23,10 @@ export const status = {
   ALREADY_IN_COMMUNITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4004", "message": "이미 이 커뮤니티에 참여 중입니다." },
   COMMUNITY_NOT_FOUND: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4005", "message": "존재하지 않는 커뮤니티입니다." },
   NOT_IN_COMMUNITY: { status: StatusCodes.NOT_FOUND, "isSuccess": false, code: "COMMUNITY4006", message: "사용자가 해당 커뮤니티에 가입되어 있지 않습니다." },
-  CANNOT_LEAVE_OWNED_COMMUNITY: { status: StatusCodes.BAD_REQUEST,"isSuccess": false,  code: "COMMUNITY4007", message: "방장은 커뮤니티를 탈퇴할 수 없습니다. 커뮤니티를 삭제하세요." },
-  ALREADY_LEFT_COMMUNITY: { status: StatusCodes.BAD_REQUEST,"isSuccess": false,  code: "COMMUNITY4008", message: "이미 해당 커뮤니티를 탈퇴하였습니다." },
+  CANNOT_LEAVE_OWNED_COMMUNITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4007", message: "방장은 커뮤니티를 탈퇴할 수 없습니다. 커뮤니티를 삭제하세요." },
+  ALREADY_LEFT_COMMUNITY: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4008", message: "이미 해당 커뮤니티를 탈퇴하였습니다." },
   INVALID_MEETING_DATE: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, code: "COMMUNITY4009", message: "미팅시간은 지금으로부터 적어도 30분이 지난 뒤로 설정해주세요." },
-  
+
 
   // member err
   MEMBER_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다." },
@@ -56,6 +55,8 @@ export const status = {
   ACCESS_TOKEN_NOT_EXPIRED: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4003", "message": "엑세스 토큰이 만료되지 않았습니다." },
   MISSING_TOKEN: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4004", "message": "헤더에 토큰 값이 존재하지 않습니다." },
   ACCESS_TOKEN_EXPIRED: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4005", "message": "엑세스 토큰이 만료되었습니다." },
-  INVALID_REFRESH_TOKEN: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4005", "message": "유효하지 않는 리프레시 토큰입니다." }
+  INVALID_REFRESH_TOKEN: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4005", "message": "유효하지 않는 리프레시 토큰입니다." },
 
+  // book err
+  BOOK_NOT_FOUND: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "BOOK4001", "message": "존재하지 않는 책입니다." }
 };

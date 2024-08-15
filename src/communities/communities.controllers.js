@@ -12,7 +12,6 @@ import {
     updateMeetingDetailsService
 } from './communities.service.js';
 
-
 // 커뮤니티 생성
 export const createCommunityController = async (req, res, next) => {
     const userId = req.user_id;
@@ -35,7 +34,6 @@ export const createCommunityController = async (req, res, next) => {
     // 성공 응답 전송
     res.send(response(status.CREATED));
 };
-
 
 export const deleteCommunityController = async (req, res, next) => {
     const user_id = req.user_id;
@@ -63,20 +61,16 @@ export const joinCommunityController = async (req, res, next) => {
 
 };
 
+// 전체 커뮤니티 리스트 조회
 export const getCommunitiesController = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const size = parseInt(req.query.size) || 10;
 
-    const { communityList, pageInfo } = await getCommunitiesService(page, size);
+    const result = await getCommunitiesService(page, size);
 
-    res.status(status.SUCCESS.status).send({
-        isSuccess: true,
-        code: status.SUCCESS.code,
-        message: "전체 모임 리스트 불러오기 성공",
-        pageInfo: pageInfo,
-        result: communityList
-    });
+    res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
 };
+
 
 // 커뮤니티 탈퇴
 export const leaveCommunityController = async (req, res, next) => {
@@ -134,3 +128,12 @@ export const updateMeetingDetailsController = async (req, res, next) => {
     // 성공 시 응답
     res.send(response(status.SUCCESS));
 };
+
+// 커뮤니티 검색
+export const searchCommunityController = async (req, res, next) => {
+    const { keyword, page = 1, size = 10 } = req.query;
+    const result = await searchCommunityService(keyword, page, size);
+
+    res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
+};
+
