@@ -82,7 +82,16 @@ export const getMyCommunitiesController = async (req, res, next) => {
 // 커뮤니티 검색
 export const searchCommunityController = async (req, res, next) => {
     const { keyword, page = 1, size = 10 } = req.query;
-    const result = await searchCommunityService(keyword, page, size);
 
-    res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
+    // 파라미터 검증
+    if (!keyword || page <= 0 || size <= 0 || keyword.trim() === "") {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+    const offset = (page -1) * size
+    const result = await searchCommunityService(keyword, offset, size+1)
+
+    const hasNext = result.length > size;
+    if (hasNext) result.pop();
+    
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
 };

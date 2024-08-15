@@ -127,36 +127,32 @@ export const getMyCommunitiesService = async (myId, offset, limit) => {
 };
 
 // 커뮤니티 검색 서비스
-export const searchCommunityService = async (keyword, page = 1, size = 10) => {
-    // 파라미터 검증
-    if (!keyword || page <= 0 || size <= 0 || keyword.trim() === "") {
-        throw new BaseError(status.PARAMETER_IS_WRONG);
-    }
-
-    let communities;
-    const decodedKeyword = decodeURIComponent(keyword.trim().replace(/\s+/g, '')); // URL 디코딩 및 공백 제거
+export const searchCommunityService = async (keyword, offset, limit) => {
+    
+    // 키워드 디코딩 및 공백 제거
+    const decodedKeyword = decodeURIComponent(keyword.trim().replace(/\s+/g, ''));
     const isTagSearch = decodedKeyword.startsWith('#');
 
-    if (isTagSearch) {
-        // 태그 검색
-        const formattedKeyword = decodedKeyword.substring(1); 
-        communities = await searchCommunitiesByTagKeyword(formattedKeyword);
-    } else {
-        // 제목 검색
-        communities = await searchCommunitiesByTitleKeyword(decodedKeyword);
+    // 태그 또는 제목 검색
+    const searchCommunities = isTagSearch 
+        ? await searchCommunitiesByTagKeyword(decodedKeyword.substring(1)) // 태그 검색 ('#은 제거')
+        : await searchCommunitiesByTitleKeyword(decodedKeyword); // 제목 검색
+
+    const searchCommunitiesDTOList = [];
+
+    for (const c of searchCommunities) {
+
+        //현재 참여자수
+        let currentCount = await getCommunityCurrentCount(c.community_id);
+                
+        // 모임 책 정보
+        let communityBook = await getCommunityBookInfo(c.community_id);
+
+        let result = communitiesInfoDTO(c, communityBook, currentCount);
+        searchCommunitiesDTOList.push(result);
     }
 
-    // 페이지네이션 계산
-    const offset = (page - 1) * size;
-    const limit = size + 1; // 요청한 size보다 하나 더 조회
-    const paginatedCommunities = communities.slice(offset, offset + limit);
-    const hasNext = paginatedCommunities.length > size;
-    const actualSize = hasNext ? size : paginatedCommunities.length;
-
-    return {
-        communityList: getCommunitiesDto({ communities: paginatedCommunities.slice(0, actualSize) }),
-        pageInfo: pageInfo(page, actualSize, hasNext, communities.length)
-    };
+    return searchCommunitiesDTOList; // 결과 리스트 반환
 };
 
 export const deleteCommunityService = async (user_id, community_id) => {
