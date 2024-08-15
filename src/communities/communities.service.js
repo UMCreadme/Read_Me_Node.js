@@ -128,14 +128,19 @@ export const leaveCommunityService = async (communityId, userId) => {
 };
 
 // 커뮤니티 상세정보를 가져오는 서비스 함수
-export const getCommunityDetailsService = async (communityId) => {
+export const getCommunityDetailsService = async (communityId, userId) => {
     const communityData = await getCommunityDetailsDao(communityId);
+    let isUserParticipating = false;
+
 
     if (!communityData || communityData.length === 0) {
         throw new BaseError(status.COMMUNITY_NOT_FOUND);
     }
-    const isUserParticipating = await checkUserParticipationInCommunityDao(communityId, userId);
-    return getCommunityDetailsDto(communityData);
+
+    if(userId !== null) {
+        isUserParticipating = await checkUserParticipationInCommunityDao(communityId, userId);
+    }
+    return getCommunityDetailsDto(communityData, isUserParticipating);
 };
 
 // 채팅방 상세정보를 가져오는 서비스 함수
