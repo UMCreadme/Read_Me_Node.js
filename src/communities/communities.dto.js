@@ -10,7 +10,8 @@ export const communitiesInfoDTO = (community, communityBook, currentCount, tagsL
         "Participants" : currentCount,
         "capacity" : community.capacity,
         "tags": tagsList,
-        "location" : community.location
+        "location" : community.location,
+        "community_id" : community.community_id
     }
 };
 
@@ -24,7 +25,8 @@ export const mycommunitiesInfoDTO = (community, communityBook, currentCount, unr
         "capacity" : community.capacity,
         "tags": tagsList,
         "location" : community.location,
-        "unReadCount" : unreadCnt
+        "unReadCount" : unreadCnt,
+        "community_id" : community.community_id
     }
 }; 
 
