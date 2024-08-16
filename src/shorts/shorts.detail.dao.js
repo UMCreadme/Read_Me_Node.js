@@ -2,7 +2,7 @@ import { pool } from "../../config/db.config.js";
 import { findFollowStatus } from "../users/users.sql.js";
 import * as sql from "./shorts.detail.sql.js";
 import { POPULARITY_LIKE_CNT } from "./shorts.service.js";
-import { countShortsDetailByBookId, isLikeShorts } from "./shorts.sql.js";
+import { isLikeShorts } from "./shorts.sql.js";
 
 // 쇼츠 ID로 쇼츠 상세 조회
 export const getShortsDetailToShortsId = async (shortsId, userId) => {

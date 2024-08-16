@@ -56,23 +56,26 @@ export const getAllCategories = "SELECT name FROM CATEGORY;";
 
 // 유저가 선택한 카테고리의 숏츠 1개씩 반환 + 인기쇼츠 중 랜덤
 export const getUserRecommendedShorts = 
-`WITH FilteredShorts AS (
-    SELECT s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, b.author, c.name AS category, c.category_id, COUNT(ls.like_shorts_id) AS likeCnt
+`WITH RankedShorts AS (
+    SELECT
+        s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title,
+        b.author,
+        c.name AS category, c.category_id,
+        COALESCE(likes.like_count, 0) AS like_count,
+        ROW_NUMBER() OVER (PARTITION BY c.category_id ORDER BY RAND()) AS rn
     FROM SHORTS s
-    JOIN BOOK b ON s.book_id = b.book_id
-    JOIN CATEGORY c ON b.category_id = c.category_id
-    JOIN USER_FAVORITE uf ON c.category_id = uf.category_id
-    LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id
-    WHERE uf.user_id = ?
-    GROUP BY s.shorts_id, s.image_url, s.phrase, s.title, b.author, c.name
-    HAVING COUNT(ls.like_shorts_id) >= 1
-),
-RankedShorts AS (
-    SELECT shorts_id, shortsImg, phrase, title, author, category, category_id,likeCnt,
-        ROW_NUMBER() OVER (PARTITION BY category ORDER BY RAND()) AS RN
-    FROM FilteredShorts
+    LEFT JOIN BOOK b ON s.book_id = b.book_id
+    LEFT JOIN USER_FAVORITE uf ON b.category_id = uf.category_id
+    LEFT JOIN CATEGORY c ON uf.category_id = c.category_id
+    LEFT JOIN (
+        SELECT shorts_id, COUNT(*) AS like_count
+        FROM LIKE_SHORTS
+        GROUP BY shorts_id
+    ) likes ON s.shorts_id = likes.shorts_id
+    WHERE COALESCE(likes.like_count, 0) >= ? AND uf.user_id = ?
 )
-SELECT shorts_id, shortsImg, phrase, title, author, category, likeCnt
+SELECT
+    shorts_id, shortsImg, phrase, title, author, category, like_count
 FROM RankedShorts
 WHERE rn = 1
 ORDER BY category_id;
