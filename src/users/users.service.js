@@ -294,11 +294,11 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
         return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
     }
 
-    const recentSerachId = await getResearchId(userId, keyword);
-    if(!recentSerachId) {
+    const recentSearchId = await getResearchId(userId, keyword);
+    if(!recentSearchId) {
         await addSearchDao(userId, keyword);
     } else {
-        await updateSearchDao(recentSerachId);
+        await updateSearchDao(recentSearchId);
     }
 
     return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
