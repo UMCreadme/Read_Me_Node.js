@@ -73,13 +73,8 @@ export const joinCommunityService = async (communityId, userId) => {
 export const getCommunitiesService = async (offset, limit) => {
     const allCommunities = await getCommunities(offset, limit);
 
-    // 결과를 DTO 형식으로 변환
-    const allCommunitiesDTOList = allCommunities.map(c => {
-        
-        const tagsList = c.tag ? c.tag.split('|') : []; // 태그가 없을 경우, 빈 리스트로
-
-        return communitiesInfoDTO(c, { title: c.title, link: c.link }, c.currentCount, tagsList);
-    });
+    // DTO 내부 로직으로 처리
+    const allCommunitiesDTOList = allCommunities.map(c => communitiesInfoDTO(c));
 
     return allCommunitiesDTOList;
 };
@@ -88,13 +83,8 @@ export const getCommunitiesService = async (offset, limit) => {
 export const getMyCommunitiesService = async (myId, offset, limit) => {
     const myCommunities = await getMyCommunities(myId, offset, limit);
 
-    // 결과를 DTO 형식으로 변환
-    const myCommunitiesDTOList = await Promise.all(myCommunities.map(async (c) => {
-        const tagsList = c.tag ? c.tag.split('|') : []; // 태그가 없을 경우, 빈 리스트로
-        const unreadCnt = await getUnreadCnt(c.community_id, myId); // 비동기 함수 호출 시 await 사용
-
-        return mycommunitiesInfoDTO(c, { title: c.title, link: c.link }, c.currentCount, unreadCnt, tagsList);
-    }));
+    // DTO 내부 로직으로 처리
+    const myCommunitiesDTOList = myCommunities.map(c => mycommunitiesInfoDTO(c));
 
     return myCommunitiesDTOList;
 };
@@ -111,13 +101,8 @@ export const searchCommunityService = async (keyword, offset, limit) => {
         ? await searchCommunitiesByTagKeyword(decodedKeyword.substring(1), offset, limit) // 태그 검색 ('#은 제거')
         : await searchCommunitiesByTitleKeyword(decodedKeyword, offset, limit); // 제목 검색
 
-    // 결과를 DTO 형식으로 변환
-    const searchCommunitiesDTOList = searchCommunities.map(c => {
-        
-        const tagsList = c.tag ? c.tag.split('|') : []; // 태그가 없을 경우, 빈 리스트로
-
-        return communitiesInfoDTO(c, { title: c.title, link: c.link }, c.currentCount, tagsList);
-    });
+    // DTO 내부 로직으로 처리
+    const searchCommunitiesDTOList = searchCommunities.map(c => communitiesInfoDTO(c));
 
     return searchCommunitiesDTOList; // 결과 리스트 반환
 };

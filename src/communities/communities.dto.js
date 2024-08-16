@@ -2,30 +2,28 @@ import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 
 // 커뮤니티 상세
-export const communitiesInfoDTO = (community, communityBook, currentCount, tagsList) => {
-    
-    return{   
-        "bookImg" : communityBook.link,
-        "bookTitle" : communityBook.title,
-        "Participants" : currentCount,
+export const communitiesInfoDTO = (community) => {
+    return {
+        "bookImg": community.bookImg,
+        "bookTitle": community.title,   
+        "Participants" : community.currentCount,
         "capacity" : community.capacity,
-        "tags": tagsList,
+        "tags": community.tag ? community.tag.split("|") : [],
         "location" : community.location,
         "community_id" : community.community_id
     }
-};
+}; 
 
 // 내가 참여한 커뮤니티 상세
-export const mycommunitiesInfoDTO = (community, communityBook, currentCount, unreadCnt, tagsList) => {
-    
-    return{   
-        "bookImg" : communityBook.link,
-        "bookTitle" : communityBook.title,
-        "Participants" : currentCount,
+export const mycommunitiesInfoDTO = (community) => {
+    return {
+        "bookImg": community.bookImg,
+        "bookTitle": community.title,   
+        "Participants" : community.currentCount,
         "capacity" : community.capacity,
-        "tags": tagsList,
+        "tags": community.tag ? community.tag.split("|") : [],
         "location" : community.location,
-        "unReadCount" : unreadCnt,
+        "unReadCount" : community.unreadCnt,
         "community_id" : community.community_id
     }
 }; 

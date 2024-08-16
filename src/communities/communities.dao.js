@@ -102,7 +102,7 @@ export const joinCommunity = async (communityId, userId) => {
 export const getCommunities = async (offset, limit) => {
     const conn = await pool.getConnection();
     try {
-        const [communities] = await conn.query(sql.getCommunities, [offset, limit]);
+        const [communities] = await conn.query(sql.getCommunities, [limit, offset]);
         return communities;
     } catch (err) {
         console.error(err);
@@ -116,8 +116,7 @@ export const getCommunities = async (offset, limit) => {
 export const getMyCommunities = async (myId, offset, limit) => {
     const conn = await pool.getConnection();
     try {
-        const [communities] = await conn.query(sql.getMyCommunities, [myId, limit, offset]);
-
+        const [communities] = await conn.query(sql.getMyCommunities, [myId, myId, limit, offset]);
         return communities;
     } catch (err) {
         console.log(err);

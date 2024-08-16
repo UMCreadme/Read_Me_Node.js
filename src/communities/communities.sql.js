@@ -40,8 +40,7 @@ export const getCommunities = `
     SELECT 
         c.*,
         COALESCE(p.currentCount, 0) AS currentCount,
-        b.title,
-        b.link
+        b.title, b.image_url as bookImg
     FROM 
         COMMUNITY c
     LEFT JOIN 
@@ -50,46 +49,44 @@ export const getCommunities = `
         BOOK b ON c.book_id = b.book_id  -- 커뮤니티의 book_id를 사용하여 책 정보 조회
     WHERE 
         c.is_deleted = 0
-    LIMIT ?, ?;`;
+    LIMIT ? OFFSET ?;`;
 
-// 나의 참여 모임 리스트 조회 쿼리 (최신 메시지 온 순으로 정렬)
-export const getMyCommunities =  `
-    SELECT cu.*, c.*, b.title, b.link
-    FROM COMMUNITY_USERS cu
-    LEFT JOIN MESSAGE m ON cu.community_id = m.community_id
-    LEFT JOIN COMMUNITY c ON cu.community_id = c.community_id  -- 커뮤니티 테이블 조인
-    LEFT JOIN BOOK b ON c.book_id = b.book_id
-    WHERE cu.user_id = ? AND cu.is_deleted = 0
-    GROUP BY cu.community_id
-    ORDER BY 
-        MAX(m.created_at) DESC,
-        COUNT(m.message_id) ASC  -- 메시지가 없는 경우 아래로 정렬
-    LIMIT ? OFFSET ?;
-`;
+// 나의 참여 모임 리스트 조회 쿼리 (최신 메시지 온 순으로 정렬) + 안읽음 개수 카운트
+export const getMyCommunities = `
+SELECT
+    c.community_id, c.capacity, c.tag, c.location,
+    COALESCE(currentCount.cnt, 0) AS currentCount,
+    COALESCE(unread.cnt, 0) AS unreadCnt,
+    b.title, b.image_url as bookImg,
+    recent_msg.latest_message_time
+FROM COMMUNITY c
+LEFT JOIN (
+    SELECT community_id, COUNT(*) AS cnt
+    FROM COMMUNITY_USERS
+    GROUP BY community_id
+) currentCount ON c.community_id = currentCount.community_id
+LEFT JOIN COMMUNITY_USERS cu ON c.community_id = cu.community_id
+LEFT JOIN BOOK b ON c.book_id = b.book_id
+LEFT JOIN (
+    SELECT m.community_id, COUNT(*) as cnt
+    FROM MESSAGE m
+    WHERE m.message_id > (
+        SELECT COALESCE(MAX(mrs.latest_message_id), 0)
+        FROM MESSAGE_READ_STATUS mrs 
+        WHERE mrs.user_id = ?
+    )
+    GROUP BY m.community_id
+) unread ON c.community_id = unread.community_id
+LEFT JOIN (
+    SELECT m.community_id, MAX(m.created_at) AS latest_message_time
+    FROM MESSAGE m
+    GROUP BY m.community_id
+) recent_msg ON c.community_id = recent_msg.community_id
+WHERE cu.user_id = ?
+ORDER BY recent_msg.latest_message_time DESC
+LIMIT ? OFFSET ?;`
+;
 
-// 안읽음 개수 카운트
-export const getUnreadCount = `
-WITH Params AS (
-    SELECT ? AS user_id, ? AS community_id
-),
-LastReadTime AS (  -- 마지막으로 메시지 읽은 시간
-    SELECT COALESCE(MAX(r.created_at), '1970-01-01') AS last_read_time
-    FROM MESSAGE_READ_STATUS r, Params p
-    WHERE r.user_id = p.user_id AND r.community_id = p.community_id
-), 
-JoinTime AS (  -- 모임 가입 시간
-    SELECT cu.created_at AS join_time
-    FROM COMMUNITY_USERS cu, Params p
-    WHERE cu.user_id = p.user_id AND cu.community_id = p.community_id
-)
-SELECT COUNT(*) AS unread
-FROM MESSAGE m, Params p
-WHERE m.community_id = p.community_id 
-AND m.created_at > (
-    SELECT GREATEST(lr.last_read_time, jt.join_time)
-    FROM LastReadTime lr, JoinTime jt
-);
-`;
 
 // 커뮤니티 ID로 책 id 조회
 export const getCommunityBookID = "SELECT book_id FROM COMMUNITY WHERE community_id = ?;";
@@ -99,7 +96,9 @@ export const getBookInfo = "SELECT title, image_url FROM BOOK WHERE book_id = ?;
 
 // 제목으로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TITLE_KEYWORD = `
-SELECT c.*, b.title, b.link, COALESCE(p.currentCount, 0) AS currentCount
+SELECT c.*, 
+    b.title, b.image_url as bookImg, 
+    COALESCE(p.currentCount, 0) AS currentCount
 FROM COMMUNITY c
 LEFT JOIN 
         (SELECT community_id, COUNT(*) AS currentCount FROM COMMUNITY_USERS cs GROUP BY community_id) p ON c.community_id = p.community_id
@@ -114,7 +113,9 @@ LIMIT ? OFFSET ?;
 
 // 태그로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TAG_KEYWORD = `
-SELECT c.*, b.title, b.link, COALESCE(p.currentCount, 0) AS currentCount
+SELECT c.*, 
+    b.title, b.image_url as bookImg, 
+    COALESCE(p.currentCount, 0) AS currentCount
 FROM COMMUNITY c
 LEFT JOIN 
         (SELECT community_id, COUNT(*) AS currentCount FROM COMMUNITY_USERS cs GROUP BY community_id) p ON c.community_id = p.community_id
