@@ -119,7 +119,7 @@ export const leaveCommunityDao = async (communityId, userId) => {
 export const checkUserInCommunity = async (communityId, userId) => {
     const conn = await pool.getConnection();
     try {
-        const [rows] = await conn.query(CHECK_USER_IN_COMMUNITY, [communityId, userId])
+        const [rows] = await conn.query(CHECK_USER_IN_COMMUNITY, [communityId, userId]);
         // 유저가 존재하지 않으면 null, 존재하면 is_deleted 상태 반환
         return rows.length > 0 ? rows[0].is_deleted : null;
     } finally {

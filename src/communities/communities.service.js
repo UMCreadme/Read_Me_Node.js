@@ -145,11 +145,7 @@ export const leaveCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 존재하는지 확인
     const userStatus = await checkUserInCommunity(communityId, userId);
 
-    if (userStatus === null) {
-        // 유저가 커뮤니티에 가입되어 있지 않은 경우
-        throw new BaseError(status.NOT_IN_COMMUNITY);
-    } else if (userStatus) {
-        // 유저가 이미 탈퇴한 경우
+    if (userStatus === null || userStatus) {
         throw new BaseError(status.NOT_IN_COMMUNITY);
     }
 
