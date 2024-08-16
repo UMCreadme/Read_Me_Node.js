@@ -1,7 +1,8 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
-import { createCommunityService, joinCommunityService, getCommunitiesService } from './communities.service.js';
+import { createCommunityService, joinCommunityService, searchCommunityService, getCommunitiesService, deleteCommunityService } from './communities.service.js';
+
 
 // 커뮤니티 생성
 export const createCommunityController = async (req, res, next) => {
@@ -26,6 +27,18 @@ export const createCommunityController = async (req, res, next) => {
     res.send(response(status.CREATED));
 };
 
+export const deleteCommunityController = async (req, res, next) => {
+    const user_id = req.user_id;
+    const community_id = req.params.communityId;
+
+    if (!user_id || !community_id) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    await deleteCommunityService(user_id, community_id);
+    res.send(response(status.SUCCESS));
+}
+
 // 커뮤니티 가입 컨트롤러
 export const joinCommunityController = async (req, res, next) => {
     const communityId = req.params.communityId;
@@ -41,17 +54,20 @@ export const joinCommunityController = async (req, res, next) => {
 };
 
 
+// 전체 커뮤니티 리스트 조회
 export const getCommunitiesController = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const size = parseInt(req.query.size) || 10;
 
-    const { communityList, pageInfo } = await getCommunitiesService(page, size);
+    const result = await getCommunitiesService(page, size);
 
-    res.status(status.SUCCESS.status).send({
-        isSuccess: true,
-        code: status.SUCCESS.code,
-        message: "전체 모임 리스트 불러오기 성공",
-        pageInfo: pageInfo,
-        result: communityList
-    });
+    res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
+};
+
+// 커뮤니티 검색
+export const searchCommunityController = async (req, res, next) => {
+    const { keyword, page = 1, size = 10 } = req.query;
+    const result = await searchCommunityService(keyword, page, size);
+
+    res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
 };

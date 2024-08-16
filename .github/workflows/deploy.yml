@@ -53,6 +53,7 @@ jobs:
           echo "S3_SECRET=${{secrets.S3_SECRET}}" >> .env
           echo "S3_BUCKET=${{secrets.S3_BUCKET}}" >> .env
           echo "SECRET_KEY=${{secrets.SECRET_KEY}}" >> .env
+          echo "TTB_KEY=${{secrets.TTB_KEY}}" >> .env
           cat .env
 
       - name: Run Build

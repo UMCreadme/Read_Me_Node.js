@@ -8,6 +8,8 @@ export const categoryShortsResponseDTO = (shorts) => {
         "bookId": shorts.book_id,
         "shortsImg": shorts.shortsImg,
         "phrase": shorts.phrase,
+        "phraseX": shorts.phraseX,
+        "phraseY": shorts.phraseY,
         "title": shorts.title,
         "content": shorts.content,
         "tags": shorts.tag ? shorts.tag.split("|") : [],
@@ -20,24 +22,25 @@ export const categoryShortsResponseDTO = (shorts) => {
 
 export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
     return {
-        "categories": categories.map(category => category.name),
-        "shorts": shorts.map(shorts => ({
+        "categories": categories?.map(category => category.name),
+        "shorts": shorts ? shorts.map(shorts => ({
             "shorts_id": shorts.shorts_id,
             "shortsImg": shorts.shortsImg,
             "phrase": shorts.phrase,
             "bookTitle": shorts.title,
             "author": shorts.author,
-            "translator": shorts.translator,
             "likeCnt":shorts.likeCnt,
             "category": shorts.category
-        })),
-        "feeds": feeds.map(feeds => ({
+        })) : [],
+        "feeds": feeds ? feeds.map(feeds => ({
             "user_id": feeds.user_id,
             "profileImg": feeds.profileImg,
             "nickname": feeds.nickname,
             "shorts_id": feeds.shorts_id,
             "shortsImg": feeds.shortsImg,
             "phrase": feeds.phrase,
+            "phraseX": shorts.phraseX,
+            "phraseY": shorts.phraseY,
             "title": feeds.title,
             "content": feeds.content,
             "tags": feeds.tag ? feeds.tag.split("|") : [],
@@ -45,5 +48,5 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
             "likeCnt": feeds.likeCnt,
             "commentCnt": feeds.commentCnt,
             "postingDate": feeds.created_at
-        }))
+        })) : []
     }}
