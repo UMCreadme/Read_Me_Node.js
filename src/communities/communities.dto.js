@@ -27,7 +27,6 @@ export const getCommunityDetailsDto = (data, isParticipating) => {
         },
         location: community.location,
         createdAt: community.created_at,
-        updatedAt: community.updated_at,
         content: community.content,
         tags: community.tag ? community.tag.split('|') : [],
         capacity: community.capacity,

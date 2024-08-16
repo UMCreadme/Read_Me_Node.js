@@ -15,7 +15,7 @@ import {
     GET_CHATROOM_MEMBERS,
     SET_MEETING_DETAILS,
     GET_COMMUNITY_UPDATED_AT,
-    CHECK_USER_PARTICIPATION_QUERY,
+    UPDATE_COMMUNITY_CAPACITY,
     COUNT_COMMUNITIES,
     GET_COMMUNITIES,
     GET_COMMUNITIES_BY_TAG_KEYWORD,
@@ -104,21 +104,24 @@ export const checkIfLeaderDao = async (communityId, userId) => {
     }
 };
 
-// 커뮤니티 탈퇴 처리 (소프트 딜리트)
+
 export const leaveCommunityDao = async (communityId, userId) => {
     const conn = await pool.getConnection();
     try {
         await conn.query(LEAVE_COMMUNITY, [communityId, userId]);
+        await conn.query(UPDATE_COMMUNITY_CAPACITY, [communityId, communityId]);
     } finally {
         if (conn) conn.release();
     }
 };
 
+
+
 // 유저가 커뮤니티에 이미 존재하는지 확인하고, is_deleted 상태를 반환하는 함수
 export const checkUserInCommunity = async (communityId, userId) => {
     const conn = await pool.getConnection();
     try {
-        const [rows] = await conn.query(CHECK_USER_IN_COMMUNITY, [communityId, userId]);
+        const [rows] = await conn.query(CHECK_USER_IN_COMMUNITY, [communityId, userId])
         // 유저가 존재하지 않으면 null, 존재하면 is_deleted 상태 반환
         return rows.length > 0 ? rows[0].is_deleted : null;
     } finally {
@@ -192,18 +195,21 @@ export const checkCommunityExistenceDao = async (community_id) => {
         const [rows] = await conn.query(CHECK_COMMUNITY_EXISTENCE, [community_id]);
         return rows[0].count > 0;
     } finally {
-        conn.release();
+        if (conn) conn.release();
     }
 };
 
 export const checkCommunityOwnerDao = async (community_id) => {
     const conn = await pool.getConnection();
-
-    const [result] = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
-    if (result.length === 0) {
-        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    try {
+        const [result] = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
+        if (result.length === 0) {
+            throw new BaseError(status.COMMUNITY_NOT_FOUND);
+        }
+        return result[0].user_id;
+    } finally {
+        if (conn) conn.release();
     }
-    return result[0].user_id;
 };
 
 
@@ -230,7 +236,6 @@ export const deleteCommunityDao = async (community_id) => {
 
 };
 
-
 // 커뮤니티 상세정보를 조회하는 DAO 함수
 export const getCommunityDetailsDao = async (communityId) => {
     const conn = await pool.getConnection();
@@ -239,21 +244,6 @@ export const getCommunityDetailsDao = async (communityId) => {
         return rows;
     } catch (err) {
         console.error(err);
-        throw err;
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
-// 커뮤니티에 유저가 참여 중인지 확인하는 DAO 메서드
-export const checkUserParticipationInCommunityDao = async (communityId, userId) => {
-    const conn = await pool.getConnection();
-    try {
-        const [result] = await conn.query(CHECK_USER_PARTICIPATION_QUERY,
-            [communityId, userId]
-        );
-        return result[0].count > 0;
-    } catch (err) {
         throw err;
     } finally {
         if (conn) conn.release();
@@ -279,7 +269,6 @@ export const getChatroomDetailsDao = async (communityId) => {
 export const updateMeetingDetailsDao = async (communityId, meetingDate, latitude, longitude, address, userId) => {
     const conn = await pool.getConnection();
     try {
-        console.log('Executing query for communityId:', communityId);
         const [result] = await conn.query(SET_MEETING_DETAILS, [
             meetingDate,
             `POINT(${latitude} ${longitude})`,

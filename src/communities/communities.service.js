@@ -16,7 +16,6 @@ import {
     getChatroomDetailsDao,
     updateMeetingDetailsDao,
     getCommunityUpdatedAtDao,
-    checkUserParticipationInCommunityDao,
     searchCommunitiesByTagKeyword,
     searchCommunitiesByTitleKeyword,
     checkIfLeaderDao
@@ -60,11 +59,18 @@ export const createCommunityService = async (userId, bookId, address, tag, capac
 export const joinCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 이미 존재하는지 확인하고 is_deleted 상태 반환
     const userStatus = await checkUserInCommunity(communityId, userId);
+    // 커뮤니티의 현재 인원수 및 최대 인원수 조회
+    const currentCount = await getCommunityCurrentCountDao(communityId);
 
+    // 현재 인원수가 최대 인원수를 초과하면 오류 발생
+    const capacity = await getCommunityCapacityDao(communityId);
+    if (currentCount >= capacity) {
+        throw new BaseError(status.COMMUNITY_FULL);
+    }
     if (userStatus === null) {
         // 디비에 유저 정보가 없으면 새로 가입 처리
         await joinCommunity(communityId, userId);
-    } else if (userStatus === 1) {
+    } else if (userStatus) {
         // 유저가 탈퇴한 경우, 재가입 처리
         await rejoinCommunity(communityId, userId);
     } else {
@@ -72,14 +78,6 @@ export const joinCommunityService = async (communityId, userId) => {
         throw new BaseError(status.ALREADY_IN_COMMUNITY);
     }
 
-    // 커뮤니티의 현재 인원수 및 최대 인원수 조회
-    const currentCount = await getCommunityCurrentCountDao(communityId);
-    const capacity = await getCommunityCapacityDao(communityId);
-
-    // 현재 인원수가 최대 인원수를 초과하면 오류 발생
-    if (currentCount >= capacity) {
-        throw new BaseError(status.COMMUNITY_FULL);
-    }
 };
 
 // 전체 모임 리스트 조회
@@ -110,7 +108,7 @@ export const searchCommunityService = async (keyword, page = 1, size = 10) => {
 
     if (isTagSearch) {
         // 태그 검색
-        const formattedKeyword = decodedKeyword.substring(1); 
+        const formattedKeyword = decodedKeyword.substring(1);
         communities = await searchCommunitiesByTagKeyword(formattedKeyword);
     } else {
         // 제목 검색
@@ -150,9 +148,9 @@ export const leaveCommunityService = async (communityId, userId) => {
     if (userStatus === null) {
         // 유저가 커뮤니티에 가입되어 있지 않은 경우
         throw new BaseError(status.NOT_IN_COMMUNITY);
-    } else if (userStatus === 1) {
+    } else if (userStatus) {
         // 유저가 이미 탈퇴한 경우
-        throw new BaseError(status.ALREADY_LEFT_COMMUNITY);
+        throw new BaseError(status.NOT_IN_COMMUNITY);
     }
 
     // 유저가 방장인지 확인
@@ -176,8 +174,8 @@ export const getCommunityDetailsService = async (communityId, userId) => {
         throw new BaseError(status.COMMUNITY_NOT_FOUND);
     }
 
-    if(userId !== null) {
-        isUserParticipating = await checkUserParticipationInCommunityDao(communityId, userId);
+    if (userId !== null) {
+        isUserParticipating = await checkUserInCommunity(communityId, userId);
     }
     return getCommunityDetailsDto(communityData, isUserParticipating);
 };
@@ -190,9 +188,6 @@ export const getChatroomDetailsService = async (communityId, currentUserId) => {
         // 유저가 커뮤니티에 가입되어 있지 않거나 이미 탈퇴한 경우
         throw new BaseError(status.UNAUTHORIZED);
     }
-
-    // 유저가 커뮤니티에 참여하고 있는지 확인
-    const isParticipating = currentUserId ? await checkUserParticipationInCommunityDao(communityId, currentUserId) : false;
 
     // 커뮤니티 데이터 가져오기
     const { communityData, membersData } = await getChatroomDetailsDao(communityId);
@@ -209,11 +204,6 @@ export const updateMeetingDetailsService = async (communityId, meetingDate, lati
     const exists = await checkCommunityExistenceDao(communityId);
     if (!exists) {
         throw new BaseError(status.COMMUNITY_NOT_FOUND);
-    }
-
-    const owner = await checkCommunityOwnerDao(communityId);
-    if (owner !== userId) {
-        throw new BaseError(status.UNAUTHORIZED);
     }
 
     const communityUpdatedAt = await getCommunityUpdatedAtDao(communityId);

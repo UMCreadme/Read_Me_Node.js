@@ -113,9 +113,6 @@ export const updateMeetingDetailsController = async (req, res, next) => {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    console.log('Received request to update meeting details:', { communityId, meetingDate, latitude, longitude, address, userId });
-
-    // 서비스 호출
     await updateMeetingDetailsService(
         communityId,
         meetingDate,
@@ -125,7 +122,6 @@ export const updateMeetingDetailsController = async (req, res, next) => {
         userId
     );
 
-    // 성공 시 응답
     res.send(response(status.SUCCESS));
 };
 

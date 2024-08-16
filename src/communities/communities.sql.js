@@ -6,7 +6,7 @@ export const GET_COMMUNITY_CAPACITY = `
 // 커뮤니티에 재가입하는 쿼리
 export const REJOIN_COMMUNITY = `
     UPDATE COMMUNITY_USERS 
-    SET is_deleted = 0, updated_at = NOW(), deleted_at = NULL 
+    SET is_deleted = 0, deleted_at = NULL 
     WHERE community_id = ? AND user_id = ?
 `;
 
@@ -18,7 +18,7 @@ export const JOIN_COMMUNITY = `
 
 // 커뮤니티 현재 참여자 수 조회 쿼리 (탈퇴하지 않은 유저만 카운트)
 export const GET_COMMUNITY_CURRENT_COUNT = `
-    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = 0
+    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = false
 `;
 
 // 방장 추가 쿼리
@@ -47,7 +47,7 @@ export const GET_COMMUNITIES = `
 // 커뮤니티 탈퇴(소프트 딜리트) 쿼리
 export const LEAVE_COMMUNITY = `
     UPDATE COMMUNITY_USERS 
-    SET is_deleted = 1, deleted_at = NOW(), updated_at = NOW() 
+    SET is_deleted = 1, deleted_at = NOW(), 
     WHERE community_id = ? AND user_id = ?
 `;
 
@@ -65,7 +65,6 @@ export const GET_COMMUNITY_DETAILS = `
         c.tag,
         c.capacity,
         c.created_at,
-        c.updated_at,
         c.content,
         b.title,
         b.author,
@@ -123,7 +122,6 @@ export const SET_MEETING_DETAILS = `
     WHERE 
         c.community_id = ? 
         AND cu.user_id = ? 
-        AND cu.role = 'admin' 
         AND c.is_deleted = 0;
 `;
 export const GET_COMMUNITY_UPDATED_AT = `
@@ -180,4 +178,16 @@ export const CHECK_COMMUNITY_EXISTENCE = `
     SELECT COUNT(*) as count 
     FROM COMMUNITY 
     WHERE community_id = ? AND is_deleted = 0
+`;
+
+export const UPDATE_COMMUNITY_CAPACITY = `
+    UPDATE COMMUNITY c
+    JOIN (
+        SELECT community_id, COUNT(*) AS user_count
+        FROM COMMUNITY_USERS
+        WHERE community_id = ? AND is_deleted = 0
+        GROUP BY community_id
+    ) cu ON c.community_id = cu.community_id
+    SET c.capacity = cu.user_count
+    WHERE c.community_id = ?;
 `;
