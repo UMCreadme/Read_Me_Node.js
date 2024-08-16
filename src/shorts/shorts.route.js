@@ -8,7 +8,7 @@ import { authJWT, authJWTNoUserRequired } from '../jwt/authJWT.js';
 export const shortsRouter = express.Router({mergeParams:true});
 
 shortsRouter.get('', asyncHandler(authJWTNoUserRequired), asyncHandler(searchShorts));
-shortsRouter.get('/:shortsId', asyncHandler(getShortsDetail));
+shortsRouter.get('/:shortsId', asyncHandler(authJWTNoUserRequired), asyncHandler(getShortsDetail));
 
 shortsRouter.post('/:shortsId/comments',asyncHandler(authJWT), asyncHandler(addComment));
 shortsRouter.post('/:shortsId/likes', asyncHandler(authJWT), asyncHandler(likeShorts));
