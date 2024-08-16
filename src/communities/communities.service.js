@@ -71,45 +71,32 @@ export const joinCommunityService = async (communityId, userId) => {
 
 // 전체 모임 리스트 조회
 export const getCommunitiesService = async (offset, limit) => {
-    
     const allCommunities = await getCommunities(offset, limit);
-    const allCommunitiesDTOList = [];
-    
-    for (const c of allCommunities) {
-        //현재 참여자수
-        let currentCount = await getCommunityCurrentCount(c.community_id);
-        
-        // 모임 책 정보
-        let communityBook = await getCommunityBookInfo(c.community_id);
-        let result = communitiesInfoDTO(c, communityBook, currentCount);
-        allCommunitiesDTOList.push(result);
-    }
 
-    return allCommunitiesDTOList
+    // 결과를 DTO 형식으로 변환
+    const allCommunitiesDTOList = allCommunities.map(c => {
+        
+        const tagsList = c.tag ? c.tag.split('|') : []; // 태그가 없을 경우, 빈 리스트로
+
+        return communitiesInfoDTO(c, { title: c.title, link: c.link }, c.currentCount, tagsList);
+    });
+
+    return allCommunitiesDTOList;
 };
 
 // 나의 참여 모임 리스트 조회
 export const getMyCommunitiesService = async (myId, offset, limit) => {
-    
     const myCommunities = await getMyCommunities(myId, offset, limit);
-    const myCommunitiesDTOList = [];
 
-    for (const c of myCommunities) {
-        //현재 참여자수
-        let currentCount = await getCommunityCurrentCount(c.community_id);
-        
-        // 모임 책 정보
-        let communityBook = await getCommunityBookInfo(c.community_id);
+    // 결과를 DTO 형식으로 변환
+    const myCommunitiesDTOList = await Promise.all(myCommunities.map(async (c) => {
+        const tagsList = c.tag ? c.tag.split('|') : []; // 태그가 없을 경우, 빈 리스트로
+        const unreadCnt = await getUnreadCnt(c.community_id, myId); // 비동기 함수 호출 시 await 사용
 
-        // 안읽음 개수
-        let unreadCnt = await getUnreadCnt(c.community_id, myId);
-        unreadCnt = Number(unreadCnt.unread);
-        
-        let result = mycommunitiesInfoDTO(c, communityBook, currentCount, unreadCnt);
-        myCommunitiesDTOList.push(result);
-    }
+        return mycommunitiesInfoDTO(c, { title: c.title, link: c.link }, c.currentCount, unreadCnt, tagsList);
+    }));
 
-    return myCommunitiesDTOList
+    return myCommunitiesDTOList;
 };
 
 // 커뮤니티 검색 서비스
@@ -121,22 +108,16 @@ export const searchCommunityService = async (keyword, offset, limit) => {
 
     // 태그 또는 제목 검색
     const searchCommunities = isTagSearch 
-        ? await searchCommunitiesByTagKeyword(decodedKeyword.substring(1)) // 태그 검색 ('#은 제거')
-        : await searchCommunitiesByTitleKeyword(decodedKeyword); // 제목 검색
+        ? await searchCommunitiesByTagKeyword(decodedKeyword.substring(1), offset, limit) // 태그 검색 ('#은 제거')
+        : await searchCommunitiesByTitleKeyword(decodedKeyword, offset, limit); // 제목 검색
 
-    const searchCommunitiesDTOList = [];
+    // 결과를 DTO 형식으로 변환
+    const searchCommunitiesDTOList = searchCommunities.map(c => {
+        
+        const tagsList = c.tag ? c.tag.split('|') : []; // 태그가 없을 경우, 빈 리스트로
 
-    for (const c of searchCommunities) {
-
-        //현재 참여자수
-        let currentCount = await getCommunityCurrentCount(c.community_id);
-                
-        // 모임 책 정보
-        let communityBook = await getCommunityBookInfo(c.community_id);
-
-        let result = communitiesInfoDTO(c, communityBook, currentCount);
-        searchCommunitiesDTOList.push(result);
-    }
+        return communitiesInfoDTO(c, { title: c.title, link: c.link }, c.currentCount, tagsList);
+    });
 
     return searchCommunitiesDTOList; // 결과 리스트 반환
 };

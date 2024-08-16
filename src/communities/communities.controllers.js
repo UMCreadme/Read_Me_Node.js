@@ -87,7 +87,9 @@ export const getMyCommunitiesController = async (req, res, next) => {
 
 // 커뮤니티 검색
 export const searchCommunityController = async (req, res, next) => {
-    const { keyword, page = 1, size = 10 } = req.query;
+    const keyword = req.query.keyword;
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 10;
 
     // 파라미터 검증
     if (!keyword || page <= 0 || size <= 0 || keyword.trim() === "") {

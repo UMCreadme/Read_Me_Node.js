@@ -9,6 +9,7 @@ export const createCommunity = async (community) => {
     const conn = await pool.getConnection();
     try {
         await conn.query('BEGIN');
+
         const communityId = await insertObject(conn, "COMMUNITY", community);
 
         // 방장을 커뮤니티에 추가
@@ -97,18 +98,17 @@ export const joinCommunity = async (communityId, userId) => {
     }
 };
 
-// 모임 리스트 조회
+// 전체 모임 리스트 조회
 export const getCommunities = async (offset, limit) => {
     const conn = await pool.getConnection();
-    try{
-        const [communities] = await conn.query(sql.GET_COMMUNITIES, [limit, offset]);
-        
+    try {
+        const [communities] = await conn.query(sql.getCommunities, [offset, limit]);
         return communities;
-    }catch (err) {
-        console.log(err);
+    } catch (err) {
+        console.error(err);
         throw err;
     } finally {
-        if(conn) conn.release();
+        if (conn) conn.release();
     }
 };
 
@@ -152,7 +152,7 @@ export const getUnreadCnt = async (communityId, myId) => {
     const conn = await pool.getConnection();
     try {
         const [result] =  await conn.query(sql.getUnreadCount, [myId, communityId])
-        return result[0];
+        return result[0].unread;
     } catch (err) {
         console.log(err);
         throw err;
@@ -162,10 +162,10 @@ export const getUnreadCnt = async (communityId, myId) => {
 }
 
 // 제목으로 커뮤니티 검색
-export const searchCommunitiesByTitleKeyword = async (keyword) => {
+export const searchCommunitiesByTitleKeyword = async (keyword, offset, limit) => {
     const conn = await pool.getConnection();
     try {
-        const [results] = await conn.query(sql.GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword]);
+        const [results] = await conn.query(sql.GET_COMMUNITIES_BY_TITLE_KEYWORD, [keyword, limit, offset ]);
         return results;
     } catch (err) {
         console.log(err);
@@ -176,10 +176,10 @@ export const searchCommunitiesByTitleKeyword = async (keyword) => {
 };
 
 // 태그로 커뮤니티 검색
-export const searchCommunitiesByTagKeyword = async (keyword) => {
+export const searchCommunitiesByTagKeyword = async (keyword, offset, limit) => {
     const conn = await pool.getConnection()
     try {
-        const [shortsTag] = await conn.query(sql.GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`]);
+        const [shortsTag] = await conn.query(sql.GET_COMMUNITIES_BY_TAG_KEYWORD, [`%${keyword}%`, limit, offset ]);
         return shortsTag;
     } catch (err) {
         console.log(err);

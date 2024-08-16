@@ -35,20 +35,30 @@ export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, conten
 // 모임 총 개수 조회 쿼리
 export const COUNT_COMMUNITIES = "SELECT COUNT(*) as count FROM COMMUNITY;";
 
-//모임 리스트 조회 쿼리 (최신순 정렬)
-export const GET_COMMUNITIES = `
-    SELECT * FROM COMMUNITY 
-    WHERE is_deleted = 0
-    ORDER BY created_at DESC 
-    LIMIT ? OFFSET ?;
-`;
+// 모임 리스트 조회
+export const getCommunities = `
+    SELECT 
+        c.*,
+        COALESCE(p.currentCount, 0) AS currentCount,
+        b.title,
+        b.link
+    FROM 
+        COMMUNITY c
+    LEFT JOIN 
+        (SELECT community_id, COUNT(*) AS currentCount FROM COMMUNITY_USERS cs GROUP BY community_id) p ON c.community_id = p.community_id
+    LEFT JOIN 
+        BOOK b ON c.book_id = b.book_id  -- 커뮤니티의 book_id를 사용하여 책 정보 조회
+    WHERE 
+        c.is_deleted = 0
+    LIMIT ?, ?;`;
 
 // 나의 참여 모임 리스트 조회 쿼리 (최신 메시지 온 순으로 정렬)
 export const getMyCommunities =  `
-    SELECT cu.*, c.*
+    SELECT cu.*, c.*, b.title, b.link
     FROM COMMUNITY_USERS cu
     LEFT JOIN MESSAGE m ON cu.community_id = m.community_id
     LEFT JOIN COMMUNITY c ON cu.community_id = c.community_id  -- 커뮤니티 테이블 조인
+    LEFT JOIN BOOK b ON c.book_id = b.book_id
     WHERE cu.user_id = ? AND cu.is_deleted = 0
     GROUP BY cu.community_id
     ORDER BY 
@@ -56,7 +66,6 @@ export const getMyCommunities =  `
         COUNT(m.message_id) ASC  -- 메시지가 없는 경우 아래로 정렬
     LIMIT ? OFFSET ?;
 `;
-
 
 // 안읽음 개수 카운트
 export const getUnreadCount = `
@@ -90,18 +99,29 @@ export const getBookInfo = "SELECT title, image_url FROM BOOK WHERE book_id = ?;
 
 // 제목으로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TITLE_KEYWORD = `
-SELECT c.*
+SELECT c.*, b.title, b.link, COALESCE(p.currentCount, 0) AS currentCount
 FROM COMMUNITY c
-JOIN BOOK b ON c.book_id = b.book_id
+LEFT JOIN 
+        (SELECT community_id, COUNT(*) AS currentCount FROM COMMUNITY_USERS cs GROUP BY community_id) p ON c.community_id = p.community_id
+    LEFT JOIN 
+        BOOK b ON c.book_id = b.book_id  -- 커뮤니티의 book_id를 사용하여 책 정보 조회
+    
 WHERE REPLACE(b.title, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%') AND is_deleted = 0
-ORDER BY c.created_at DESC;
+ORDER BY c.created_at DESC
+LIMIT ? OFFSET ?;
 `;
 
 
 // 태그로 커뮤니티 검색 (부분 검색 가능)
 export const GET_COMMUNITIES_BY_TAG_KEYWORD = `
-SELECT c.*
+SELECT c.*, b.title, b.link, COALESCE(p.currentCount, 0) AS currentCount
 FROM COMMUNITY c
+LEFT JOIN 
+        (SELECT community_id, COUNT(*) AS currentCount FROM COMMUNITY_USERS cs GROUP BY community_id) p ON c.community_id = p.community_id
+    LEFT JOIN 
+        BOOK b ON c.book_id = b.book_id  -- 커뮤니티의 book_id를 사용하여 책 정보 조회
+    
 WHERE REPLACE(c.tag, ' ', '') LIKE CONCAT('%', REPLACE(?, ' ', ''), '%') AND is_deleted = 0
-ORDER BY c.created_at DESC;
+ORDER BY c.created_at DESC
+LIMIT ? OFFSET ?;
 `;
