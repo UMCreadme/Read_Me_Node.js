@@ -27,6 +27,7 @@ export const getUserRecentBookList = `
 SELECT 
     s.book_id,
     b.image_url,
+    b.ISBN,
     b.title,
     b.author
 FROM 
