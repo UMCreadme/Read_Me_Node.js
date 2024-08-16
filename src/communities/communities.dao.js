@@ -15,7 +15,6 @@ import {
     GET_CHATROOM_MEMBERS,
     SET_MEETING_DETAILS,
     GET_COMMUNITY_UPDATED_AT,
-    UPDATE_COMMUNITY_CAPACITY,
     COUNT_COMMUNITIES,
     GET_COMMUNITIES,
     GET_COMMUNITIES_BY_TAG_KEYWORD,
@@ -109,7 +108,6 @@ export const leaveCommunityDao = async (communityId, userId) => {
     const conn = await pool.getConnection();
     try {
         await conn.query(LEAVE_COMMUNITY, [communityId, userId]);
-        await conn.query(UPDATE_COMMUNITY_CAPACITY, [communityId, communityId]);
     } finally {
         if (conn) conn.release();
     }

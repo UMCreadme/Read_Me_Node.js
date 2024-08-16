@@ -47,7 +47,7 @@ export const GET_COMMUNITIES = `
 // 커뮤니티 탈퇴(소프트 딜리트) 쿼리
 export const LEAVE_COMMUNITY = `
     UPDATE COMMUNITY_USERS 
-    SET is_deleted = 1, deleted_at = NOW(), 
+    SET is_deleted = 1, deleted_at = NOW() 
     WHERE community_id = ? AND user_id = ?
 `;
 
@@ -180,14 +180,3 @@ export const CHECK_COMMUNITY_EXISTENCE = `
     WHERE community_id = ? AND is_deleted = 0
 `;
 
-export const UPDATE_COMMUNITY_CAPACITY = `
-    UPDATE COMMUNITY c
-    JOIN (
-        SELECT community_id, COUNT(*) AS user_count
-        FROM COMMUNITY_USERS
-        WHERE community_id = ? AND is_deleted = 0
-        GROUP BY community_id
-    ) cu ON c.community_id = cu.community_id
-    SET c.capacity = cu.user_count
-    WHERE c.community_id = ?;
-`;

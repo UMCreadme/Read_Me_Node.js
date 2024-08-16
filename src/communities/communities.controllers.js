@@ -37,7 +37,7 @@ export const createCommunityController = async (req, res, next) => {
 
 export const deleteCommunityController = async (req, res, next) => {
     const user_id = req.user_id;
-    const community_id = req.params.communityId;
+    const community_id = parseInt(req.params.communityId);
 
     if (!user_id || !community_id) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
@@ -49,7 +49,7 @@ export const deleteCommunityController = async (req, res, next) => {
 
 // 커뮤니티 가입 컨트롤러
 export const joinCommunityController = async (req, res, next) => {
-    const communityId = req.params.communityId;
+    const communityId = parseInt(req.params.communityId);
     const userId = req.user_id;
 
     if (!communityId) {
@@ -71,11 +71,10 @@ export const getCommunitiesController = async (req, res, next) => {
     res.send(response(status.SUCCESS, result.communityList, result.pageInfo))
 };
 
-
 // 커뮤니티 탈퇴
 export const leaveCommunityController = async (req, res, next) => {
     const userId = req.user_id;
-    const communityId = req.params.communityId;
+    const communityId = parseInt(req.params.communityId);
 
     if (!userId || !communityId) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
@@ -87,7 +86,7 @@ export const leaveCommunityController = async (req, res, next) => {
 
 // 커뮤니티 상세정보 조회
 export const getCommunityDetailsController = async (req, res, next) => {
-    const { communityId } = req.params;
+    const communityId = parseInt(req.params.communityId);
     const userId = req.user_id;
 
     const communityDetails = await getCommunityDetailsService(communityId, userId);
@@ -97,7 +96,7 @@ export const getCommunityDetailsController = async (req, res, next) => {
 // 채팅방 상세정보 조회
 export const getChatroomDetailsController = async (req, res, next) => {
     const userId = req.user_id;
-    const { communityId } = req.params;
+    const communityId = parseInt(req.params.communityId);
 
 
     const detailedCommunityDetails = await getChatroomDetailsService(communityId, userId);
@@ -106,7 +105,7 @@ export const getChatroomDetailsController = async (req, res, next) => {
 
 export const updateMeetingDetailsController = async (req, res, next) => {
     const { meetingDate, latitude, longitude, address } = req.body;
-    const communityId = req.params.communityId;
+    const communityId = parseInt(req.params.communityId);
     const userId = req.user_id;
 
     if (!meetingDate || !latitude || !longitude || !address) {
