@@ -9,7 +9,7 @@ export const communitiesInfoDTO = (community, communityBook, currentCount) => {
         "bookTitle" : communityBook.title,
         "Participants" : currentCount,
         "capacity" : community.capacity,
-        "tags" : community.tag ? community.tag.split('|') : [],
+        "tag": community.tags,
         "location" : community.location
     }
 };
@@ -22,14 +22,14 @@ export const mycommunitiesInfoDTO = (community, communityBook, currentCount, unr
         "bookTitle" : communityBook.title,
         "Participants" : currentCount,
         "capacity" : community.capacity,
-        "tags" : community.tag ? community.tag.split('|') : [],
+        "tag": community.tags,
         "location" : community.location,
         "unReadCount" : unreadCnt
     }
 }; 
 
-// 쇼츠 생성 때 입력되는 필수값들
-export const creatCommunityDto= (data, userId) => {
+// 커뮤니티 생성 때 입력되는 필수값들
+export const creatCommunityDto = (data, userId) => {
     if (!data || !data.tags || !data.capacity || !data.location || !data.content ) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }

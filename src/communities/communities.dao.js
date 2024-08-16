@@ -2,26 +2,14 @@ import { pool } from '../../config/db.config.js';
 import * as sql from "./communities.sql.js";
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
+import { insertObject } from '../common/common.dao.js';
 
 // 커뮤니티 생성
-export const createCommunity = async (community, bookId) => {
+export const createCommunity = async (community) => {
     const conn = await pool.getConnection();
-
     try {
-        await conn.query('BEGIN'); // 트랜잭션 시작
-
-        // 사용자가 특정 책으로 생성한 모임 수 조회
-        const [countResult] = await conn.query(sql.COUNT_COMMUNITIES_BY_USER_AND_BOOK, [community.user_id, bookId]);
-        const existingCount = countResult[0].count;
-
-        // 한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없도록 제한
-        if (existingCount >= 5) {
-            throw new BaseError(status.COMMUNITY_LIMIT_EXCEEDED);
-        }
-
-        // 커뮤니티 생성
-        const [communityResult] = await conn.query(sql.CREATE_COMMUNITY, [community.user_id, bookId, community.content, community.location, community.tag, community.capacity] );
-        const communityId = communityResult.insertId;
+        await conn.query('BEGIN');
+        const communityId = await insertObject(conn, "COMMUNITY", community);
 
         // 방장을 커뮤니티에 추가
         await conn.query(sql.ADD_ADMIN_TO_COMMUNITY, [communityId, community.user_id]);
@@ -30,17 +18,27 @@ export const createCommunity = async (community, bookId) => {
         return communityId;
     } catch (err) {
         await conn.query('ROLLBACK'); // 트랜잭션 롤백
-        console.error(err); // 에러 로그 출력
-
-        if (err instanceof BaseError) {
-            throw err;
-        } else {
-            throw new BaseError(status.INTERNAL_SERVER_ERROR);
-        }
+        throw err;
     } finally {
         if(conn) conn.release();
     }
-    
+};
+
+// 사용자가 모임 생성 가능한지 확인 (동일 책으로 5권 생성)
+export const isPossibleCreateCommunity = async (userId, bookId) => {
+    const conn = await pool.getConnection();
+    try {
+        // 사용자가 특정 책으로 생성한 모임 수 조회
+        const [countResult] = await conn.query(sql.COUNT_COMMUNITIES_BY_USER_AND_BOOK, [userId, bookId]);
+        const existingCount = countResult[0].count;
+
+        // 한 사용자가 같은 책으로 5개 이상의 모임을 생성할 수 없도록 제한
+        return existingCount < 5;
+    } catch (err) {
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
 };
 
 

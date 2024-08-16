@@ -2,18 +2,24 @@ import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
 import { pageInfo } from "../../config/pageInfo.js";
-import { bookInfoDto } from "../book/book.dto.js";
+import { createBook } from "../book/book.service.js";
 import { creatCommunityDto } from './communities.dto.js';
 import { createCommunityService, joinCommunityService, searchCommunityService, getCommunitiesService, getMyCommunitiesService, deleteCommunityService } from './communities.service.js';
 
 // 커뮤니티 생성 - 책정보 + 내용, 태그, 참여인원, 만남장소
 export const createCommunityController = async (req, res, next) => {
+    const ISBN = req.body.ISBN;
     const userId = req.user_id;
-    const book = bookInfoDto(req.body);
 
+    if(!ISBN) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    const bookId = await createBook(req.body.ISBN);
     const community = creatCommunityDto(req.body, userId);
+    community.book_id = bookId;
 
-    const communityId = await createCommunityService(book, community, req.body.cid);
+    const communityId = await createCommunityService(community);
 
     if(!communityId) {
         throw new BaseError(status.INTERNAL_SERVER_ERROR);

@@ -16,54 +16,40 @@ import {
     deleteCommunityDao,
     checkCommunityExistenceDao,
     checkCommunityOwnerDao,
+    isPossibleCreateCommunity,
 } from './communities.dao.js';
-import { communitiesInfoDTO, mycommunitiesInfoDTO, getCommunitiesDto } from './communities.dto.js';
-import { getBookIdByISBN, getCategoryIdByAladinCid } from "../book/book.dao.js";
-import { createBook } from "../book/book.service.js";
-import { pageInfo } from '../../config/pageInfo.js';
+import { communitiesInfoDTO, mycommunitiesInfoDTO } from './communities.dto.js';
 
 // 커뮤니티 생성 서비스
-export const createCommunityService = async (book, community, cid) => {
-    // ISBN 값으로 book_id 조회
-    let bookId = await getBookIdByISBN(book.ISBN);
-    
-    // book_id 값이 존재하지 않을 경우 책 정보 생성
-    if(!bookId) {
-        const categoryId = await getCategoryIdByAladinCid(cid);
-        if(!categoryId) {
-            throw new BaseError(status.CATEGORY_NOT_FOUND);
-        }
-
-        book.category_id = categoryId;
-        bookId = await createBook(book);
-    }
-    
+export const createCommunityService = async (community) => {
     // Capacity 값이 4 이상, 10 이하인지 체크
     if (community.capacity > 10 || community.capacity < 4) {
         throw new BaseError(status.INVALID_CAPACITY);
     }
 
     // 태그 유효성 검사
-    if (community.tag) {
-
-        // 태그 문자열을 '|'로 분리하여 배열로 변환
-        const tagsArray = community.tag.split('|');
-
+    const communityTagList = community.tag.split('|');
+    if (communityTagList) {
         // 태그 개수가 10개를 초과하면 오류 발생
-        if (tagsArray.length > 10) {
+        if (communityTagList.length > 10) {
             throw new BaseError(status.SHORTS_TAG_COUNT_TOO_LONG);
         }
 
         // 각 태그의 길이가 10자를 초과하면 오류 발생
-        for (const singleTag of tagsArray) {
+        for (const singleTag of communityTagList) {
             if (singleTag.length > 10) {
                 throw new BaseError(status.SHORTS_TAG_TOO_LONG);
             }
         }
     }
 
+    // 방장이 모임 생성 가능한지 확인
+    if(!isPossibleCreateCommunity(community.user_id, community.book_id)) {
+        throw new BaseError(status.COMMUNITY_LIMIT_EXCEEDED);
+    }
+
     // 모임 생성
-    return await createCommunity(community, bookId);
+    return await createCommunity(community);
 };
 
 // 커뮤니티 가입 서비스
