@@ -33,15 +33,22 @@ export const getSearchShortsListDto = (data) => {
 
     for(const short of data) {
         shortsList.push({
+            "userId": short.user_id,
+            "profileImg": short.profile_img,
+            "nickname": short.nickname,
             "shortsId": short.shorts_id,
             "shortsImg": short.shorts_img,
             "phrase": short.phrase,
             "phraseX": short.phrase_x,
             "phraseY": short.phrase_y,
+            "title": short.title,
+            "content": short.content,
+            "tags": short.tag ? short.tag.split("|") : [],
             "category": short.category,
-            "bookTitle": short.book_title,
-            "author": short.author,
-            "tags": short.tag ? short.tag.split("|") : []
+            "isLike": short.isLike? Boolean(short.isLike) : false,
+            "likeCnt": short.like_count,
+            "commentCnt": short.comment_count,
+            "postingDate": short.created_at
         });
     }
 

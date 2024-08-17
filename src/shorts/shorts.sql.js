@@ -19,8 +19,8 @@ export const getShortsById = "SELECT * FROM SHORTS WHERE shorts_id = ?";
 // 책 제목에서 키워드로 쇼츠 검색
 export const getShortsByTitleKeyword = 
 `SELECT 
-    u.user_id, u.account, u.image_url AS profile_img,
-    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
+    u.user_id, u.account, u.nickname, u.image_url AS profile_img,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag, s.created_at,
     b.book_id, b.title AS book_title, b.author, c.name AS category, c.category_id,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count
@@ -44,8 +44,8 @@ ORDER BY like_count DESC;`;
 // 저자에서 키워드로 쇼츠 검색
 export const getShortsByAuthorKeyword =
 `SELECT 
-    u.user_id, u.account, u.image_url AS profile_img,
-    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
+    u.user_id, u.account, u.nickname, u.image_url AS profile_img,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag, s.created_at,
     b.book_id, b.title AS book_title, b.author, c.name AS category, c.category_id,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count
@@ -69,8 +69,8 @@ ORDER BY like_count DESC;`;
 // 태그에서 키워드로 쇼츠 검색
 export const getShortsByTagKeyword =
 `SELECT 
-    u.user_id, u.account, u.image_url AS profile_img,
-    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
+    u.user_id, u.account, u.nickname, u.image_url AS profile_img,
+    s.shorts_id, s.image_url AS shorts_img, s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag, s.created_at,
     b.book_id, b.title AS book_title, b.author, c.name AS category, c.category_id,
     COALESCE(likes.like_count, 0) AS like_count, 
     COALESCE(comments.comment_count, 0) AS comment_count

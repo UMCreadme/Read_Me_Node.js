@@ -30,10 +30,14 @@ export const getSearchShorts = async (userId, keyword, page, size) => {
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
-    // 검색어 저장 - 회원인 경우
+    // 검색어 저장 & 쇼츠 좋아요 여부 확인
     if(!userId) {
         return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
     }
+
+    result.map(async (short) => {
+        short.isLike = await shortsDao.checkLikeDao(short.shorts_id, userId);
+    });
 
     const recentSearchId = await getResearchId(userId, keyword);
     if(!recentSearchId) {
