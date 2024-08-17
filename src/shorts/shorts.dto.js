@@ -44,7 +44,6 @@ export const getSearchShortsListDto = (data) => {
             "title": short.title,
             "content": short.content,
             "tags": short.tag ? short.tag.split("|") : [],
-            "category": short.category,
             "isLike": short.isLike? Boolean(short.isLike) : false,
             "likeCnt": short.like_count,
             "commentCnt": short.comment_count,
