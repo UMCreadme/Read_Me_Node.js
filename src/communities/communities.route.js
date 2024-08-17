@@ -1,7 +1,12 @@
 import express from 'express';
 import asyncHandler from 'express-async-handler';
 
-import { createCommunityController, joinCommunityController, getCommunitiesController, getMyCommunitiesController, searchCommunityController, deleteCommunityController } from './communities.controllers.js';
+import { createCommunityController, 
+    joinCommunityController, 
+    getCommunitiesController, 
+    getMyCommunitiesController, 
+    searchCommunityController, 
+    deleteCommunityController } from './communities.controllers.js';
 import { authJWT } from '../jwt/authJWT.js';
 
 export const communitiesRouter = express.Router();

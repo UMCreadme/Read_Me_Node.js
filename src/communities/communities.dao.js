@@ -126,40 +126,6 @@ export const getMyCommunities = async (myId, offset, limit) => {
     }
 };
 
-// 커뮤니티 책 제목, 표지 불러오기
-export const getCommunityBookInfo = async (communityId) => {
-    const conn = await pool.getConnection();
-    try {
-        // 모임에서 선택된 책 id 불러오기
-        const [bookIdResult] = await conn.query(sql.getCommunityBookID, [communityId]);
-        const bookId = bookIdResult[0].book_id;
-
-        // 해당 책의 표지와 제목 불러오기
-        const [result] = await conn.query(sql.getBookInfo, [bookId]);
-
-        return result[0]
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
-// 안읽은 메시지 개수 
-export const getUnreadCnt = async (communityId, myId) => {
-    const conn = await pool.getConnection();
-    try {
-        const [result] =  await conn.query(sql.getUnreadCount, [myId, communityId])
-        return result[0].unread;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-}
-
 // 제목으로 커뮤니티 검색
 export const searchCommunitiesByTitleKeyword = async (keyword, offset, limit) => {
     const conn = await pool.getConnection();

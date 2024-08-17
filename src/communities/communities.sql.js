@@ -32,9 +32,6 @@ export const COUNT_COMMUNITIES_BY_USER_AND_BOOK = `
 // 그룹 생성 쿼리
 export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, content, location, tag, capacity) VALUES (?, ?, ?, ?, ?, ?);";
 
-// 모임 총 개수 조회 쿼리
-export const COUNT_COMMUNITIES = "SELECT COUNT(*) as count FROM COMMUNITY;";
-
 // 모임 리스트 조회
 export const getCommunities = `
     SELECT 
@@ -48,7 +45,7 @@ export const getCommunities = `
     LEFT JOIN 
         BOOK b ON c.book_id = b.book_id  -- 커뮤니티의 book_id를 사용하여 책 정보 조회
     WHERE 
-        c.is_deleted = 0
+        c.is_deleted = false -- 삭제되지 않은 모임만 조회
     LIMIT ? OFFSET ?;`;
 
 // 나의 참여 모임 리스트 조회 쿼리 (최신 메시지 온 순으로 정렬) + 안읽음 개수 카운트
@@ -63,9 +60,10 @@ FROM COMMUNITY c
 LEFT JOIN (
     SELECT community_id, COUNT(*) AS cnt
     FROM COMMUNITY_USERS
+    WHERE COMMUNITY_USERS.is_deleted = false -- 탈퇴자는 빼고 현 참여인원 조사
     GROUP BY community_id
 ) currentCount ON c.community_id = currentCount.community_id
-LEFT JOIN COMMUNITY_USERS cu ON c.community_id = cu.community_id
+LEFT JOIN COMMUNITY_USERS cu ON c.community_id = cu.community_id AND cu.is_deleted = false -- 커뮤니티유저 테이블의 is_deleted 조건 추가
 LEFT JOIN BOOK b ON c.book_id = b.book_id
 LEFT JOIN (
     SELECT m.community_id, COUNT(*) as cnt
@@ -82,7 +80,8 @@ LEFT JOIN (
     FROM MESSAGE m
     GROUP BY m.community_id
 ) recent_msg ON c.community_id = recent_msg.community_id
-WHERE cu.user_id = ?
+WHERE c.is_deleted = false   -- 커뮤니티 테이블의 is_deleted 조건 추가
+AND cu.user_id = ?
 ORDER BY recent_msg.latest_message_time DESC
 LIMIT ? OFFSET ?;`
 ;

@@ -6,8 +6,6 @@ import {
     getMyCommunities,
     createCommunity,
     getCommunityCurrentCount,
-    getUnreadCnt,
-    getCommunityBookInfo,
     getCommunityCapacity,
     isUserAlreadyInCommunity,
     searchCommunitiesByTagKeyword,
