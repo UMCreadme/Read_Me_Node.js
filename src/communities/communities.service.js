@@ -32,6 +32,14 @@ export const createCommunityService = async (community) => {
         throw new BaseError(status.COMMUNITY_LIMIT_EXCEEDED);
     }
 
+    const validLocations = ['서울', '인천', '대전', '대구', '광주', '울산', '부산', 
+        '제주', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '세종'];
+    
+    // location 타입 유효성 검증
+    if (!validLocations.includes(community.location)) {
+        throw new BaseError(status.LOCATION_ERROR);
+    }
+
     // 모임 생성
     return await dao.createCommunity(community);
 };
@@ -137,8 +145,7 @@ export const leaveCommunityService = async (communityId, userId) => {
 export const getCommunityDetailsService = async (communityId, userId) => {
     const communityData = await dao.getCommunityDetailsDao(communityId);
     let isUserParticipating = false;
-
-
+    
     if (!communityData || communityData.length === 0) {
         throw new BaseError(status.COMMUNITY_NOT_FOUND);
     }

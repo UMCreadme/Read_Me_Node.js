@@ -49,9 +49,6 @@ export const COUNT_COMMUNITIES_BY_USER_AND_BOOK = `
     WHERE user_id = ? AND book_id = ? AND is_deleted = FALSE;
 `;
 
-// 그룹 생성 쿼리
-export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, content, location, tag, capacity) VALUES (?, ?, ?, ?, ?, ?);";
-
 // 모임 리스트 조회
 export const getCommunities = `
     SELECT 
@@ -189,12 +186,6 @@ export const SET_MEETING_DETAILS = `
 
 export const GET_COMMUNITY_UPDATED_AT = `
 SELECT updated_at FROM COMMUNITY WHERE community_id = ?;
-`;
-
-export const CHECK_USER_PARTICIPATION_QUERY = `
-SELECT COUNT(*) AS count
-FROM COMMUNITY_USERS
-WHERE community_id = ? AND user_id = ? AND is_deleted = 0;
 `;
 
 // 제목으로 커뮤니티 검색 (부분 검색 가능)
