@@ -6,6 +6,7 @@ export const userInfoResponseDTO = async (userData, isRecentPost, followerNum, f
         "nickname" : userData.nickname,
         "account" : userData.account,
         "comment" : userData.comment,
+        "email" : userData.email,
         "followerNum" : followerNum,
         "followingNum" : followingNum,
         "profileImg" : userData.image_url,
