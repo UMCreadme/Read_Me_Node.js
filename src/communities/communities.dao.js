@@ -124,6 +124,32 @@ export const isUserAlreadyInCommunity = async (communityId, userId) => {
     }
 };
 
+// 유저가 커뮤니티에 이미 존재하는지 확인하고, is_deleted 상태를 반환하는 함수
+export const checkUserInCommunity = async (communityId, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [rows] = await conn.query(sql.CHECK_USER_IN_COMMUNITY, [communityId, userId]);
+        // 유저가 존재하지 않으면 null, 존재하면 is_deleted 상태 반환
+        return rows.length > 0 ? rows[0].is_deleted : null;
+    } finally {
+        if (conn) conn.release(); // 연결 해제
+    }
+};
+
+// 커뮤니티의 최대 인원수를 조회하는 함수
+export const getCommunityCapacityDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.GET_COMMUNITY_CAPACITY, [communityId]);
+        return result[0].capacity;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
 // 커뮤니티의 최대 인원수를 조회하는 함수
 export const getCommunityCapacity = async (communityId) => {
     const conn = await pool.getConnection();
