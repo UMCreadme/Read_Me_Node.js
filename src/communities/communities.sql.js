@@ -26,10 +26,19 @@ export const IS_USER_ALREADY_IN_COMMUNITY = `
     SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?
 `;
 
-export const CHECK_IF_LEADER = "SELECT role FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?";
+// 방장인지 확인
+export const CHECK_IF_LEADER = `
+    SELECT role 
+    FROM COMMUNITY_USERS 
+    WHERE community_id = ? AND user_id = ? AND is_deleted = 0
+`;
 
-export const CHECK_COMMUNITY_EXISTENCE = "SELECT community_id FROM COMMUNITY WHERE community_id = ?";
-
+// 커뮤니티 존재 여부 확인
+export const CHECK_COMMUNITY_EXISTENCE = `
+    SELECT COUNT(*) as count 
+    FROM COMMUNITY 
+    WHERE community_id = ? AND is_deleted = 0
+`;
 // 방장 추가 쿼리
 export const ADD_ADMIN_TO_COMMUNITY = "INSERT INTO COMMUNITY_USERS (community_id, user_id, role) VALUES (?, ?, 'admin');";
 
@@ -177,6 +186,7 @@ export const SET_MEETING_DETAILS = `
         AND cu.user_id = ? 
         AND c.is_deleted = 0;
 `;
+
 export const GET_COMMUNITY_UPDATED_AT = `
 SELECT updated_at FROM COMMUNITY WHERE community_id = ?;
 `;

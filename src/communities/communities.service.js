@@ -99,6 +99,7 @@ export const searchCommunityService = async (keyword, offset, limit) => {
     return searchCommunitiesDTOList; // 결과 리스트 반환
 };
 
+// 커뮤니티 삭제
 export const deleteCommunityService = async (user_id, community_id) => {
     const exists = await dao.checkCommunityExistenceDao(community_id);
     if (!exists) {
@@ -112,10 +113,10 @@ export const deleteCommunityService = async (user_id, community_id) => {
 
     await dao.deleteCommunityDao(community_id);
 };
-  
+
 export const leaveCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 존재하는지 확인
-    const userStatus = await checkUserInCommunity(communityId, userId);
+    const userStatus = await dao.checkUserInCommunity(communityId, userId);
 
     if (userStatus === null || userStatus) {
         throw new BaseError(status.NOT_IN_COMMUNITY);
