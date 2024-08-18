@@ -42,21 +42,6 @@ export const isPossibleCreateCommunity = async (userId, bookId) => {
     }
 };
 
-
-// 커뮤니티의 현재 참여자 수를 조회하는 함수
-export const getCommunityCurrentCount = async (communityId) => {
-    const conn = await pool.getConnection();
-    try {
-        const [result] = await conn.query(sql.GET_COMMUNITY_CURRENT_COUNT, [communityId]);
-        return result[0].count;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
 // 커뮤니티에 재가입하는 함수 (소프트 딜리트 취소)
 export const rejoinCommunity = async (communityId, userId) => {
     const conn = await pool.getConnection();
@@ -77,17 +62,20 @@ export const joinCommunity = async (communityId, userId) => {
     }
 };
 
-
-// 커뮤니티의 현재 참여자 수 조회 (탈퇴하지 않은 유저만 카운트)
-export const getCommunityCurrentCountDao = async (communityId) => {
+// 커뮤니티의 현재 참여자 수를 조회하는 함수 (탈퇴하지 않은 유저만 카운트)
+export const getCommunityCurrentCount = async (communityId) => {
     const conn = await pool.getConnection();
     try {
         const [result] = await conn.query(sql.GET_COMMUNITY_CURRENT_COUNT, [communityId]);
         return result[0].count;
+    } catch (err) {
+        console.log(err);
+        throw err;
     } finally {
         if(conn) conn.release();
     }
 };
+
 
 // 유저가 방장인지 확인하는 함수
 export const checkIfLeaderDao = async (communityId, userId) => {
@@ -121,6 +109,32 @@ export const isUserAlreadyInCommunity = async (communityId, userId) => {
         throw err;
     } finally {
         if(conn) conn.release();
+    }
+};
+
+// 유저가 커뮤니티에 이미 존재하는지 확인하고, is_deleted 상태를 반환하는 함수
+export const checkUserInCommunity = async (communityId, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [rows] = await conn.query(sql.CHECK_USER_IN_COMMUNITY, [communityId, userId]);
+        // 유저가 존재하지 않으면 null, 존재하면 is_deleted 상태 반환
+        return rows.length > 0 ? rows[0].is_deleted : null;
+    } finally {
+        if (conn) conn.release(); // 연결 해제
+    }
+};
+
+// 커뮤니티의 최대 인원수를 조회하는 함수
+export const getCommunityCapacityDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.GET_COMMUNITY_CAPACITY, [communityId]);
+        return result[0].capacity;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
     }
 };
 

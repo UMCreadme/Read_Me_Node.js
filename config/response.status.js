@@ -25,6 +25,9 @@ export const status = {
     NOT_IN_COMMUNITY: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "COMMUNITY4006", "message": "사용자가 해당 커뮤니티에 가입되어 있지 않습니다." },
     INVALID_MEETING_DATE: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY4008", "message": "미팅시간은 지금으로부터 적어도 30분이 지난 뒤로 설정해주세요." },
     LEADER_CANNOT_LEAVE: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY4009", "message": "방장은 커뮤니티를 탈퇴할 수 없습니다." },
+    LOCATION_ERROR: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY4010", "message": "유효하지 않은 위치 타입입니다." },
+    DATE_IS_WRONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY4011", "message": "유효하지 않은 날짜 및 시간 형식입니다. 올바른 형식: YYYY-MM-DDTHH:MM:SS.sssZ" },
+    POINT_IS_WRONG: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "COMMUNITY4012", "message": "유효하지 않은 좌표값입니다." },
 
     // member err
     MEMBER_NOT_FOUND: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "MEMBER4001", "message": "사용자가 없습니다." },

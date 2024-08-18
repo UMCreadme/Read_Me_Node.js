@@ -1,6 +1,6 @@
 // 커뮤니티의 현재 참여자 수를 조회하는 쿼리 (탈퇴자 제외)
 export const GET_COMMUNITY_CURRENT_COUNT = `
-    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = false
+    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = 0
 `;
 
 // 커뮤니티의 최대 인원수를 조회하는 쿼리
@@ -23,13 +23,22 @@ export const JOIN_COMMUNITY = `
 
 // 사용자가 이미 커뮤니티에 참여하고 있는지 확인하는 쿼리
 export const IS_USER_ALREADY_IN_COMMUNITY = `
-    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?
+    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ? AND is_deleted = 0
 `;
 
-export const CHECK_IF_LEADER = "SELECT role FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?";
+// 방장인지 확인
+export const CHECK_IF_LEADER = `
+    SELECT role 
+    FROM COMMUNITY_USERS 
+    WHERE community_id = ? AND user_id = ? AND is_deleted = 0
+`;
 
-export const CHECK_COMMUNITY_EXISTENCE = "SELECT community_id FROM COMMUNITY WHERE community_id = ?";
-
+// 커뮤니티 존재 여부 확인
+export const CHECK_COMMUNITY_EXISTENCE = `
+    SELECT COUNT(*) as count 
+    FROM COMMUNITY 
+    WHERE community_id = ? AND is_deleted = 0
+`;
 // 방장 추가 쿼리
 export const ADD_ADMIN_TO_COMMUNITY = "INSERT INTO COMMUNITY_USERS (community_id, user_id, role) VALUES (?, ?, 'admin');";
 
@@ -39,9 +48,6 @@ export const COUNT_COMMUNITIES_BY_USER_AND_BOOK = `
     FROM COMMUNITY 
     WHERE user_id = ? AND book_id = ? AND is_deleted = FALSE;
 `;
-
-// 그룹 생성 쿼리
-export const CREATE_COMMUNITY = "INSERT INTO COMMUNITY (user_id, book_id, content, location, tag, capacity) VALUES (?, ?, ?, ?, ?, ?);";
 
 // 모임 리스트 조회
 export const getCommunities = `
@@ -126,7 +132,7 @@ export const GET_COMMUNITY_DETAILS = `
         u.account AS leader_account,
         u.user_id AS leader_id,
         u.nickname AS leader_nickname,
-        (SELECT COUNT(*) FROM COMMUNITY_USERS cm WHERE cm.community_id = c.community_id) AS member_count
+        (SELECT COUNT(*) FROM COMMUNITY_USERS cm WHERE cm.community_id = c.community_id AND cm.is_deleted = 0 ) AS member_count
     FROM 
         COMMUNITY c
     JOIN 
@@ -177,14 +183,9 @@ export const SET_MEETING_DETAILS = `
         AND cu.user_id = ? 
         AND c.is_deleted = 0;
 `;
+
 export const GET_COMMUNITY_UPDATED_AT = `
 SELECT updated_at FROM COMMUNITY WHERE community_id = ?;
-`;
-
-export const CHECK_USER_PARTICIPATION_QUERY = `
-SELECT COUNT(*) AS count
-FROM COMMUNITY_USERS
-WHERE community_id = ? AND user_id = ? AND is_deleted = 0;
 `;
 
 // 제목으로 커뮤니티 검색 (부분 검색 가능)
