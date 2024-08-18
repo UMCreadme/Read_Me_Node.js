@@ -149,9 +149,10 @@ export const getCommunityDetailsService = async (communityId, userId) => {
     return getCommunityDetailsDto(communityData, isUserParticipating);
 };
 
+// 채팅방 상세 조회
 export const getChatroomDetailsService = async (communityId, currentUserId) => {
     // 유저가 커뮤니티에 속해 있는지 확인
-    const userStatus = await checkUserInCommunity(communityId, currentUserId);
+    const userStatus = await dao.checkUserInCommunity(communityId, currentUserId);
 
     if (userStatus === null || userStatus === 1) {
         // 유저가 커뮤니티에 가입되어 있지 않거나 이미 탈퇴한 경우
@@ -167,7 +168,7 @@ export const getChatroomDetailsService = async (communityId, currentUserId) => {
     return getChatroomDetailsDto(communityData, membersData, currentUserId);
 };
 
-
+// 약속 설정
 export const updateMeetingDetailsService = async (communityId, meetingDate, latitude, longitude, address, userId) => {
 
     const exists = await dao.checkCommunityExistenceDao(communityId);
@@ -184,7 +185,6 @@ export const updateMeetingDetailsService = async (communityId, meetingDate, lati
     if (meetingDateDate < minAllowedMeetingDate) {
         throw new BaseError(status.INVALID_MEETING_DATE);
     }
-
 
     await dao.updateMeetingDetailsDao(communityId, meetingDate, latitude, longitude, address, userId);
 };
