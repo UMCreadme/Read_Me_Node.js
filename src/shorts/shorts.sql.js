@@ -115,3 +115,15 @@ export const checkLike = "SELECT COUNT(*) as count FROM LIKE_SHORTS WHERE shorts
 export const addLike = "INSERT INTO LIKE_SHORTS (shorts_id, user_id) VALUES (?, ?)";
 
 export const removeLike = "DELETE FROM LIKE_SHORTS WHERE shorts_id = ? AND user_id = ?";
+
+
+// 쇼츠 댓글 조회
+export const getComments = 
+`SELECT c.user_id, u.nickname, u.image_url as profileImg, c.comment,
+TIMESTAMPDIFF(SECOND, c.created_at, NOW()) AS passedSeconds
+FROM COMMENT c
+JOIN USERS u ON c.user_id = u.user_id
+WHERE shorts_id = ?
+ORDER BY c.created_at DESC
+LIMIT ? OFFSET ?;
+`
