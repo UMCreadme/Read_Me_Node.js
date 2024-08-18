@@ -128,6 +128,7 @@ export const getChatroomDetailsController = async (req, res, next) => {
     return res.send(response(status.SUCCESS, detailedCommunityDetails));
 };
 
+// 커뮤니티 약속 설정
 export const updateMeetingDetailsController = async (req, res, next) => {
     const { meetingDate, latitude, longitude, address } = req.body;
     const communityId = parseInt(req.params.communityId);
@@ -135,6 +136,21 @@ export const updateMeetingDetailsController = async (req, res, next) => {
 
     if (!meetingDate || !latitude || !longitude || !address) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    // meetingDate 유효성 체크
+    const meetingDatePattern =  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/; // ISO 8601 형식
+    if (!meetingDatePattern.test(meetingDate)) {
+        throw new BaseError(status.DATE_IS_WRONG);
+    }
+
+    // latitude, longitude 유효성 체크
+    if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
+        throw new BaseError(status.POINT_IS_WRONG);
+    }
+
+    if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
+        throw new BaseError(status.POINT_IS_WRONG);
     }
 
     await updateMeetingDetailsService(

@@ -32,6 +32,14 @@ export const createCommunityService = async (community) => {
         throw new BaseError(status.COMMUNITY_LIMIT_EXCEEDED);
     }
 
+    const validLocations = ['서울', '인천', '대전', '대구', '광주', '울산', '부산', 
+        '제주', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '세종'];
+    
+    // location 타입 유효성 검증
+    if (!validLocations.includes(community.location)) {
+        throw new BaseError(status.LOCATION_ERROR);
+    }
+
     // 모임 생성
     return await dao.createCommunity(community);
 };
@@ -39,15 +47,10 @@ export const createCommunityService = async (community) => {
 //커뮤니티 가입 서비스
 export const joinCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 이미 존재하는지 확인하고 is_deleted 상태 반환
-    const userStatus = await checkUserInCommunity(communityId, userId);
+    const userStatus = await dao.checkUserInCommunity(communityId, userId);
     // 커뮤니티의 현재 인원수 및 최대 인원수 조회
-    const currentCount = await dao.getCommunityCurrentCountDao(communityId);
+    const currentCount = await dao.getCommunityCurrentCount(communityId);
 
-    // 현재 인원수가 최대 인원수를 초과하면 오류 발생
-    const capacity = await getCommunityCapacityDao(communityId);
-    if (currentCount >= capacity) {
-        throw new BaseError(status.COMMUNITY_FULL);
-    }
     if (userStatus === null) {
         // 디비에 유저 정보가 없으면 새로 가입 처리
         await dao.joinCommunity(communityId, userId);
@@ -57,6 +60,12 @@ export const joinCommunityService = async (communityId, userId) => {
     } else {
         // 유저가 이미 가입되어 있는 경우 오류 발생
         throw new BaseError(status.ALREADY_IN_COMMUNITY);
+    }
+
+    // 현재 인원수가 최대 인원수를 초과하면 오류 발생
+    const capacity = await dao.getCommunityCapacityDao(communityId);
+    if (currentCount >= capacity) {
+        throw new BaseError(status.COMMUNITY_FULL);
     }
 
 };
@@ -99,6 +108,7 @@ export const searchCommunityService = async (keyword, offset, limit) => {
     return searchCommunitiesDTOList; // 결과 리스트 반환
 };
 
+// 커뮤니티 삭제
 export const deleteCommunityService = async (user_id, community_id) => {
     const exists = await dao.checkCommunityExistenceDao(community_id);
     if (!exists) {
@@ -112,10 +122,10 @@ export const deleteCommunityService = async (user_id, community_id) => {
 
     await dao.deleteCommunityDao(community_id);
 };
-  
+
 export const leaveCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 존재하는지 확인
-    const userStatus = await checkUserInCommunity(communityId, userId);
+    const userStatus = await dao.checkUserInCommunity(communityId, userId);
 
     if (userStatus === null || userStatus) {
         throw new BaseError(status.NOT_IN_COMMUNITY);
@@ -136,21 +146,22 @@ export const leaveCommunityService = async (communityId, userId) => {
 export const getCommunityDetailsService = async (communityId, userId) => {
     const communityData = await dao.getCommunityDetailsDao(communityId);
     let isUserParticipating = false;
-
-
+    
     if (!communityData || communityData.length === 0) {
         throw new BaseError(status.COMMUNITY_NOT_FOUND);
     }
 
     if (userId !== null) {
-        isUserParticipating = await checkUserInCommunity(communityId, userId);
+        isUserParticipating = await dao.isUserAlreadyInCommunity(communityId, userId);
     }
+    
     return getCommunityDetailsDto(communityData, isUserParticipating);
 };
 
+// 채팅방 상세 조회
 export const getChatroomDetailsService = async (communityId, currentUserId) => {
     // 유저가 커뮤니티에 속해 있는지 확인
-    const userStatus = await checkUserInCommunity(communityId, currentUserId);
+    const userStatus = await dao.checkUserInCommunity(communityId, currentUserId);
 
     if (userStatus === null || userStatus === 1) {
         // 유저가 커뮤니티에 가입되어 있지 않거나 이미 탈퇴한 경우
@@ -166,7 +177,7 @@ export const getChatroomDetailsService = async (communityId, currentUserId) => {
     return getChatroomDetailsDto(communityData, membersData, currentUserId);
 };
 
-
+// 약속 설정
 export const updateMeetingDetailsService = async (communityId, meetingDate, latitude, longitude, address, userId) => {
 
     const exists = await dao.checkCommunityExistenceDao(communityId);
@@ -183,7 +194,6 @@ export const updateMeetingDetailsService = async (communityId, meetingDate, lati
     if (meetingDateDate < minAllowedMeetingDate) {
         throw new BaseError(status.INVALID_MEETING_DATE);
     }
-
 
     await dao.updateMeetingDetailsDao(communityId, meetingDate, latitude, longitude, address, userId);
 };
