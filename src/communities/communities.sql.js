@@ -21,6 +21,15 @@ export const JOIN_COMMUNITY = `
     VALUES (?, ?)
 `;
 
+// 사용자가 이미 커뮤니티에 참여하고 있는지 확인하는 쿼리
+export const IS_USER_ALREADY_IN_COMMUNITY = `
+    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?
+`;
+
+export const CHECK_IF_LEADER = "SELECT role FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?";
+
+export const CHECK_COMMUNITY_EXISTENCE = "SELECT community_id FROM COMMUNITY WHERE community_id = ?";
+
 // 방장 추가 쿼리
 export const ADD_ADMIN_TO_COMMUNITY = "INSERT INTO COMMUNITY_USERS (community_id, user_id, role) VALUES (?, ?, 'admin');";
 
