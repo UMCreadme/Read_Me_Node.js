@@ -1,4 +1,5 @@
 import { pool } from "../../config/db.config.js";
+import { POPULARITY_LIKE_CNT } from "../shorts/shorts.service.js";
 import { getShortsByCategory, getAllCategories, getFollowerFeed, getShort, getUserCategories, getUserRecommendedShorts } from "./home.sql.js";
 
 // 카테고리 별 쇼츠 조회
@@ -47,7 +48,7 @@ export const getUserCategoriesById = async(user_id) => {
 export const getRecommendedShorts = async (user_id) => {
     const conn = await pool.getConnection();
     try {
-        const [userRecommendedShorts] = await conn.query(getUserRecommendedShorts, [user_id]);
+        const [userRecommendedShorts] = await conn.query(getUserRecommendedShorts, [POPULARITY_LIKE_CNT, user_id]);
         return userRecommendedShorts;
     } catch (err) {
         console.log(err);

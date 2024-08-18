@@ -10,6 +10,7 @@ export const getShortsDetailListDto = (data) => {
             "userAccount": short.account,
             "profileImg": short.profile_img,
             "isFollow": short.isFollow ? Boolean(short.isFollow) : false,
+            "shortsId": short.shorts_id,
             "shortsImg": short.shorts_img,
             "phrase": short.phrase,
             "phraseX": short.phrase_x,

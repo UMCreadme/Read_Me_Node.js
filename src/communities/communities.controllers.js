@@ -4,9 +4,21 @@ import { response } from '../../config/response.js';
 import { pageInfo } from "../../config/pageInfo.js";
 import { createBook } from "../book/book.service.js";
 import { creatCommunityDto } from './communities.dto.js';
-import { createCommunityService, joinCommunityService, searchCommunityService, getCommunitiesService, getMyCommunitiesService, deleteCommunityService } from './communities.service.js';
 
-// 커뮤니티 생성 - 책정보 + 내용, 태그, 참여인원, 만남장소
+import {
+    deleteCommunityService,
+    createCommunityService,
+    searchCommunityService,
+    joinCommunityService,
+    getCommunitiesService,
+    leaveCommunityService,
+    getCommunityDetailsService,
+    getChatroomDetailsService,
+    updateMeetingDetailsService,
+    getMyCommunitiesService
+} from './communities.service.js';
+
+// 커뮤니티 생성
 export const createCommunityController = async (req, res, next) => {
     const ISBN = req.body.ISBN;
     const userId = req.user_id;
@@ -30,7 +42,7 @@ export const createCommunityController = async (req, res, next) => {
 
 export const deleteCommunityController = async (req, res, next) => {
     const user_id = req.user_id;
-    const community_id = req.params.communityId;
+    const community_id = parseInt(req.params.communityId);
 
     if (!user_id || !community_id) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
@@ -42,7 +54,7 @@ export const deleteCommunityController = async (req, res, next) => {
 
 // 커뮤니티 가입 컨트롤러
 export const joinCommunityController = async (req, res, next) => {
-    const communityId = req.params.communityId;
+    const communityId = parseInt(req.params.communityId);
     const userId = req.user_id;
 
     if (!communityId) {
@@ -53,7 +65,6 @@ export const joinCommunityController = async (req, res, next) => {
     return res.send(response(status.JOINED));
 
 };
-
 
 // 전체 커뮤니티 리스트 조회
 export const getCommunitiesController = async (req, res, next) => {
@@ -85,6 +96,59 @@ export const getMyCommunitiesController = async (req, res, next) => {
     res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
 }
 
+// 커뮤니티 탈퇴
+export const leaveCommunityController = async (req, res, next) => {
+    const userId = req.user_id;
+    const communityId = parseInt(req.params.communityId);
+
+    if (!userId || !communityId) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    await leaveCommunityService(communityId, userId);
+    return res.send(response(status.SUCCESS));
+};
+
+// 커뮤니티 상세정보 조회
+export const getCommunityDetailsController = async (req, res, next) => {
+    const communityId = parseInt(req.params.communityId);
+    const userId = req.user_id;
+
+    const communityDetails = await getCommunityDetailsService(communityId, userId);
+    return res.send(response(status.SUCCESS, communityDetails));
+};
+
+// 채팅방 상세정보 조회
+export const getChatroomDetailsController = async (req, res, next) => {
+    const userId = req.user_id;
+    const communityId = parseInt(req.params.communityId);
+
+
+    const detailedCommunityDetails = await getChatroomDetailsService(communityId, userId);
+    return res.send(response(status.SUCCESS, detailedCommunityDetails));
+};
+
+export const updateMeetingDetailsController = async (req, res, next) => {
+    const { meetingDate, latitude, longitude, address } = req.body;
+    const communityId = parseInt(req.params.communityId);
+    const userId = req.user_id;
+
+    if (!meetingDate || !latitude || !longitude || !address) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    await updateMeetingDetailsService(
+        communityId,
+        meetingDate,
+        latitude,
+        longitude,
+        address,
+        userId
+    );
+
+    res.send(response(status.SUCCESS));
+};
+
 // 커뮤니티 검색
 export const searchCommunityController = async (req, res, next) => {
     const keyword = req.query.keyword;
@@ -103,3 +167,4 @@ export const searchCommunityController = async (req, res, next) => {
     
     res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)))
 };
+

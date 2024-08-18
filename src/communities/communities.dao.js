@@ -57,17 +57,56 @@ export const getCommunityCurrentCount = async (communityId) => {
     }
 };
 
-// 커뮤니티의 최대 인원수를 조회하는 함수
-export const getCommunityCapacity = async (communityId) => {
+// 커뮤니티에 재가입하는 함수 (소프트 딜리트 취소)
+export const rejoinCommunity = async (communityId, userId) => {
     const conn = await pool.getConnection();
     try {
-        const [result] = await conn.query(sql.GET_COMMUNITY_CAPACITY, [communityId]);
-        return result[0].capacity;
-    } catch (err) {
-        console.log(err);
-        throw err;
+        await conn.query(sql.REJOIN_COMMUNITY, [communityId, userId]);
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+// 커뮤니티에 새로 가입하는 함수
+export const joinCommunity = async (communityId, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        await conn.query(sql.JOIN_COMMUNITY, [communityId, userId]);
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+
+// 커뮤니티의 현재 참여자 수 조회 (탈퇴하지 않은 유저만 카운트)
+export const getCommunityCurrentCountDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.GET_COMMUNITY_CURRENT_COUNT, [communityId]);
+        return result[0].count;
     } finally {
         if(conn) conn.release();
+    }
+};
+
+// 유저가 방장인지 확인하는 함수
+export const checkIfLeaderDao = async (communityId, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(CHECK_IF_LEADER, [communityId, userId]);
+        return result.length > 0 && result[0].role === 'admin';
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+// 커뮤니티 탈퇴
+export const leaveCommunityDao = async (communityId, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        await conn.query(sql.LEAVE_COMMUNITY, [communityId, userId]);
+    } finally {
+        if (conn) conn.release();
     }
 };
 
@@ -85,11 +124,12 @@ export const isUserAlreadyInCommunity = async (communityId, userId) => {
     }
 };
 
-// 커뮤니티 가입 처리
-export const joinCommunity = async (communityId, userId) => {
+// 커뮤니티의 최대 인원수를 조회하는 함수
+export const getCommunityCapacity = async (communityId) => {
     const conn = await pool.getConnection();
     try {
-        await conn.query(sql.JOIN_COMMUNITY, [communityId, userId]);
+        const [result] = await conn.query(sql.GET_COMMUNITY_CAPACITY, [communityId]);
+        return result[0].capacity;
     } catch (err) {
         console.log(err);
         throw err;
@@ -156,20 +196,25 @@ export const searchCommunitiesByTagKeyword = async (keyword, offset, limit) => {
 
 export const checkCommunityExistenceDao = async (community_id) => {
     const conn = await pool.getConnection();
-    const [rows] = await conn.query('SELECT COUNT(*) as count FROM COMMUNITY WHERE community_id = ? AND is_deleted = 0', [community_id]);
-
-    conn.release();
-    return rows[0].count > 0;
+    try {
+        const [rows] = await conn.query(sql.CHECK_COMMUNITY_EXISTENCE, [community_id]);
+        return rows[0].count > 0;
+    } finally {
+        if (conn) conn.release();
+    }
 };
 
 export const checkCommunityOwnerDao = async (community_id) => {
     const conn = await pool.getConnection();
-    
-    const [result] = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
-    if (result.length === 0) {
-        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    try {
+        const [result] = await conn.query('SELECT user_id FROM COMMUNITY WHERE community_id = ?', [community_id]);
+        if (result.length === 0) {
+            throw new BaseError(status.COMMUNITY_NOT_FOUND);
+        }
+        return result[0].user_id;
+    } finally {
+        if (conn) conn.release();
     }
-    return result[0].user_id;
 };
 
 
@@ -180,8 +225,8 @@ export const deleteCommunityDao = async (community_id) => {
         await conn.query('BEGIN');
 
         // 커뮤니티 소프트 딜리트
-        await conn.query('UPDATE COMMUNITY SET is_deleted = 1 WHERE community_id = ?',[community_id]);
-        
+        await conn.query('UPDATE COMMUNITY SET is_deleted = 1 WHERE community_id = ?', [community_id]);
+
         // 커뮤니티 참가자 소프트 딜리트
         await conn.query('UPDATE COMMUNITY_USERS SET is_deleted = 1 WHERE community_id = ?', [community_id]);
 
@@ -191,7 +236,72 @@ export const deleteCommunityDao = async (community_id) => {
         await conn.query('ROLLBACK');
         throw err;
     } finally {
-        if(conn) conn.release();
+        if (conn) conn.release();
     }
 
+};
+
+// 커뮤니티 상세정보를 조회하는 DAO 함수
+export const getCommunityDetailsDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [rows] = await conn.query(sql.GET_COMMUNITY_DETAILS, [communityId]);
+        return rows;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+export const getChatroomDetailsDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [communityData] = await conn.query(sql.GET_CHATROOM_DETAILS, [communityId]);
+        const [membersData] = await conn.query(sql.GET_CHATROOM_MEMBERS, [communityId]);
+
+        return { communityData, membersData };
+    } catch (err) {
+        console.error(err);
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+// 약속 설정 DAO
+export const updateMeetingDetailsDao = async (communityId, meetingDate, latitude, longitude, address, userId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.SET_MEETING_DETAILS, [
+            meetingDate,
+            `POINT(${latitude} ${longitude})`,
+            address,
+            communityId,
+            userId,
+        ]);
+
+        return result;
+    } catch (err) {
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+// 커뮤니티의 마지막 업데이트 시간을 가져옴
+export const getCommunityUpdatedAtDao = async (communityId) => {
+    const conn = await pool.getConnection();
+    try {
+        const [result] = await conn.query(sql.GET_COMMUNITY_UPDATED_AT, [communityId]);
+        if (result.length === 0) {
+            throw new BaseError(status.COMMUNITY_NOT_FOUND);
+        }
+        return result[0].updated_at;
+    } catch (err) {
+        throw err;
+    } finally {
+        if (conn) conn.release();
+    }
 };
