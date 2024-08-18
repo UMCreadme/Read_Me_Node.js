@@ -93,7 +93,7 @@ export const getCommunityCurrentCountDao = async (communityId) => {
 export const checkIfLeaderDao = async (communityId, userId) => {
     const conn = await pool.getConnection();
     try {
-        const [result] = await conn.query(CHECK_IF_LEADER, [communityId, userId]);
+        const [result] = await conn.query(sql.CHECK_IF_LEADER, [communityId, userId]);
         return result.length > 0 && result[0].role === 'admin';
     } finally {
         if (conn) conn.release();
