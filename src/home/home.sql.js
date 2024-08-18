@@ -58,7 +58,7 @@ export const getAllCategories = "SELECT name FROM CATEGORY;";
 export const getUserRecommendedShorts = 
 `WITH RankedShorts AS (
     SELECT
-        s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title,
+        s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, s.phrase_x, s.phrase_y,
         b.author,
         c.name AS category, c.category_id,
         COALESCE(likes.like_count, 0) AS like_count,
@@ -75,7 +75,7 @@ export const getUserRecommendedShorts =
     WHERE COALESCE(likes.like_count, 0) >= ? AND uf.user_id = ?
 )
 SELECT
-    shorts_id, shortsImg, phrase, title, author, category, like_count
+    shorts_id, shortsImg, phrase, phrase_x, phrase_y, title, author, category, like_count
 FROM RankedShorts
 WHERE rn = 1
 ORDER BY category_id;
