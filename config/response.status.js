@@ -1,4 +1,3 @@
-// src/config/response.status.js
 import { StatusCodes } from "http-status-codes";
 
 export const status = {
@@ -54,5 +53,12 @@ export const status = {
     INVALID_REFRESH_TOKEN: { status: StatusCodes.BAD_REQUEST, "isSuccess": false, "code": "TOKEN4005", "message": "유효하지 않는 리프레시 토큰입니다." },
 
     // book err
-    BOOK_NOT_FOUND: {status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "BOOK4001", "message": "존재하지 않는 책입니다."},
+    BOOK_NOT_FOUND: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "BOOK4001", "message": "존재하지 않는 책입니다." },
+
+    // chat related errors
+    MESSAGE_NOT_FOUND: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "CHAT4001", "message": "메시지를 찾을 수 없습니다." },
+    COMMUNITY_NOT_FOUND: { status: StatusCodes.NOT_FOUND, "isSuccess": false, "code": "CHAT4002", "message": "커뮤니티를 찾을 수 없습니다." },
+    USER_NOT_IN_COMMUNITY: { status: StatusCodes.FORBIDDEN, "isSuccess": false, "code": "CHAT4003", "message": "사용자가 커뮤니티에 속해 있지 않습니다." },
+    MESSAGE_NOT_SENT: { status: StatusCodes.INTERNAL_SERVER_ERROR, "isSuccess": false, "code": "CHAT4004", "message": "메시지를 보내지 못했습니다." },
+    MESSAGE_READ_STATUS_NOT_UPDATED: { status: StatusCodes.INTERNAL_SERVER_ERROR, "isSuccess": false, "code": "CHAT4005", "message": "메시지 읽음 상태를 업데이트하지 못했습니다." },
 };

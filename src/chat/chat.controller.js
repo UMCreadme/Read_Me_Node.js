@@ -1,49 +1,46 @@
 import { status } from '../../config/response.status.js';
 import { response } from '../../config/response.js';
+import { BaseError } from '../../config/error.js';
 import { fetchMessagesService, saveMessageService, saveMessageReadStatusService } from './chat.service.js';
 
-// 채팅 조회
-export const getMessagesController = async (req, res) => {
+// 채팅 메시지 조회
+export const getMessagesController = async (req, res, next) => {
     const { communityId } = req.params;
     const userId = req.user_id;
-    const page = parseInt(req.query.page, 10) || 1;  // 기본값 1
-    const size = parseInt(req.query.size, 10) || 10;  // 기본값 10
+    const page = parseInt(req.query.page, 10) || 1;
+    const size = parseInt(req.query.size, 10) || 10;
 
-    if (!userId) {
-        return res.status(status.UNAUTHORIZED.status).json(response(status.UNAUTHORIZED));
+    if (!userId || !communityId) {
+        return next(new BaseError(status.PARAMETER_IS_WRONG));
     }
 
     const { result, pageInfo } = await fetchMessagesService(communityId, userId, page, size);
-    res.status(status.SUCCESS.status).json(response(status.SUCCESS, result, pageInfo));
+    res.send(response(status.SUCCESS, result, pageInfo));
 };
 
-// 채팅전송
+// 채팅 메시지 전송
 export const postMessageController = async (req, res, next) => {
     const { communityId } = req.params;
     const { content } = req.body;
     const userId = req.user_id;
 
-    if (!userId) {
-        return res.send(response(status.UNAUTHORIZED));
+    if (!userId || !communityId || !content || content.trim() === '') {
+        return next(new BaseError(status.PARAMETER_IS_WRONG));
     }
 
-    if (!content || content.trim() === '') {
-        return res.send(response(status.NO_CONTENT));
-    }
-
-    const message = await saveMessageService(communityId, userId, content);
+    await saveMessageService(communityId, userId, content);
     res.send(response(status.SUCCESS));
 };
 
-// 메시지 읽음처리(일일이 하는 경우)
+// 메시지 읽음 처리
 export const markMessageReadController = async (req, res, next) => {
     const { messageId } = req.body;
     const userId = req.user_id;
 
-    if (!userId) {
-        return res.status(status.UNAUTHORIZED.status).send(response(status.UNAUTHORIZED));
+    if (!userId || !messageId) {
+        return next(new BaseError(status.PARAMETER_IS_WRONG));
     }
 
     await saveMessageReadStatusService(messageId, userId);
-    res.status(status.NO_CONTENT.status).json(response(status.NO_CONTENT, null));
+    res.send(response(status.NO_CONTENT));
 };

@@ -1,45 +1,74 @@
-import {
-    findById,
-    findEachFollowWithKeyword,
-    findFollowerNumByUserId,
-    findFollowingNumByUserId,
-    findMeFollowWithKeyword, findMeWithKeyword,
-    findMyFollowWithKeyword,
-    findUserBooksById,
-    findUserLikeShortsById,
-    findUserShortsById,
-    findUsersWithKeyword,
-    followUserAdd
-} from "./users.dao.js";
+import * as dao from "./users.dao.js";
 import {
     userBookResponseDTO,
     userInfoResponseDTO,
-    otherUserInfoResponseDTO,
     userSearchResponseDTO,
     userShortsResponseDTO,
     userSignUpResponseDTO
 } from "./users.dto.js";
-
 import {findBookById} from "../book/book.dao.js";
 import {status} from "../../config/response.status.js";
 import {BaseError} from "../../config/error.js";
+import {refresh, sign} from "../jwt/jwt-util.js";
+import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
+
+// 회원가입 후 토큰 반환
+export const join = async(body, provider) => {
+
+    await duplicateAccountCheck(body.account)
+
+    const categoryCheck = (category) => {
+        const duplicateCategory = (new Set(category).size !== category.length)
+        return (category.length < 4)  || (category.length >8) || duplicateCategory
+    }
+
+    if(!body.uniqueId || !body.email || !accountCheck(body.account) || !nicknameCheck(body.nickname) || categoryCheck(body.categoryIdList))
+    {
+        throw new BaseError(status.PARAMETER_IS_WRONG)
+    }
+
+    const refreshToken = refresh()
+    const newUser = await dao.userSignUp(body, provider, refreshToken);
+
+    const tokenToUser = {user_id: newUser.user_id, email: newUser.email}
+    const accessToken = sign(tokenToUser)
+
+    return userSignUpResponseDTO(accessToken, newUser.refresh_token)
+}
+
+// 이미 존재하는 유저가 다시 로그인해서 토큰 값 줄때
+export const login = async(body, provider) => {
+    if(!body.uniqueId || !body.email){
+        throw new BaseError(status.PARAMETER_IS_WRONG)
+    }
+
+    const refreshToken = refresh()
+    const foundUser = await dao.userLogin(body, provider, refreshToken)
+
+    if(!foundUser){
+        return null
+    }
+
+    const tokenToUser = {user_id: foundUser.user_id, email: foundUser.email}
+    const accessToken = sign(tokenToUser)
+
+    return {accessToken, refreshToken}
+}
 
 // 유저 정보 조회 로직
-export const findOne = async(body) => {
-    const userId = body.id;
-    const userData = await findById(userId)
-
+export const findOne = async(userId) => {
+    const userData = await dao.findById(userId)
     // 없는 유저 확인
     if(userData === -1){
         throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
-    // const profileImg = await findImageById(userData.image_id)
+    const isRecentPost = await dao.hasRecentPostForUser(userId); // 프로필 띠 기능
+    const followingNum = await dao.findFollowingNumByUserId(userId);
+    const followerNum = await dao.findFollowerNumByUserId(userId);
+    const readBookNum = await dao.findUserBooksCountById(userId);
 
-    const followingNum = await findFollowingNumByUserId(userId);
-    const followerNum = await findFollowerNumByUserId(userId);
-
-    return userInfoResponseDTO( userData, followerNum, followingNum);
+    return userInfoResponseDTO(userData, isRecentPost, followerNum, followingNum, readBookNum);
 }
 
 // 다른 유저 팔로잉 여부 확인 로직
@@ -167,14 +196,11 @@ export const findUserBooks = async(userId, offset, limit) => {
 }
 
 // 유저(본인)가 다른 유저 팔로우하는 로직
-export const followNewUser = async(body, followUserId) =>{
-    const userId = body.id
-
+export const followNewUser = async(userId, followUserId) =>{
     // 없는 유저 확인
-    const userData = await findById(userId)
-    const followUserData = await findById(followUserId)
-    if((userData === -1) || (followUserData === -1)){
-        throw new BaseError(status.BAD_REQUEST)
+    const followUserData = await dao.findById(followUserId)
+    if(followUserData === -1){
+        throw new BaseError(status.MEMBER_NOT_FOUND)
     }
 
     const followStatus = await dao.followUserAdd(userId, followUserId)
@@ -268,11 +294,11 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
         return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
     }
 
-    const recentSerachId = await getResearchId(userId, keyword);
-    if(!recentSerachId) {
+    const recentSearchId = await getResearchId(userId, keyword);
+    if(!recentSearchId) {
         await addSearchDao(userId, keyword);
     } else {
-        await updateSearchDao(recentSerachId);
+        await updateSearchDao(recentSearchId);
     }
 
     return {userSearchResponseDTOList, totalCount: combinedList.length, currentSize: paginatedList.length}
