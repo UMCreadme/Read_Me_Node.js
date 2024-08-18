@@ -48,12 +48,13 @@ export const userBookResponseDTO = (userBook) => {
 }
 
 // 유저 검색시 반환 정보
-export const userSearchResponseDTO =  (userData) => {
+export const userSearchResponseDTO =  (userData, isRecentPost) => {
     return {
         "userId" : userData.user_id,
         "profileImg" : userData.image_url,
         "account" : userData.account,
-        "nickname" : userData.nickname
+        "nickname" : userData.nickname,
+        "isRecentPost" : isRecentPost
     }
 }
 
