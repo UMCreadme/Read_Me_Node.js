@@ -1,6 +1,20 @@
 import { BaseError } from "../../config/error.js";
 import { status } from "../../config/response.status.js";
 
+export const bookInfoDto = (data) => {
+    if (!data || !data.ISBN || !data.bookTitle || !data.cid || !data.bookCover || !data.author || !data.link) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    return {
+        "ISBN": data.ISBN,
+        "title": data.bookTitle,
+        "image_url": data.bookCover,
+        "author": data.author,
+        "link": data.link
+    };
+};
+
 export const bookSearchResponseDto = (data) => {
     const books = aladinBookSearchResultDto(data);
     const result = books.map(book => {
