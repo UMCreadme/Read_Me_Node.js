@@ -287,7 +287,8 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
 
     const userSearchResponseDTOList = []
     for (const paginatedListElement of paginatedList) {
-        userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement))
+        const isRecentPost = await dao.hasRecentPostForUser(paginatedListElement.user_id); // 프로필 띠 기능
+        userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement, isRecentPost))
     }
 
     if(!userId){
