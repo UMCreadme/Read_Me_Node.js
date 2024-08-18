@@ -152,8 +152,9 @@ export const getCommunityDetailsService = async (communityId, userId) => {
     }
 
     if (userId !== null) {
-        isUserParticipating = await checkUserInCommunity(communityId, userId);
+        isUserParticipating = await dao.isUserAlreadyInCommunity(communityId, userId);
     }
+    
     return getCommunityDetailsDto(communityData, isUserParticipating);
 };
 

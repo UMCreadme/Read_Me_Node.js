@@ -23,7 +23,7 @@ export const JOIN_COMMUNITY = `
 
 // 사용자가 이미 커뮤니티에 참여하고 있는지 확인하는 쿼리
 export const IS_USER_ALREADY_IN_COMMUNITY = `
-    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ?
+    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND user_id = ? AND is_deleted = 0
 `;
 
 // 방장인지 확인

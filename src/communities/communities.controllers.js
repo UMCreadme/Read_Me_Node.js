@@ -139,7 +139,7 @@ export const updateMeetingDetailsController = async (req, res, next) => {
     }
 
     // meetingDate 유효성 체크
-    const meetingDatePattern =  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z$/; // YYYY-MM-DD HH:MM:SS 형식
+    const meetingDatePattern =  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/; // ISO 8601 형식
     if (!meetingDatePattern.test(meetingDate)) {
         throw new BaseError(status.DATE_IS_WRONG);
     }
