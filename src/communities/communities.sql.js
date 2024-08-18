@@ -1,6 +1,6 @@
 // 커뮤니티의 현재 참여자 수를 조회하는 쿼리 (탈퇴자 제외)
 export const GET_COMMUNITY_CURRENT_COUNT = `
-    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = false
+    SELECT COUNT(*) AS count FROM COMMUNITY_USERS WHERE community_id = ? AND is_deleted = 0
 `;
 
 // 커뮤니티의 최대 인원수를 조회하는 쿼리
@@ -135,7 +135,7 @@ export const GET_COMMUNITY_DETAILS = `
         u.account AS leader_account,
         u.user_id AS leader_id,
         u.nickname AS leader_nickname,
-        (SELECT COUNT(*) FROM COMMUNITY_USERS cm WHERE cm.community_id = c.community_id) AS member_count
+        (SELECT COUNT(*) FROM COMMUNITY_USERS cm WHERE cm.community_id = c.community_id AND cm.is_deleted = 0 ) AS member_count
     FROM 
         COMMUNITY c
     JOIN 

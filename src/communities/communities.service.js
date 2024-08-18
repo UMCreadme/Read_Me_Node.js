@@ -41,7 +41,7 @@ export const joinCommunityService = async (communityId, userId) => {
     // 유저가 커뮤니티에 이미 존재하는지 확인하고 is_deleted 상태 반환
     const userStatus = await dao.checkUserInCommunity(communityId, userId);
     // 커뮤니티의 현재 인원수 및 최대 인원수 조회
-    const currentCount = await dao.getCommunityCurrentCountDao(communityId);
+    const currentCount = await dao.getCommunityCurrentCount(communityId);
 
     // 현재 인원수가 최대 인원수를 초과하면 오류 발생
     const capacity = await dao.getCommunityCapacityDao(communityId);

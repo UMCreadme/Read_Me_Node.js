@@ -42,21 +42,6 @@ export const isPossibleCreateCommunity = async (userId, bookId) => {
     }
 };
 
-
-// 커뮤니티의 현재 참여자 수를 조회하는 함수
-export const getCommunityCurrentCount = async (communityId) => {
-    const conn = await pool.getConnection();
-    try {
-        const [result] = await conn.query(sql.GET_COMMUNITY_CURRENT_COUNT, [communityId]);
-        return result[0].count;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
 // 커뮤니티에 재가입하는 함수 (소프트 딜리트 취소)
 export const rejoinCommunity = async (communityId, userId) => {
     const conn = await pool.getConnection();
@@ -77,17 +62,20 @@ export const joinCommunity = async (communityId, userId) => {
     }
 };
 
-
-// 커뮤니티의 현재 참여자 수 조회 (탈퇴하지 않은 유저만 카운트)
-export const getCommunityCurrentCountDao = async (communityId) => {
+// 커뮤니티의 현재 참여자 수를 조회하는 함수 (탈퇴하지 않은 유저만 카운트)
+export const getCommunityCurrentCount = async (communityId) => {
     const conn = await pool.getConnection();
     try {
         const [result] = await conn.query(sql.GET_COMMUNITY_CURRENT_COUNT, [communityId]);
         return result[0].count;
+    } catch (err) {
+        console.log(err);
+        throw err;
     } finally {
         if(conn) conn.release();
     }
 };
+
 
 // 유저가 방장인지 확인하는 함수
 export const checkIfLeaderDao = async (communityId, userId) => {
