@@ -230,8 +230,6 @@ export const unfollowUser = async(myId, unfollowUserId) => {
     if(!unfollowStatus){
         throw new BaseError(status.BAD_REQUEST)
     }
-
-    return userFollowResponseDTO(userId, followingId)
 }
 
 // 유저 검색 기능 로직
