@@ -3,10 +3,10 @@ import { POPULARITY_LIKE_CNT } from "../shorts/shorts.service.js";
 import { getShortsByCategory, getAllCategories, getFollowerFeed, getShort, getUserCategories, getUserRecommendedShorts } from "./home.sql.js";
 
 // 카테고리 별 쇼츠 조회
-export const getShortsbyCategory = async (category_id, offset, limit) => {
+export const getShortsbyCategory = async (category_id, user_id, offset, limit) => {
     const conn = await pool.getConnection();
     try {
-        const [categoryShorts] = await conn.query(getShortsByCategory, [category_id, category_id]);
+        const [categoryShorts] = await conn.query(getShortsByCategory, [user_id, category_id, user_id, category_id]);
         return categoryShorts;
     } catch (err) {
         console.log(err);

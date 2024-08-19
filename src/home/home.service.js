@@ -5,11 +5,10 @@ import { getShortsbyCategory, getAllCategory, getUserCategoriesById,getFollowers
 import { getCategoryIdByName } from "../book/book.dao.js";
 
 // 카테고리별 쇼츠 리스트 조회 로직
-export const ShortsByCategory = async (category_name, offset, limit) => {
+export const ShortsByCategory = async (category_name, user_id, offset, limit) => {
 
     const category_id = await getCategoryIdByName(category_name);
-
-    const categoryShorts = await getShortsbyCategory(category_id, offset, limit);
+    const categoryShorts = await getShortsbyCategory(category_id, user_id, offset, limit);
     const categoryShortsDTOList = [];
 
     for (const shorts of categoryShorts) {
