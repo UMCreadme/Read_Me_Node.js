@@ -7,7 +7,9 @@ import { BaseError } from "../../config/error.js";
 // 책 상세 정보 조회
 export const getBookDetail = async (req, res, next) => {
     const id = req.params.id;
-    const { page=1, size=10, isBookId } = req.query;
+    const { isBookId } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 20;
     const userId = req.user_id;
 
     if(!id) {
@@ -15,10 +17,10 @@ export const getBookDetail = async (req, res, next) => {
     }
 
     if(isBookId === 'true') {
-        const result = await service.getBookDetailInfoById(parseInt(id), parseInt(page), parseInt(size), userId);
+        const result = await service.getBookDetailInfoById(parseInt(id), page, size, userId);
         return res.send(response(status.SUCCESS, result.data, result.pageInfo));
     } else {
-        const result = await service.getBookDetailInfoByISBN(id, parseInt(page), parseInt(size), userId);
+        const result = await service.getBookDetailInfoByISBN(id, page, size, userId);
         return res.send(response(status.SUCCESS, result.data, result.pageInfo));
     }
 };
@@ -61,14 +63,25 @@ export const getUserRecentBook = async (req, res, next) => {
 
 // 책 검색
 export const searchBook = async (req, res, next) => {
-    let { page=1, size=50, keyword, preview } = req.query;
+    let { keyword, preview } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 20;
+
     const userId = req.user_id;
     if(!keyword || keyword.trim().length < 1) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
+    if (preview === 'true') {
+        preview = true
+    } else if (preview === 'false') {
+        preview = false
+    } else {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
     keyword = keyword.trim();
-    const book = await service.searchBookService(userId, keyword, preview === 'true', parseInt(page), parseInt(size));
+    const book = await service.searchBookService(userId, keyword, preview, page, size);
 
     res.send(response(status.SUCCESS, book.data, book.pageInfo));
 };
