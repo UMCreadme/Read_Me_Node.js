@@ -11,7 +11,8 @@ const USER = "user"; const LIKE = "like";
 
 export const getShortsDetail = async (req, res, next) => {
     const { start, keyword, userId } = req.query;
-    let { page=1, size=20 } = req.query; size = parseInt(size);
+    let page = parseInt(req.query.page) || 1;
+    let size = parseInt(req.query.size) || 20;
     const shortsId = parseInt(req.params.shortsId);
     const myId = req.user_id; // 좋아요 여부 체크를 위한 myId값
 
@@ -63,15 +64,17 @@ export const getShortsDetail = async (req, res, next) => {
 };
 
 export const searchShorts = async (req, res, next) => {
-    let { keyword, page=1, size=10 } = req.query;
+    let { keyword } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 20;
     const userId = req.user_id;
 
-    if(!keyword) {
+    if(!keyword || keyword.trim().length < 1) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
     keyword = keyword.trim();
-    const shorts = await service.getSearchShorts(userId, keyword, parseInt(page), parseInt(size));
+    const shorts = await service.getSearchShorts(userId, keyword, page, size);
 
     res.send(response(status.SUCCESS, shorts.data, shorts.pageInfo));
 };
@@ -131,7 +134,6 @@ export const likeShorts = async (req, res, next) => {
     const { likeCnt, action } = await service.likeShortsService(shorts_id, user_id);
     const responseStatus = action === 'added' ? status.CREATED : status.SUCCESS;
     res.send(response(responseStatus, likeCnt));
-
 };
 
 export const deleteShorts = async (req, res, next) => {
