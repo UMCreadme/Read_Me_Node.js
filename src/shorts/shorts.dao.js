@@ -227,3 +227,35 @@ export const deleteShortsDao = async (shorts_id) => {
         if(conn) conn.release();
     } 
 };
+
+
+// 시간 계산 함수
+const calculatePassedTime = (seconds) => {
+    if (seconds < 60) return `${seconds}초`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}분`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}시간`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}일`;
+    if (seconds < 2592000) return `${Math.floor(seconds / 604800)}주`;
+    return `${Math.floor(seconds / 2592000)}개월`;
+};
+
+// 쇼츠 댓글 조회
+export const getShortsComments = async (shorts_id, offset, limit) => {
+    const conn =  await pool.getConnection();
+
+    try {
+        const [comments] = await conn.query(sql.getComments, [shorts_id, limit, offset]);
+        return comments.map(comment => ({
+            userId: comment.user_id,
+            account: comment.account,
+            profileImg: comment.profileImg,
+            content: comment.comment,
+            passedDate: calculatePassedTime(comment.passedSeconds),
+          }));
+    } catch (err) {
+        console.log(err);
+        throw err;
+    } finally {
+        if(conn) conn.release();
+    }
+};

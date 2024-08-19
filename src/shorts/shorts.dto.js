@@ -64,3 +64,13 @@ export const shortsInfoDto = (data, imgUrl, userId) => {
         "phrase_y": parseFloat(data.phraseY)
     };
 }
+
+export const shortsCommentsResponseDTO = (comments) => {
+    return {
+        "userId": comments.userId,
+        "account": comments.account,
+        "profileImg": comments.profileImg,
+        "content": comments.content,
+        "passedDate": comments.passedDate
+    }
+}

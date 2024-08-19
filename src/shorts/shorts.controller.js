@@ -145,3 +145,29 @@ export const deleteShorts = async (req, res, next) => {
     await service.deleteShortsService(user_id, shorts_id);
     res.send(response(status.SUCCESS));
 };
+
+export const getShortsComment = async (req, res, next) => {
+    const shorts_id = parseInt(req.params.shortsId);
+    let page = parseInt(req.query.page) || 1;
+    let size = parseInt(req.query.size) || 20;
+    const offset = (page - 1) * size;
+
+    // 필수 파라미터 체크
+    if(!shorts_id) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    // page, size 값 체크
+    page = parseInt(page); size = parseInt(size);
+    if((page) < 1 || size < 1) {
+        throw new BaseError(status.PARAMETER_IS_WRONG);
+    }
+
+    const result = await service.ShortsCommentService(shorts_id, offset, size+1);
+
+    const hasNext = result.length > size;
+    if (hasNext) result.pop();
+
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)));
+
+}
