@@ -245,7 +245,6 @@ export const getShortsComments = async (shorts_id, offset, limit) => {
 
     try {
         const [comments] = await conn.query(sql.getComments, [shorts_id, limit, offset]);
-        console.log(comments);
         return comments.map(comment => ({
             userId: comment.user_id,
             account: comment.account,
