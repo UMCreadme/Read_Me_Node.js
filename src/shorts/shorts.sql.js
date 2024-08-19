@@ -38,7 +38,7 @@ LEFT JOIN (
     FROM COMMENT
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
-WHERE b.title REGEXP ? AND s.is_deleted = false
+WHERE b.title LIKE CONCAT('%', ?, '%') AND s.is_deleted = false
 ORDER BY like_count DESC;`;
 
 // 저자에서 키워드로 쇼츠 검색
@@ -63,7 +63,7 @@ LEFT JOIN (
     FROM COMMENT
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
-WHERE b.author REGEXP ? AND s.is_deleted = false
+WHERE b.author LIKE CONCAT('%', ?, '%') AND s.is_deleted = false
 ORDER BY like_count DESC;`;
 
 // 태그에서 키워드로 쇼츠 검색
@@ -88,7 +88,7 @@ LEFT JOIN (
     FROM COMMENT
     GROUP BY shorts_id
 ) comments ON s.shorts_id = comments.shorts_id
-WHERE s.tag REGEXP ? AND s.is_deleted = false
+WHERE s.tag LIKE CONCAT('%', ?, '%') AND s.is_deleted = false
 ORDER BY like_count DESC;`;
 
 // 카테고리에 해당하는 인기 쇼츠 개수 조회

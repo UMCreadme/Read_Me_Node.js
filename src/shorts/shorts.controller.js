@@ -66,7 +66,7 @@ export const searchShorts = async (req, res, next) => {
     let { keyword, page=1, size=10 } = req.query;
     const userId = req.user_id;
 
-    if(!keyword) {
+    if(!keyword || keyword.trim().length < 1) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 

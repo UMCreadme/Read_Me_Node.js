@@ -63,7 +63,7 @@ export const getUserRecentBook = async (req, res, next) => {
 export const searchBook = async (req, res, next) => {
     let { page=1, size=50, keyword, preview } = req.query;
     const userId = req.user_id;
-    if(!keyword) {
+    if(!keyword || keyword.trim().length < 1) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
