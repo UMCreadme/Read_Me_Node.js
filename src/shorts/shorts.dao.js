@@ -248,7 +248,7 @@ export const getShortsComments = async (shorts_id, offset, limit) => {
         console.log(comments);
         return comments.map(comment => ({
             userId: comment.user_id,
-            nickname: comment.nickname,
+            account: comment.account,
             profileImg: comment.profileImg,
             content: comment.comment,
             passedDate: calculatePassedTime(comment.passedSeconds),

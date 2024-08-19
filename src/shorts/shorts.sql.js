@@ -119,7 +119,7 @@ export const removeLike = "DELETE FROM LIKE_SHORTS WHERE shorts_id = ? AND user_
 
 // 쇼츠 댓글 조회
 export const getComments = 
-`SELECT c.user_id, u.nickname, u.image_url as profileImg, c.comment,
+`SELECT c.user_id, u.account, u.image_url as profileImg, c.comment,
 TIMESTAMPDIFF(SECOND, c.created_at, NOW()) AS passedSeconds
 FROM COMMENT c
 JOIN USERS u ON c.user_id = u.user_id
@@ -127,3 +127,4 @@ WHERE shorts_id = ?
 ORDER BY c.created_at DESC
 LIMIT ? OFFSET ?;
 `
+

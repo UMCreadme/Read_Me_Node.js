@@ -68,7 +68,7 @@ export const shortsInfoDto = (data, imgUrl, userId) => {
 export const shortsCommentsResponseDTO = (comments) => {
     return {
         "userId": comments.userId,
-        "nickname": comments.nickname,
+        "account": comments.account,
         "profileImg": comments.profileImg,
         "content": comments.content,
         "passedDate": comments.passedDate
