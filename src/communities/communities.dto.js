@@ -8,7 +8,7 @@ export const communitiesInfoDTO = (community) => {
         "bookTitle": community.title,   
         "Participants" : community.currentCount,
         "capacity" : community.capacity,
-        "tags": community.tag ? community.tag.split("|") : [],
+        "tags": community.tag ? community.tag.split("|").map(tag => `#${tag}`) : [],
         "location" : community.location,
         "community_id" : community.community_id
     }
@@ -21,7 +21,7 @@ export const mycommunitiesInfoDTO = (community) => {
         "bookTitle": community.title,   
         "Participants" : community.currentCount,
         "capacity" : community.capacity,
-        "tags": community.tag ? community.tag.split("|") : [],
+        "tags": community.tag ? community.tag.split("|").map(tag => `#${tag}`) : [],
         "location" : community.location,
         "unReadCount" : community.unreadCnt,
         "community_id" : community.community_id
