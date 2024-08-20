@@ -5,7 +5,6 @@ export const categoryShortsResponseDTO = (shorts) => {
         "profileImg": shorts.profileImg,
         "account": shorts.account,
         "shortsId": shorts.shorts_id,
-        "bookId": shorts.book_id,
         "shortsImg": shorts.shortsImg,
         "phrase": shorts.phrase,
         "phraseX": shorts.phrase_x,
