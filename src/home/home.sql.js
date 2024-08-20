@@ -1,7 +1,7 @@
 export const getShortsByCategory = 
 `
 WITH RankedShorts AS (
-    SELECT u.user_id, u.image_url AS profileImg, u.nickname,
+    SELECT u.user_id, u.image_url AS profileImg, u.account,
            s.shorts_id, s.book_id, s.image_url AS shortsImg,
            s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
            (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
@@ -16,7 +16,7 @@ WITH RankedShorts AS (
     JOIN SHORTS s ON u.user_id = s.user_id
     JOIN BOOK b ON s.book_id = b.book_id
     WHERE b.category_id = ?
-    GROUP BY u.user_id, u.image_url, u.nickname,
+    GROUP BY u.user_id, u.image_url, u.account,
              s.shorts_id, s.book_id, s.image_url,
              s.phrase, s.title, s.content, s.tag, s.created_at
     HAVING likeCnt >= 20
@@ -24,7 +24,7 @@ WITH RankedShorts AS (
 ),
 
 UnrankedShorts AS (
-    SELECT u.user_id, u.image_url AS profileImg, u.nickname,
+    SELECT u.user_id, u.image_url AS profileImg, u.account,
            s.shorts_id, s.book_id, s.image_url AS shortsImg,
            s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
            (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
