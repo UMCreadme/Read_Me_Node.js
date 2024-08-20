@@ -22,8 +22,8 @@ export const getHomeInfo = async(req, res, next) => {
 
     const result = await getMainInfo(user_id, offset, size+1);
 
-    const hasNext = result.length > size;
-    if (hasNext) result.pop();
+    const hasNext = result.feeds.length > size;
+    if (hasNext) result.feeds.pop();
 
-    res.send(response(status.SUCCESS, result, pageInfo(page, result.length, hasNext)));
+    res.send(response(status.SUCCESS, result, pageInfo(page, result.feeds.length, hasNext)));
 };
