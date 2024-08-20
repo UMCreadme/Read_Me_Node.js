@@ -3,7 +3,7 @@ export const categoryShortsResponseDTO = (shorts) => {
     return {
         "userId" : shorts.user_id,
         "profileImg": shorts.profileImg,
-        "nickname": shorts.nickname,
+        "account": shorts.account,
         "shortsId": shorts.shorts_id,
         "shortsImg": shorts.shortsImg,
         "phrase": shorts.phrase,
@@ -36,7 +36,7 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
         "feeds": feeds ? feeds.map(feeds => ({
             "user_id": feeds.user_id,
             "profileImg": feeds.profileImg,
-            "nickname": feeds.nickname,
+            "account": shorts.account,
             "shorts_id": feeds.shorts_id,
             "shortsImg": feeds.shortsImg,
             "phrase": feeds.phrase,
