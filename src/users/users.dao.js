@@ -418,3 +418,15 @@ export const updateUserInfoDao = async(userId, userData) => {
         if(conn) conn.release()
     }
 }
+
+export const getAccountByUserId = async (userId) => {
+    const conn = await pool.getConnection()
+    try {
+        const [result] = await conn.query(sql.getAccountByUserId, [userId])
+        return result[0]
+    } catch (err) {
+        console.log(err)
+    } finally {
+        if (conn) conn.release()
+    }
+}

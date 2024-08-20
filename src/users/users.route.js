@@ -28,7 +28,7 @@ export const userRouter = express.Router({mergeParams:true});
 userRouter.get('/my', asyncHandler(authJWT), asyncHandler(getUserInfo));
 
 // 나의 프로필 이미지 편집
-userRouter.put('/my', asyncHandler(authJWT),  imgUploader.single('image'), (req, res, next) => {
+userRouter.put('/my/image', asyncHandler(authJWT),  imgUploader.single('image'), (req, res, next) => {
     next(); // 다음 미들웨어로 넘어가기
 }, asyncHandler(updateUserImage));
 
@@ -36,7 +36,7 @@ userRouter.put('/my', asyncHandler(authJWT),  imgUploader.single('image'), (req,
 userRouter.delete('/my', asyncHandler(authJWT), asyncHandler(deleteUserImage))
 
 // 나의 프로필 내용 편집
-userRouter.patch('/my', asyncHandler(authJWT), asyncHandler(updateUserInfo))
+userRouter.put('/my', asyncHandler(authJWT), asyncHandler(updateUserInfo))
 
 
 // 내가 만든 쇼츠 리스트 조회
