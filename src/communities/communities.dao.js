@@ -138,20 +138,6 @@ export const getCommunityCapacityDao = async (communityId) => {
     }
 };
 
-// 커뮤니티의 최대 인원수를 조회하는 함수
-export const getCommunityCapacity = async (communityId) => {
-    const conn = await pool.getConnection();
-    try {
-        const [result] = await conn.query(sql.GET_COMMUNITY_CAPACITY, [communityId]);
-        return result[0].capacity;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if(conn) conn.release();
-    }
-};
-
 // 전체 모임 리스트 조회
 export const getCommunities = async (offset, limit) => {
     const conn = await pool.getConnection();
