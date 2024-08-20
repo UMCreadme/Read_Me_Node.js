@@ -63,6 +63,8 @@ export const getCommunities = `
         BOOK b ON c.book_id = b.book_id  -- 커뮤니티의 book_id를 사용하여 책 정보 조회
     WHERE 
         c.is_deleted = false -- 삭제되지 않은 모임만 조회
+    ORDER BY
+        c.created_at DESC
     LIMIT ? OFFSET ?;`;
 
 // 나의 참여 모임 리스트 조회 쿼리 (최신 메시지 온 순으로 정렬) + 안읽음 개수 카운트
