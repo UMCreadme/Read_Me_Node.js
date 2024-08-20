@@ -60,7 +60,7 @@ export const getCommunityDetailsDto = (data, isParticipating) => {
         location: community.location,
         createdAt: community.created_at,
         content: community.content,
-        tags: community.tag ? community.tag.split('|') : [],
+        tags: community.tag ? community.tag.split("|").map(tag => `#${tag}`) : [],
         capacity: community.capacity,
         currentMembers: community.member_count,
         isParticipating 
@@ -72,7 +72,7 @@ export const getChatroomDetailsDto = (data, members, currentUserId) => {
     const community = data[0];
     return {
         title: community.title,
-        tags: community.tag ? community.tag.split('|') : [],
+        tags: community.tag ? community.tag.split("|").map(tag => `#${tag}`) : [],
         where: {
             position: community.position,
             address: community.address
