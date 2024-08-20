@@ -20,6 +20,7 @@ WITH RankedShorts AS (
              s.shorts_id, s.book_id, s.image_url,
              s.phrase, s.title, s.content, s.tag, s.created_at
     HAVING likeCnt >= 20
+    ORDER BY RAND()
     LIMIT ?
 ),
 
@@ -39,6 +40,7 @@ UnrankedShorts AS (
     JOIN SHORTS s ON u.user_id = s.user_id
     JOIN BOOK b ON s.book_id = b.book_id
     WHERE b.category_id = ? AND s.shorts_id NOT IN (SELECT shorts_id FROM RankedShorts)
+    ORDER BY RAND()
     LIMIT ?
 )
 
