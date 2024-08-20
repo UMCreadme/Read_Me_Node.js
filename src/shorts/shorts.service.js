@@ -282,6 +282,7 @@ export const addCommentService = async (shorts_id, user_id, content) => {
     }
     await shortsDao.addCommentDao(shorts_id, user_id, content);
 
+    return await shortsDao.getShortsComments(shorts_id, null, null);
 };
 
 export const likeShortsService = async (shorts_id, user_id) => {
