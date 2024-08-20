@@ -2,7 +2,6 @@
 export const categoryShortsResponseDTO = (shorts, isRecentPost) => {
     return {
         "userId" : shorts.user_id,
-        "isRecentPost" : isRecentPost,
         "profileImg": shorts.profileImg,
         "nickname": shorts.nickname,
         "shortsId": shorts.shorts_id,
