@@ -8,7 +8,7 @@ import { addSearchDao, getResearchId, updateSearchDao } from "../research/resear
 import { shuffle } from "../common/common.algorithm.js";
 
 // 인기순 기준값
-export const POPULARITY_LIKE_CNT = 20;
+export const POPULARITY_LIKE_CNT = 5;
 
 // 쇼츠 ID로 쇼츠 정보 조회
 export const getShortsDetailById = async (shortsId, userId) => {
