@@ -97,12 +97,15 @@ export const deleteUserImageService = async (userId) => {
 // 유저 프로필 내용 수정
 export const updateUserInfoService = async(userId, userData) => {
 
-    if(userData.account) {
-       await duplicateAccountCheck(userData.account)
+    const myAccount = await dao.getAccountByUserId(userId)
+
+    if(myAccount.account !== userData.account){
+        await duplicateAccountCheck(userData.account)
     }
 
     const commentCheck = (comment) => {
-        return comment.length <= 50
+        if(comment === undefined) return false
+        return comment.length <= 50;
     }
 
     if(!accountCheck(userData.account) || !nicknameCheck(userData.nickname) || !commentCheck(userData.comment)){

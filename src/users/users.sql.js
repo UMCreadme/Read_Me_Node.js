@@ -64,7 +64,7 @@ export const deleteUserImageSql = `
     UPDATE USERS
     SET image_url =  "https://readme-image.s3.ap-northeast-2.amazonaws.com/profile/default-profile.png"
     WHERE user_id = ?
-`
+`;
 
 export const updateUserInfoSql = `
     UPDATE USERS
@@ -72,4 +72,6 @@ export const updateUserInfoSql = `
         account = COALESCE(?, account), 
         comment = COALESCE(?, comment)
     WHERE user_id = ?
-`
+`;
+
+export const getAccountByUserId = `SELECT account FROM USERS WHERE user_id = ?`

@@ -385,6 +385,7 @@ export const updateUserImageDao = async (userId, profileImg) => {
     }
     catch(err){
         console.log(err)
+        throw err
     }
     finally {
         if(conn) conn.release()
@@ -399,6 +400,7 @@ export const deleteUserImageDao = async (userId) => {
     }
     catch (err) {
         console.log(err)
+        throw err
     }
     finally {
         if(conn) conn.release()
@@ -413,8 +415,22 @@ export const updateUserInfoDao = async(userId, userData) => {
     }
     catch (err) {
         console.log(err)
+        throw err
     }
     finally {
         if(conn) conn.release()
+    }
+}
+
+export const getAccountByUserId = async (userId) => {
+    const conn = await pool.getConnection()
+    try {
+        const [result] = await conn.query(sql.getAccountByUserId, [userId])
+        return result[0]
+    } catch (err) {
+        console.log(err)
+        throw err
+    } finally {
+        if (conn) conn.release()
     }
 }
