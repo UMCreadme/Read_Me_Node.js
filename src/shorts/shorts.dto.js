@@ -55,7 +55,7 @@ export const getSearchShortsListDto = (data) => {
 };
 
 export const shortsInfoDto = (data, imgUrl, userId) => {
-    if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.shortsTitle || !data.content || !data.phraseX || !data.phraseY) {
+    if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.content || !data.phraseX || !data.phraseY) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
