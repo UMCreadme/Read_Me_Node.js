@@ -35,7 +35,7 @@ export const getSearchShortsListDto = (data) => {
         shortsList.push({
             "userId": short.user_id,
             "profileImg": short.profile_img,
-            "nickname": short.nickname,
+            "account": short.account,
             "shortsId": short.shorts_id,
             "shortsImg": short.shorts_img,
             "phrase": short.phrase,
