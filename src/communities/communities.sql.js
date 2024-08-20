@@ -58,7 +58,7 @@ export const getCommunities = `
     FROM 
         COMMUNITY c
     LEFT JOIN 
-        (SELECT community_id, COUNT(*) AS currentCount FROM COMMUNITY_USERS cs GROUP BY community_id) p ON c.community_id = p.community_id
+        (SELECT community_id, COUNT(*) AS currentCount FROM COMMUNITY_USERS cs WHERE is_deleted = false GROUP BY community_id) p ON c.community_id = p.community_id
     LEFT JOIN 
         BOOK b ON c.book_id = b.book_id  -- 커뮤니티의 book_id를 사용하여 책 정보 조회
     WHERE 
