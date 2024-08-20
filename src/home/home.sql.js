@@ -1,45 +1,55 @@
 export const getShortsByCategory = 
-`WITH FilteredShorts AS (
-    SELECT u.user_id, u.image_url AS profileImg, u.nickname,
+`
+WITH RankedShorts AS (
+    SELECT u.user_id, u.image_url AS profileImg, u.account,
            s.shorts_id, s.book_id, s.image_url AS shortsImg,
-           s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
+           s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
            (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
            (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
-           s.created_at
+           s.created_at,
+           EXISTS (
+               SELECT 1 
+               FROM LIKE_SHORTS ls 
+               WHERE ls.shorts_id = s.shorts_id AND ls.user_id = ?
+           ) AS isLike
     FROM USERS u
     JOIN SHORTS s ON u.user_id = s.user_id
     JOIN BOOK b ON s.book_id = b.book_id
     WHERE b.category_id = ?
-    GROUP BY u.user_id, u.image_url, u.nickname,
+    GROUP BY u.user_id, u.image_url, u.account,
              s.shorts_id, s.book_id, s.image_url,
              s.phrase, s.title, s.content, s.tag, s.created_at
-    HAVING likeCnt >= 2
+    HAVING likeCnt >= 20
+    ORDER BY RAND()
+    LIMIT ?
 ),
-RankedShorts AS (
-    SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
-           phrase, phrase_x, phrase_y, title, content, tags, likeCnt, commentCnt, created_at,
-           ROW_NUMBER() OVER (ORDER BY RAND()) AS RN
-    FROM FilteredShorts
+
+UnrankedShorts AS (
+    SELECT u.user_id, u.image_url AS profileImg, u.account,
+           s.shorts_id, s.book_id, s.image_url AS shortsImg,
+           s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag,
+           (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
+           (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
+           s.created_at,
+           EXISTS (
+               SELECT 1 
+               FROM LIKE_SHORTS ls 
+               WHERE ls.shorts_id = s.shorts_id AND ls.user_id = ?
+           ) AS isLike
+    FROM USERS u
+    JOIN SHORTS s ON u.user_id = s.user_id
+    JOIN BOOK b ON s.book_id = b.book_id
+    WHERE b.category_id = ? AND s.shorts_id NOT IN (SELECT shorts_id FROM RankedShorts)
+    ORDER BY RAND()
+    LIMIT ?
 )
-SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
-       phrase, phrase_x, phrase_y, title, content, tags, likeCnt, commentCnt, created_at
-FROM RankedShorts
-WHERE RN <= 20
 
-UNION ALL
-
-SELECT u.user_id, u.image_url AS profileImg, u.nickname,
-       s.shorts_id, s.book_id, s.image_url AS shortsImg,
-       s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
-       (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
-       (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
-       s.created_at
-FROM USERS u
-JOIN SHORTS s ON u.user_id = s.user_id
-JOIN BOOK b ON s.book_id = b.book_id
-WHERE b.category_id = ? AND s.shorts_id NOT IN (SELECT shorts_id FROM RankedShorts)
-ORDER BY RAND()
-LIMIT 20;
+SELECT * FROM (
+    SELECT * FROM RankedShorts
+    UNION ALL
+    SELECT * FROM UnrankedShorts
+) AS CombinedResults
+ORDER BY RAND();
 `;
 
 export const getUserCategories =
@@ -58,7 +68,7 @@ export const getAllCategories = "SELECT name FROM CATEGORY;";
 export const getUserRecommendedShorts = 
 `WITH RankedShorts AS (
     SELECT
-        s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title,
+        s.shorts_id, s.image_url AS shortsImg, s.phrase, s.title, s.phrase_x, s.phrase_y,
         b.author,
         c.name AS category, c.category_id,
         COALESCE(likes.like_count, 0) AS like_count,
@@ -75,7 +85,7 @@ export const getUserRecommendedShorts =
     WHERE COALESCE(likes.like_count, 0) >= ? AND uf.user_id = ?
 )
 SELECT
-    shorts_id, shortsImg, phrase, title, author, category, like_count
+    shorts_id, shortsImg, phrase, phrase_x, phrase_y, title, author, category, like_count
 FROM RankedShorts
 WHERE rn = 1
 ORDER BY category_id;
@@ -104,7 +114,7 @@ COALESCE(comments.comment_count, 0) AS commentCnt,
 s.created_at, 
 EXISTS(SELECT 1 FROM LIKE_SHORTS WHERE shorts_id = s.shorts_id AND user_id = ?) AS isLike 
 FROM USERS u 
-JOIN FOLLOW f ON u.user_id = f.follower 
+JOIN FOLLOW f ON u.user_id = f.user_id
 JOIN SHORTS s ON u.user_id = s.user_id 
 LEFT JOIN (
     SELECT shorts_id, COUNT(*) AS like_count

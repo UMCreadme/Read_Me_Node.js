@@ -3,12 +3,12 @@ import { pageInfo } from "../../config/pageInfo.js";
 import { status } from "../../config/response.status.js";
 import * as shortsDao from "./shorts.dao.js";
 import * as shortsDetailDao from "./shorts.detail.dao.js";
-import { getSearchShortsListDto, getShortsDetailListDto } from "./shorts.dto.js";
+import { getSearchShortsListDto, getShortsDetailListDto, shortsCommentsResponseDTO } from "./shorts.dto.js";
 import { addSearchDao, getResearchId, updateSearchDao } from "../research/research.dao.js";
 import { shuffle } from "../common/common.algorithm.js";
 
 // 인기순 기준값
-export const POPULARITY_LIKE_CNT = 20;
+export const POPULARITY_LIKE_CNT = 2;
 
 // 쇼츠 ID로 쇼츠 정보 조회
 export const getShortsDetailById = async (shortsId, userId) => {
@@ -30,10 +30,14 @@ export const getSearchShorts = async (userId, keyword, page, size) => {
     const hasNext = result.length > size;
     if(hasNext) result.pop();
 
-    // 검색어 저장 - 회원인 경우
+    // 검색어 저장 & 쇼츠 좋아요 여부 확인
     if(!userId) {
         return {"data": getSearchShortsListDto(result), "pageInfo": pageInfo(page, result.length, hasNext)};
     }
+
+    result.map(async (short) => {
+        short.isLike = await shortsDao.checkLikeDao(short.shorts_id, userId);
+    });
 
     const recentSearchId = await getResearchId(userId, keyword);
     if(!recentSearchId) {
@@ -278,6 +282,7 @@ export const addCommentService = async (shorts_id, user_id, content) => {
     }
     await shortsDao.addCommentDao(shorts_id, user_id, content);
 
+    return await shortsDao.getShortsComments(shorts_id, null, null);
 };
 
 export const likeShortsService = async (shorts_id, user_id) => {
@@ -311,3 +316,23 @@ export const deleteShortsService = async (user_id, shorts_id) => {
 
     await shortsDao.deleteShortsDao(shorts_id);
 };
+
+
+// 쇼츠 댓글 리스트
+export const ShortsCommentService = async (shorts_id, offset, limit) => {
+    
+    const exists = await shortsDao.doesShortExistDao(shorts_id);
+    if (!exists) {
+        throw new BaseError(status.SHORTS_NOT_FOUND);
+    }
+
+    const shortsComments = await shortsDao.getShortsComments(shorts_id, offset, limit);
+    const shortsCommentsDTOList = [];
+
+    for (const comments of shortsComments) {
+        let result = shortsCommentsResponseDTO(comments);
+        shortsCommentsDTOList.push(result);
+    }
+
+    return shortsCommentsDTOList;
+}

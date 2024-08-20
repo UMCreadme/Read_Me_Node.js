@@ -230,8 +230,6 @@ export const unfollowUser = async(myId, unfollowUserId) => {
     if(!unfollowStatus){
         throw new BaseError(status.BAD_REQUEST)
     }
-
-    return userFollowResponseDTO(userId, followingId)
 }
 
 // 유저 검색 기능 로직
@@ -287,7 +285,8 @@ export const searchUserByKeyword = async (userId, keyword, offset, size) => {
 
     const userSearchResponseDTOList = []
     for (const paginatedListElement of paginatedList) {
-        userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement))
+        const isRecentPost = await dao.hasRecentPostForUser(paginatedListElement.user_id); // 프로필 띠 기능
+        userSearchResponseDTOList.push(userSearchResponseDTO(paginatedListElement, isRecentPost))
     }
 
     if(!userId){

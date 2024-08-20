@@ -1,127 +1,201 @@
 import { BaseError } from '../../config/error.js';
 import { status } from '../../config/response.status.js';
-import {
-    getCommunities,
-    createCommunityWithCheck,
-    getCommunityCurrentCount,
-    getCommunityCapacity,
-    isUserAlreadyInCommunity,
-    searchCommunitiesByTagKeyword,
-    searchCommunitiesByTitleKeyword,
-    joinCommunity,
-    deleteCommunityDao,
-    checkCommunityExistenceDao,
-    checkCommunityOwnerDao,
-} from './communities.dao.js';
-import { getCommunitiesDto } from './communities.dto.js';
-import { pageInfo } from '../../config/pageInfo.js';
+import * as dao from './communities.dao.js';
+import { getCommunityDetailsDto, getChatroomDetailsDto, communitiesInfoDTO, mycommunitiesInfoDTO } from './communities.dto.js';
 
 
 // 커뮤니티 생성 서비스
-export const createCommunityService = async (userId, bookId, address, tag, capacity) => {
-    // Capacity 값이 10을 초과하는지 체크
-    if (capacity > 10) {
+export const createCommunityService = async (community) => {
+    // Capacity 값이 4 이상, 10 이하인지 체크
+    if (community.capacity > 10 || community.capacity < 4) {
         throw new BaseError(status.INVALID_CAPACITY);
     }
 
     // 태그 유효성 검사
-    if (tag) {
-
-        // 태그 문자열을 '|'로 분리하여 배열로 변환
-        const tagsArray = tag.split('|');
-
+    const communityTagList = community.tag.split('|');
+    if (communityTagList) {
         // 태그 개수가 10개를 초과하면 오류 발생
-        if (tagsArray.length > 10) {
+        if (communityTagList.length > 10) {
             throw new BaseError(status.SHORTS_TAG_COUNT_TOO_LONG);
         }
 
         // 각 태그의 길이가 10자를 초과하면 오류 발생
-        for (const singleTag of tagsArray) {
+        for (const singleTag of communityTagList) {
             if (singleTag.length > 10) {
                 throw new BaseError(status.SHORTS_TAG_TOO_LONG);
             }
         }
     }
 
-    // 커뮤니티 생성과 관련된 전체 과정 처리
-    await createCommunityWithCheck(userId, bookId, address, tag, capacity);
-};
-
-// 커뮤니티 가입 서비스
-export const joinCommunityService = async (communityId, userId) => {
-    const userInCommunity = await isUserAlreadyInCommunity(communityId, userId);
-    if (userInCommunity) {
-        throw new BaseError(status.ALREADY_IN_COMMUNITY);
+    // 방장이 모임 생성 가능한지 확인
+    if(!dao.isPossibleCreateCommunity(community.user_id, community.book_id)) {
+        throw new BaseError(status.COMMUNITY_LIMIT_EXCEEDED);
     }
 
-    const currentCount = await getCommunityCurrentCount(communityId);
-    const capacity = await getCommunityCapacity(communityId);
+    const validLocations = ['서울', '인천', '대전', '대구', '광주', '울산', '부산', 
+        '제주', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '세종'];
+    
+    // location 타입 유효성 검증
+    if (!validLocations.includes(community.location)) {
+        throw new BaseError(status.LOCATION_ERROR);
+    }
 
+    // 모임 생성
+    return await dao.createCommunity(community);
+};
+
+//커뮤니티 가입 서비스
+export const joinCommunityService = async (communityId, userId) => {
+    // 유저가 커뮤니티에 이미 존재하는지 확인하고 is_deleted 상태 반환
+    const userStatus = await dao.checkUserInCommunity(communityId, userId);
+    // 커뮤니티의 현재 인원수 및 최대 인원수 조회
+    const currentCount = await dao.getCommunityCurrentCount(communityId);
+
+    // 현재 인원수가 최대 인원수를 초과하면 오류 발생
+    const capacity = await dao.getCommunityCapacityDao(communityId);
     if (currentCount >= capacity) {
         throw new BaseError(status.COMMUNITY_FULL);
     }
 
-    await joinCommunity(communityId, userId);
+    if (userStatus === null) {
+        // 디비에 유저 정보가 없으면 새로 가입 처리
+        await dao.joinCommunity(communityId, userId);
+    } else if (userStatus) {
+        // 유저가 탈퇴한 경우, 재가입 처리
+        await dao.rejoinCommunity(communityId, userId);
+    } else {
+        // 유저가 이미 가입되어 있는 경우 오류 발생
+        throw new BaseError(status.ALREADY_IN_COMMUNITY);
+    }
+
+
+
 };
 
 // 전체 모임 리스트 조회
-export const getCommunitiesService = async (page, size) => {
-    const { communities, totalElements } = await getCommunities(page, size);
+export const getCommunitiesService = async (offset, limit) => {
+    const allCommunities = await dao.getCommunities(offset, limit);
 
-    // 페이지 정보를 계산
-    const hasNext = communities.length > size;
-    const actualSize = hasNext ? size : communities.length;
-    const communityList = communities.slice(0, actualSize);
+    // DTO 내부 로직으로 처리
+    const allCommunitiesDTOList = allCommunities.map(c => communitiesInfoDTO(c));
 
-    return {
-        communityList: getCommunitiesDto({ communities: communityList }),
-        pageInfo: pageInfo(page, actualSize, hasNext, totalElements)
-    };
+    return allCommunitiesDTOList;
+};
+
+// 나의 참여 모임 리스트 조회
+export const getMyCommunitiesService = async (myId, offset, limit) => {
+    const myCommunities = await dao.getMyCommunities(myId, offset, limit);
+
+    // DTO 내부 로직으로 처리
+    const myCommunitiesDTOList = myCommunities.map(c => mycommunitiesInfoDTO(c));
+
+    return myCommunitiesDTOList;
 };
 
 // 커뮤니티 검색 서비스
-export const searchCommunityService = async (keyword, page = 1, size = 10) => {
-    // 파라미터 검증
-    if (!keyword || page <= 0 || size <= 0 || keyword.trim() === "") {
-        throw new BaseError(status.PARAMETER_IS_WRONG);
-    }
-
-    let communities;
-    const decodedKeyword = decodeURIComponent(keyword.trim().replace(/\s+/g, '')); // URL 디코딩 및 공백 제거
+export const searchCommunityService = async (keyword, offset, limit) => {
+    
+    // 키워드 디코딩 및 공백 제거
+    const decodedKeyword = decodeURIComponent(keyword.trim().replace(/\s+/g, ''));
     const isTagSearch = decodedKeyword.startsWith('#');
 
-    if (isTagSearch) {
-        // 태그 검색
-        const formattedKeyword = decodedKeyword.substring(1); 
-        communities = await searchCommunitiesByTagKeyword(formattedKeyword);
-    } else {
-        // 제목 검색
-        communities = await searchCommunitiesByTitleKeyword(decodedKeyword);
-    }
+    // 태그 또는 제목 검색
+    const searchCommunities = isTagSearch 
+        ? await dao.searchCommunitiesByTagKeyword(decodedKeyword.substring(1), offset, limit) // 태그 검색 ('#은 제거')
+        : await dao.searchCommunitiesByTitleKeyword(decodedKeyword, offset, limit); // 제목 검색
 
-    // 페이지네이션 계산
-    const offset = (page - 1) * size;
-    const limit = size + 1; // 요청한 size보다 하나 더 조회
-    const paginatedCommunities = communities.slice(offset, offset + limit);
-    const hasNext = paginatedCommunities.length > size;
-    const actualSize = hasNext ? size : paginatedCommunities.length;
+    // DTO 내부 로직으로 처리
+    const searchCommunitiesDTOList = searchCommunities.map(c => communitiesInfoDTO(c));
 
-    return {
-        communityList: getCommunitiesDto({ communities: paginatedCommunities.slice(0, actualSize) }),
-        pageInfo: pageInfo(page, actualSize, hasNext, communities.length)
-    };
+    return searchCommunitiesDTOList; // 결과 리스트 반환
 };
 
+// 커뮤니티 삭제
 export const deleteCommunityService = async (user_id, community_id) => {
-    const exists = await checkCommunityExistenceDao(community_id);
+    const exists = await dao.checkCommunityExistenceDao(community_id);
     if (!exists) {
         throw new BaseError(status.COMMUNITY_NOT_FOUND);
     }
 
-    const owner = await checkCommunityOwnerDao(community_id);
+    const owner = await dao.checkCommunityOwnerDao(community_id);
     if (owner !== user_id) {
         throw new BaseError(status.UNAUTHORIZED);
     }
 
-    await deleteCommunityDao(community_id);
+    await dao.deleteCommunityDao(community_id);
+};
+
+export const leaveCommunityService = async (communityId, userId) => {
+    // 유저가 커뮤니티에 존재하는지 확인
+    const userStatus = await dao.checkUserInCommunity(communityId, userId);
+
+    if (userStatus === null || userStatus) {
+        throw new BaseError(status.NOT_IN_COMMUNITY);
+    }
+
+    // 유저가 방장인지 확인
+    const isLeader = await dao.checkIfLeaderDao(communityId, userId);
+    if (isLeader) {
+        // 방장은 탈퇴할 수 없음
+        throw new BaseError(status.LEADER_CANNOT_LEAVE);
+    }
+
+    // 유저 탈퇴 처리 (소프트 딜리트 및 삭제 시간 기록)
+    await dao.leaveCommunityDao(communityId, userId);
+};
+
+// 커뮤니티 상세정보를 가져오는 서비스 함수
+export const getCommunityDetailsService = async (communityId, userId) => {
+    const communityData = await dao.getCommunityDetailsDao(communityId);
+    let isUserParticipating = false;
+    
+    if (!communityData || communityData.length === 0) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    }
+
+    if (userId !== null) {
+        isUserParticipating = await dao.isUserAlreadyInCommunity(communityId, userId);
+    }
+    
+    return getCommunityDetailsDto(communityData, isUserParticipating);
+};
+
+// 채팅방 상세 조회
+export const getChatroomDetailsService = async (communityId, currentUserId) => {
+    // 유저가 커뮤니티에 속해 있는지 확인
+    const userStatus = await dao.checkUserInCommunity(communityId, currentUserId);
+
+    if (userStatus === null || userStatus === 1) {
+        // 유저가 커뮤니티에 가입되어 있지 않거나 이미 탈퇴한 경우
+        throw new BaseError(status.UNAUTHORIZED);
+    }
+
+    // 커뮤니티 데이터 가져오기
+    const { communityData, membersData } = await dao.getChatroomDetailsDao(communityId);
+    if (!communityData || communityData.length === 0) {
+        throw new BaseError(status.NOT_FOUND);
+    }
+
+    return getChatroomDetailsDto(communityData, membersData, currentUserId);
+};
+
+// 약속 설정
+export const updateMeetingDetailsService = async (communityId, meetingDate, latitude, longitude, address, userId) => {
+
+    const exists = await dao.checkCommunityExistenceDao(communityId);
+    if (!exists) {
+        throw new BaseError(status.COMMUNITY_NOT_FOUND);
+    }
+
+    const communityUpdatedAt = await dao.getCommunityUpdatedAtDao(communityId);
+    const updatedAtDate = new Date(communityUpdatedAt);
+    const meetingDateDate = new Date(meetingDate);
+    const thirtyMinutesInMs = 30 * 60 * 1000;
+    const minAllowedMeetingDate = new Date(updatedAtDate.getTime() + thirtyMinutesInMs);
+
+    if (meetingDateDate < minAllowedMeetingDate) {
+        throw new BaseError(status.INVALID_MEETING_DATE);
+    }
+
+    await dao.updateMeetingDetailsDao(communityId, meetingDate, latitude, longitude, address, userId);
 };

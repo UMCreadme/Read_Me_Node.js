@@ -6,6 +6,7 @@ export const userInfoResponseDTO = async (userData, isRecentPost, followerNum, f
         "nickname" : userData.nickname,
         "account" : userData.account,
         "comment" : userData.comment,
+        "email" : userData.email,
         "followerNum" : followerNum,
         "followingNum" : followingNum,
         "profileImg" : userData.image_url,
@@ -42,17 +43,18 @@ export const userBookResponseDTO = (userBook) => {
         "bookImage" : userBook.image_url,
         "bookTitle" : userBook.title,
         "bookAuthor" : userBook.author,
-        "bookId" : userBook.id
+        "bookId" : userBook.book_id
     }
 }
 
 // 유저 검색시 반환 정보
-export const userSearchResponseDTO =  (userData) => {
+export const userSearchResponseDTO =  (userData, isRecentPost) => {
     return {
         "userId" : userData.user_id,
         "profileImg" : userData.image_url,
         "account" : userData.account,
-        "nickname" : userData.nickname
+        "nickname" : userData.nickname,
+        "isRecentPost" : isRecentPost
     }
 }
 

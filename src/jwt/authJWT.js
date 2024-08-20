@@ -22,7 +22,7 @@ export const authJWT = (req, res, next) => {
         }
     }
     else {
-        res.send(response(status.MISSING_TOKEN));
+        res.send(response(status.UNAUTHORIZED));
     }
 };
 

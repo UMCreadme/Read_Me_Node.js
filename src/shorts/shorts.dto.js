@@ -33,15 +33,21 @@ export const getSearchShortsListDto = (data) => {
 
     for(const short of data) {
         shortsList.push({
+            "userId": short.user_id,
+            "profileImg": short.profile_img,
+            "account": short.account,
             "shortsId": short.shorts_id,
             "shortsImg": short.shorts_img,
             "phrase": short.phrase,
             "phraseX": short.phrase_x,
             "phraseY": short.phrase_y,
-            "category": short.category,
-            "bookTitle": short.book_title,
-            "author": short.author,
-            "tags": short.tag ? short.tag.split("|") : []
+            "title": short.title,
+            "content": short.content,
+            "tags": short.tag ? short.tag.split("|") : [],
+            "isLike": short.isLike? Boolean(short.isLike) : false,
+            "likeCnt": short.like_count,
+            "commentCnt": short.comment_count,
+            "postingDate": short.created_at
         });
     }
 
@@ -49,7 +55,7 @@ export const getSearchShortsListDto = (data) => {
 };
 
 export const shortsInfoDto = (data, imgUrl, userId) => {
-    if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.shortsTitle || !data.content || !data.phraseX || !data.phraseY) {
+    if (!data || !imgUrl || !data.phrase || !data.shortsTitle || !data.content || !data.phraseX || !data.phraseY) {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
@@ -63,4 +69,14 @@ export const shortsInfoDto = (data, imgUrl, userId) => {
         "phrase_x": parseFloat(data.phraseX),
         "phrase_y": parseFloat(data.phraseY)
     };
+}
+
+export const shortsCommentsResponseDTO = (comments) => {
+    return {
+        "userId": comments.userId,
+        "account": comments.account,
+        "profileImg": comments.profileImg,
+        "content": comments.content,
+        "passedDate": comments.passedDate
+    }
 }
