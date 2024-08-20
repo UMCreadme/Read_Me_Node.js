@@ -51,6 +51,12 @@ export const joinCommunityService = async (communityId, userId) => {
     // 커뮤니티의 현재 인원수 및 최대 인원수 조회
     const currentCount = await dao.getCommunityCurrentCount(communityId);
 
+    // 현재 인원수가 최대 인원수를 초과하면 오류 발생
+    const capacity = await dao.getCommunityCapacityDao(communityId);
+    if (currentCount >= capacity) {
+        throw new BaseError(status.COMMUNITY_FULL);
+    }
+
     if (userStatus === null) {
         // 디비에 유저 정보가 없으면 새로 가입 처리
         await dao.joinCommunity(communityId, userId);
@@ -62,11 +68,7 @@ export const joinCommunityService = async (communityId, userId) => {
         throw new BaseError(status.ALREADY_IN_COMMUNITY);
     }
 
-    // 현재 인원수가 최대 인원수를 초과하면 오류 발생
-    const capacity = await dao.getCommunityCapacityDao(communityId);
-    if (currentCount >= capacity) {
-        throw new BaseError(status.COMMUNITY_FULL);
-    }
+
 
 };
 
