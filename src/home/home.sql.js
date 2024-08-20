@@ -1,5 +1,6 @@
 export const getShortsByCategory = 
-`WITH FilteredShorts AS (
+`
+WITH RankedShorts AS (
     SELECT u.user_id, u.image_url AS profileImg, u.nickname,
            s.shorts_id, s.book_id, s.image_url AS shortsImg,
            s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
@@ -18,40 +19,35 @@ export const getShortsByCategory =
     GROUP BY u.user_id, u.image_url, u.nickname,
              s.shorts_id, s.book_id, s.image_url,
              s.phrase, s.title, s.content, s.tag, s.created_at
-    HAVING likeCnt >= 2
+    HAVING likeCnt >= 20
+    LIMIT ?
 ),
-RankedShorts AS (
-    SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
-           phrase, phrase_x, phrase_y, title, content, tags, likeCnt, commentCnt, created_at,
-           isLike,
-           ROW_NUMBER() OVER (ORDER BY RAND()) AS RN
-    FROM FilteredShorts
+
+UnrankedShorts AS (
+    SELECT u.user_id, u.image_url AS profileImg, u.nickname,
+           s.shorts_id, s.book_id, s.image_url AS shortsImg,
+           s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
+           (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
+           (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
+           s.created_at,
+           EXISTS (
+               SELECT 1 
+               FROM LIKE_SHORTS ls 
+               WHERE ls.shorts_id = s.shorts_id AND ls.user_id = ?
+           ) AS isLike
+    FROM USERS u
+    JOIN SHORTS s ON u.user_id = s.user_id
+    JOIN BOOK b ON s.book_id = b.book_id
+    WHERE b.category_id = ? AND s.shorts_id NOT IN (SELECT shorts_id FROM RankedShorts)
+    LIMIT ?
 )
-SELECT user_id, profileImg, nickname, shorts_id, book_id, shortsImg,
-       phrase, phrase_x, phrase_y, title, content, tags, likeCnt, commentCnt, created_at,
-       isLike
-FROM RankedShorts
-WHERE RN <= 20
 
-UNION ALL
-
-SELECT u.user_id, u.image_url AS profileImg, u.nickname,
-       s.shorts_id, s.book_id, s.image_url AS shortsImg,
-       s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag AS tags,
-       (SELECT COUNT(*) FROM LIKE_SHORTS ls WHERE ls.shorts_id = s.shorts_id) AS likeCnt,
-       (SELECT COUNT(*) FROM COMMENT c WHERE c.shorts_id = s.shorts_id) AS commentCnt,
-       s.created_at,
-       EXISTS (
-           SELECT 1 
-           FROM LIKE_SHORTS ls 
-           WHERE ls.shorts_id = s.shorts_id AND ls.user_id = ?
-       ) AS isLike
-FROM USERS u
-JOIN SHORTS s ON u.user_id = s.user_id
-JOIN BOOK b ON s.book_id = b.book_id
-WHERE b.category_id = ? AND s.shorts_id NOT IN (SELECT shorts_id FROM RankedShorts)
-ORDER BY RAND()
-LIMIT 20;
+SELECT * FROM (
+    SELECT * FROM RankedShorts
+    UNION ALL
+    SELECT * FROM UnrankedShorts
+) AS CombinedResults
+ORDER BY RAND();
 `;
 
 export const getUserCategories =
