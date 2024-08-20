@@ -34,9 +34,9 @@ export const HomeInfoResponseDTO = (user_id, categories, shorts, feeds) => {
             "category": shorts.category
         })) : [],
         "feeds": feeds ? feeds.map(feeds => ({
-            "user_id": feeds.user_id,
+            "userId": feeds.user_id,
+            "account": feeds.account,
             "profileImg": feeds.profileImg,
-            "account": shorts.account,
             "shorts_id": feeds.shorts_id,
             "shortsImg": feeds.shortsImg,
             "phrase": feeds.phrase,

@@ -108,7 +108,7 @@ export const getFollowerFeed =
 `
 SELECT 
     u.user_id, u.image_url AS profileImg, 
-    u.nickname, s.shorts_id, s.image_url AS shortsImg, 
+    u.account, s.shorts_id, s.image_url AS shortsImg, 
     s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag, 
     COUNT(ls.like_shorts_id) AS likeCnt, 
     COUNT(c.comment_id) AS commentCnt, 
