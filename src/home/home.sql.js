@@ -99,15 +99,23 @@ export const getFollowerFeed =
 u.user_id, u.image_url AS profileImg, 
 u.nickname, s.shorts_id, s.image_url AS shortsImg, 
 s.phrase, s.phrase_x, s.phrase_y, s.title, s.content, s.tag, 
-COUNT(ls.like_shorts_id) AS likeCnt, 
-COUNT(c.comment_id) AS commentCnt, 
+COALESCE(likes.like_count, 0) AS likeCnt,
+COALESCE(comments.comment_count, 0) AS commentCnt,
 s.created_at, 
 EXISTS(SELECT 1 FROM LIKE_SHORTS WHERE shorts_id = s.shorts_id AND user_id = ?) AS isLike 
 FROM USERS u 
 JOIN FOLLOW f ON u.user_id = f.follower 
 JOIN SHORTS s ON u.user_id = s.user_id 
-LEFT JOIN LIKE_SHORTS ls ON s.shorts_id = ls.shorts_id 
-LEFT JOIN COMMENT c ON s.shorts_id = c.shorts_id 
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS like_count
+    FROM LIKE_SHORTS
+    GROUP BY shorts_id
+) likes ON s.shorts_id = likes.shorts_id
+LEFT JOIN (
+    SELECT shorts_id, COUNT(*) AS comment_count
+    FROM COMMENT
+    GROUP BY shorts_id
+) comments ON s.shorts_id = comments.shorts_id
 WHERE f.user_id = ? 
 AND s.created_at >= NOW() - INTERVAL 24 HOUR
 GROUP BY u.user_id, u.image_url, u.nickname, s.shorts_id, s.image_url, s.phrase, s.title, s.content, s.tag, s.created_at
