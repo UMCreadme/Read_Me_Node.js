@@ -104,7 +104,8 @@ export const updateUserInfoService = async(userId, userData) => {
     }
 
     const commentCheck = (comment) => {
-        return comment.length <= 50
+        if(comment === undefined) return false
+        return comment.length <= 50;
     }
 
     if(!accountCheck(userData.account) || !nicknameCheck(userData.nickname) || !commentCheck(userData.comment)){
