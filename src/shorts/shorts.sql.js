@@ -124,7 +124,6 @@ TIMESTAMPDIFF(SECOND, c.created_at, NOW()) AS passedSeconds
 FROM COMMENT c
 JOIN USERS u ON c.user_id = u.user_id
 WHERE shorts_id = ?
-ORDER BY c.created_at DESC
-LIMIT ? OFFSET ?;
+ORDER BY c.created_at
 `
 

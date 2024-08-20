@@ -118,8 +118,8 @@ export const addComment = async (req, res, next) => {
         throw new BaseError(status.PARAMETER_IS_WRONG);
     }
 
-    await service.addCommentService(shorts_id, user_id, content);
-    res.send(response(status.CREATED));
+    const result = await service.addCommentService(shorts_id, user_id, content);
+    res.send(response(status.CREATED, result));
 };
 
 

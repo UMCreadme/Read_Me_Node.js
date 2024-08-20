@@ -242,9 +242,15 @@ const calculatePassedTime = (seconds) => {
 // 쇼츠 댓글 조회
 export const getShortsComments = async (shorts_id, offset, limit) => {
     const conn =  await pool.getConnection();
-
     try {
-        const [comments] = await conn.query(sql.getComments, [shorts_id, limit, offset]);
+        let query = sql.getComments;
+        const params = [shorts_id];
+
+        if (limit !== null && offset !== null) {
+            query += ` LIMIT ? OFFSET ?`;
+            params.push(limit, offset);
+        }
+        const [comments] = await conn.query(query, params);
         return comments.map(comment => ({
             userId: comment.user_id,
             account: comment.account,
