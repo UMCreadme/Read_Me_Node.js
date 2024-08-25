@@ -14,7 +14,7 @@ export const getUserFollowings = "SELECT * FROM FOLLOW WHERE follower = ?";
 
 export const getUserFollowers = "SELECT * FROM FOLLOW WHERE user_id = ?";
 
-export const getUserShortsById = "SELECT * FROM SHORTS WHERE user_id = ? AND is_deleted = false ORDER BY CREATED_AT DESC LIMIT ? OFFSET ?";
+export const getUserShortsById = "SELECT * FROM SHORTS WHERE user_id = ? AND is_deleted = false ORDER BY shorts_id DESC LIMIT ? OFFSET ?";
 
 export const getUserLikeShortsIdById = "SELECT shorts_id FROM LIKE_SHORTS WHERE user_id = ? ORDER BY CREATED_AT DESC LIMIT ? OFFSET ?";
 
