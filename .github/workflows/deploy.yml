@@ -7,8 +7,9 @@ on:
 
 jobs:
   build:
-    # pull 요청이 dev에 merge 되었을 때 아래 steps를 실행
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    # pull 요청이 dev에 merge 되었을 때 또는 수동 실행일 경우 아래 steps를 실행
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev') || github.event_name == 'workflow_dispatch'
     
     runs-on: ubuntu-latest  # 우분투 최신 버전으로 실행
 
